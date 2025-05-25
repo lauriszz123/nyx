@@ -1,0 +1,27 @@
+# Lua bytecode
+*.luac
+
+# LuaRocks build artifacts
+*.rock
+*.rockspec
+.rocks/
+
+# LÖVE (Love2D) temporary files
+*.love
+
+# Unix / macOS / Windows system files
+.DS_Store
+Thumbs.db
+
+# Editor-specific files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.bak
+
+# Test output or logs
+*.log
+tmp/
+temp/
