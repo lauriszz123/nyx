@@ -1,27 +1,35 @@
-# Lua bytecode
+# Compiled Lua files
 *.luac
 
-# LuaRocks build artifacts
+# LÖVE game files
+*.love
+*.sav
+
+# Build output (if you export games to Windows, macOS, etc.)
+build/
+dist/
+*.exe
+*.app
+*.zip
+
+# LuaRocks (if used)
+.rocks/
 *.rock
 *.rockspec
-.rocks/
 
-# LÖVE (Love2D) temporary files
-*.love
-
-# Unix / macOS / Windows system files
+# System files
 .DS_Store
 Thumbs.db
 
-# Editor-specific files
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# Editor/IDE settings
 *.swp
 *.swo
 *~
 .vscode/
 .idea/
 *.bak
-
-# Test output or logs
-*.log
-tmp/
-temp/
