@@ -123,11 +123,45 @@ function TypeChecker:getExpressionType(node, against)
 end
 
 function TypeChecker:checkNewInstance(node)
-	if self.scope:classExists(node.callee.name) then
-		return node.callee.name
-	else
-		return 'any'
+	if node.kind == 'CallExpression' then
+		local className = node.callee.name
+		local clas = self:getClass(className)
+
+		if not class then
+			self:addError('Cannot instantiate undefined class: ' .. className, node)
+			return 'any'
+		end
+
+		local constructor = class.methods['init']
+		if constructor then
+			if #node.arguments ~= #constructor.paras then
+				self:addError(string.format(
+					'Constructor %s expects %d arguments, got %d',
+					className,
+					#constructor.params,
+					#node.arguments
+				), node)
+			else
+				for i, arg in ipairs(node.arguments) do
+					if constructor.params[i] then
+						local expectedType = constructor.params[i].type
+						local actualType = self:getExpressionType(arg)
+
+						if not self:isTypeCompatible(expectedType, actualType) then
+							self:addError(string.format(
+								'Constructor argument %d: expected %s, got %s',
+								i, expectedType, actualType
+							))
+						end
+					end
+				end
+			end
+		end
+
+		return className
 	end
+	
+	return 'any'
 end
 
 function TypeChecker:checkBinaryExpression(node)
@@ -301,19 +335,58 @@ function TypeChecker:isTypeCompatible(expected, actual)
 	return expected == actual
 end
 
+function TypeChecker:declareClass(node)
+	self.scope:declareClass(node.name, {
+		typeParams = node.typeParams,
+		supeclass = node.superclass,
+		members = node.members,
+		fields = {},
+		methods = {}
+	})
+
+	local classInfo = self.scope:getClass(node.name).info
+	for _, member in ipairs(node.members) do
+		if member.kind == 'FieldDeclaration' then
+			classInfo.fields[member.name] = {
+				type = member.varType,
+				hasDefaultValue = member.value ~= nil
+			}
+		elseif member.kind == 'FunctionDeclaration' then
+			classInfo.methods[member.name] = {
+				params = member.params,
+				returnType = member.returnType,
+			}
+		else
+			self:addError(string.format(
+				'Unknown member %s of class %s',
+				member.kind,
+				node.name
+			), node)
+		end
+	end
+end
+
 TypeChecker.visitor = {
 	["Program"] = function(node, self)
 		for _, stmt in ipairs(node.body) do
 			if stmt.kind == 'FunctionDeclaration' then
 				self.scope:declareFunction(stmt)
-			elseif stmt.kind == 'ClassDeclaration' then
-				self.scope:declareClass(stmt)
 			end
 		end
 
 		for _, stmt in ipairs(node.body) do
 			AST.visit(stmt, self.visitor, self)
 		end
+	end,
+
+	["ClassDeclaration"] = function(node, self)
+		if node.superclass then
+			if not self:classExists(node.superclass) then
+				self:addError('Undefined superclass: ' .. node.superclass, node)
+			end
+		end
+
+		self:declareClass(node)
 	end,
 
 	["VariableDeclaration"] = function(node, self)

@@ -46,10 +46,11 @@ function Scope:getGlobalScope()
 	end
 end
 
-function Scope:declareClass(node)
+function Scope:declareClass(name, object)
 	local global = self:getGlobalScope()
-	global.variables[node.name] = {
-		isClass = true
+	global.variables[name] = {
+		isClass = true,
+		info = object
 	}
 end
 

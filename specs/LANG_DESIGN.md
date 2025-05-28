@@ -1,6 +1,6 @@
-# LiluaX Language Design
+# Nyx Language Design
 
-LiluaX is a statically-typed, class-based language inspired by Lua, intended for easy compilation to a CHIP-8 style VM architecture.
+Nyx is a statically-typed, class-based language inspired by Lua, intended for easy compilation to a CHIP-8 style VM architecture.
 
 ---
 
@@ -8,7 +8,7 @@ LiluaX is a statically-typed, class-based language inspired by Lua, intended for
 - Minimalist core syntax, expandable via libraries.
 - All types are implemented as classes.
 - No dynamic types at the core level.
-- Self-hostable: even `Array`, `Table`, `Heap`, etc. are written in LiluaX.
+- Self-hostable: even `Array`, `Table`, `Heap`, etc. are written in Nyx.
 - Designed for low-level VMs: operations are easy to compile to CHIP-8-like opcodes (A, B, H, L registers).
 
 ---
