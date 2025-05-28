@@ -25,7 +25,7 @@ local function runTypeChecker(source, printAst)
   return results
 end
 
-local function checkCodeSnippet(desc, code)
+local function checkCodeSnippet(desc, code, expected)
   print('=== ' .. desc .. ' ===')
   local results = runTypeChecker(code, true)
   print('Errors found:' .. #results.errors)
@@ -83,6 +83,14 @@ end
 checkCodeSnippet('CLASS DEFINITION', [[
   class Rectangle
     function init()
+    end
+  end
+  let rect: Rectangle = new Rectangle();
+]])
+
+checkCodeSnippet('CLASS INCORRECT DEFINITION', [[
+  class Rectangle
+    function someMethod()
     end
   end
   let rect: Rectangle = new Rectangle();

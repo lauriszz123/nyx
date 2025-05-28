@@ -399,7 +399,8 @@ function Parser:parse_call()
 		self:expect("PARENTHESIS") -- ')'
 		expr = self:node("CallExpression", {
 			callee = expr,
-			arguments = args
+			arguments = args,
+			line = expr.line
 		})
 	end
 	return expr
@@ -412,8 +413,7 @@ function Parser:parse_primary()
 		self:advance()
 		local expr = self:node("Identifier", {
 			name = t.value,
-			line = t.line,
-			column = t.column
+			line = t.line
 		})
 
 		-- SUPPORT: chain of dot accesses
@@ -423,8 +423,7 @@ function Parser:parse_primary()
 			expr = self:node("FieldAccess", {
 				object = expr,
 				field = fieldName,
-				line = fieldName.line,
-				column = fieldName.column
+				line = fieldName.line
 			})
 		end
 
@@ -433,21 +432,20 @@ function Parser:parse_primary()
 		self:advance()
 		local call = self:parse_call()
 		return self:node("NewInstance", {
-			call = call
+			call = call,
+			line = t.line
 		})
 	elseif t.type == "NUMBER" then
 		self:advance()
 		return self:node("NumberLiteral", {
 			value = tonumber(t.value),
-			line = t.line,
-			column = t.column
+			line = t.line
 		})
 	elseif t.type == "STRING" then
 		self:advance()
 		return self:node("StringLiteral", {
 			value = t.value,
-			line = t.line,
-			column = t.column
+			line = t.line
 		})
 	elseif t.type == "PARENTHESIS" and t.value == "(" then
 		self:advance()
@@ -458,8 +456,7 @@ function Parser:parse_primary()
 		self:advance()
 		return self:node("BooleanLiteral", {
 			value = t.value,
-			line = t.line,
-			column = t.column
+			line = t.line
 		})
 	else
 		error("Unexpected token in expression: " .. t.type)

@@ -125,16 +125,16 @@ end
 function TypeChecker:checkNewInstance(node)
 	if node.kind == 'CallExpression' then
 		local className = node.callee.name
-		local clas = self:getClass(className)
+		local class = self.scope:lookup(className)
 
-		if not class then
+		if not class and class.isClass ~= nil then
 			self:addError('Cannot instantiate undefined class: ' .. className, node)
 			return 'any'
 		end
 
-		local constructor = class.methods['init']
+		local constructor = class.info.methods['init']
 		if constructor then
-			if #node.arguments ~= #constructor.paras then
+			if #node.arguments ~= #constructor.params then
 				self:addError(string.format(
 					'Constructor %s expects %d arguments, got %d',
 					className,
@@ -156,9 +156,11 @@ function TypeChecker:checkNewInstance(node)
 					end
 				end
 			end
-		end
 
-		return className
+			return className
+		else
+			self:addError('No constructor found for class: ' .. className, node)
+		end
 	end
 	
 	return 'any'
@@ -344,7 +346,7 @@ function TypeChecker:declareClass(node)
 		methods = {}
 	})
 
-	local classInfo = self.scope:getClass(node.name).info
+	local classInfo = self.scope:lookup(node.name).info
 	for _, member in ipairs(node.members) do
 		if member.kind == 'FieldDeclaration' then
 			classInfo.fields[member.name] = {
