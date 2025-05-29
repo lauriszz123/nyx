@@ -1,6 +1,7 @@
 local class = require("middleclass")
 local AST = require("src.nyx.ast")
 local Scope = require("src.nyx.scope")
+local inspect = require 'inspect'
 
 local TypeChecker = class("TypeChecker")
 
@@ -162,7 +163,7 @@ function TypeChecker:checkNewInstance(node)
 			self:addError('No constructor found for class: ' .. className, node)
 		end
 	end
-	
+
 	return 'any'
 end
 
@@ -273,64 +274,80 @@ function TypeChecker:checkUnaryExpression(node)
 end
 
 function TypeChecker:checkCallExpression(node)
-	local funcName = node.callee.name
-	local func = self.scope:getFunction(funcName)
+	local callee = node.callee
+	if callee.kind == 'FieldAccess' then
+		local fieldType = self:checkFieldAccess(callee)
+		if fieldType ~= 'function' then
+			self:addError(string.format(
+				'Field %s is not a method',
+				callee.field
+			), node)
+		end
+	else
+		local funcName = callee.name
+		local func = self.scope:getFunction(funcName)
 
-	if not func then
-		self:addError('Undefined function: ' .. funcName, node)
-		return 'any'
-	end
+		if not func then
+			self:addError('Undefined function: ' .. funcName, node)
+			return 'any'
+		end
 
-	if #node.arguments ~= #func.params then
-		self:addError(string.format(
-			'Function %s expects %d arguments, got %d',
-			funcName,
-			#func.params,
-			#node.arguments
-		), node)
-	end
+		if #node.arguments ~= #func.params then
+			self:addError(string.format(
+				'Function %s expects %d arguments, got %d',
+				funcName,
+				#func.params,
+				#node.arguments
+			), node)
+		end
 
-	for i, arg in ipairs(node.arguments) do
-		if func.params[i] then
-			local expectedType = func.params[i].type or 'any'
-			local actualType = self:getExpressionType(arg)
+		for i, arg in ipairs(node.arguments) do
+			if func.params[i] then
+				local expectedType = func.params[i].type or 'any'
+				local actualType = self:getExpressionType(arg)
 
-			if expectedType ~= actualType then
-				self:addError(string.format(
-					'Argument %d to \'%s\': expected %s, got %s',
-					i, funcName,
-					expectedType,
-					actualType
-				), node)
+				if expectedType ~= actualType then
+					self:addError(string.format(
+						'Argument %d to \'%s\': expected %s, got %s',
+						i, funcName,
+						expectedType,
+						actualType
+					), node)
+				end
 			end
 		end
-	end
 
-	return func.returnType or 'any'
+		return func.returnType or 'any'
+	end
 end
 
 function TypeChecker:checkFieldAccess(node)
 	local objectType = self:getExpressionType(node.object)
 	local fieldName = node.field
 
-	local class = self.scope:getClass(objectType)
-	if not class then
+	local klass = self.scope:lookup(objectType)
+	if not klass then
 		self:addError('Cannot access field of non-object type: ' .. objectType, node)
 		return 'any'
 	end
 
-	for _, member in ipairs(class.members) do
-		if member.kind == 'FieldDeclaration' and member.name == fieldName then
-			return member.varType
-		end
+	if not klass.isClass then
+		self:addError('Object is not a class, type: ' .. klass.type, node)
+		return 'any'
 	end
 
-	self:addError(string.format(
-		'Class \'%s\' has no field \'%s\'',
-		objectType,
-		fieldName
-	), node)
-	return 'any'
+	if klass.info.methods[fieldName] then
+		return 'function'
+	end
+
+	if not klass.info.fields[fieldName] then
+		self:addError(string.format(
+			'Class \'%s\' has no field \'%s\'',
+			objectType,
+			fieldName
+		), node)
+		return 'any'
+	end
 end
 
 function TypeChecker:isTypeCompatible(expected, actual)
@@ -393,6 +410,8 @@ TypeChecker.visitor = {
 		local oldScope = self.scope
 		self.scope = Scope(self.scope)
 
+		self.scope:declare('self', node.name)
+
 		for _, member in ipairs(node.members) do
 			AST.visit(member, self.visitor, self)
 		end
@@ -417,23 +436,35 @@ TypeChecker.visitor = {
 	end,
 
 	["AssignmentStatement"] = function(node, self)
-		local targetName = node.target.name
-		local var = self.scope:lookup(targetName)
+		local target = node.target
+		if target.kind == 'FieldAccess' then
+			local fieldType = self:checkFieldAccess(target)
+			local valueType = self:getExpressionType(node.value)
+			if not self:isTypeCompatible(fieldType) then
+				self:addError(string.format(
+					'Field %s is of type %s, got: %s',
+					target.field,
+					fieldType,
+					valueType
+				), node)
+			end
+		else
+			local var = self.scope:lookup(target.name)
 
-		if not var then
-			self:addError('Undefined variable: ' .. targetName, node)
-			return
-		end
+			if not var then
+				self:addError('Undefined variable: ' .. targetName, node)
+				return
+			end
+			local valueType = self:getExpressionType(node.value)
 
-		local valueType = self:getExpressionType(node.value)
-
-		if not self:isTypeCompatible(valueType) then
-			self:addError(string.format(
-				'Cannot assign %s to variable \'%s\' of type %s',
-				valueType,
-				targetName,
-				var.type
-			), node)
+			if not self:isTypeCompatible(valueType) then
+				self:addError(string.format(
+					'Cannot assign %s to variable \'%s\' of type %s',
+					valueType,
+					target.name,
+					var.type
+				), node)
+			end
 		end
 	end,
 

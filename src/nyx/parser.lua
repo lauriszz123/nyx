@@ -419,11 +419,11 @@ function Parser:parse_primary()
 		-- SUPPORT: chain of dot accesses
 		while self.current and self.current.type == "DOT" do
 			self:advance()
-			local fieldName = self:expect("IDENTIFIER").value
+			local field = self:expect("IDENTIFIER")
 			expr = self:node("FieldAccess", {
 				object = expr,
-				field = fieldName,
-				line = fieldName.line
+				field = field.value,
+				line = field.line
 			})
 		end
 
