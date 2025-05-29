@@ -1,0 +1,22 @@
+class Heap
+  let heap: u8[0xFF];
+  let heapPtr: ptr;
+
+  function init()
+    self.heap = {};
+    for i: u8 = 0; i < 0xFF do
+      self.heap[i] = 0;
+    end
+    self.heapPtr = &heap;
+  end
+
+  function alloc(size: u8): ptr
+    let startAddr: ptr = heapPtr;
+    heapPtr = heapPtr + size;
+    return startAddr;
+  end
+end
+
+functon main(): nil
+  let heap: Heap = new Heap(); 
+end
