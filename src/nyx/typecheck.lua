@@ -389,6 +389,15 @@ TypeChecker.visitor = {
 		end
 
 		self:declareClass(node)
+
+		local oldScope = self.scope
+		self.scope = Scope(self.scope)
+
+		for _, member in ipairs(node.members) do
+			AST.visit(member, self.visitor, self)
+		end
+
+		self.scope = oldScope
 	end,
 
 	["VariableDeclaration"] = function(node, self)

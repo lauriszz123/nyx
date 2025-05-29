@@ -80,18 +80,36 @@ end
 --   end
 -- ]])
 
-checkCodeSnippet('CLASS DEFINITION', [[
-  class Rectangle
-    function init()
-    end
-  end
-  let rect: Rectangle = new Rectangle();
-]])
+-- checkCodeSnippet('CLASS DEFINITION', [[
+--   class Rectangle
+--     function init()
+--     end
+--   end
+--   let rect: Rectangle = new Rectangle();
+-- ]])
+--
+-- checkCodeSnippet('CLASS INCORRECT DEFINITION', [[
+--   class Rectangle
+--     function someMethod()
+--     end
+--   end
+--   let rect: Rectangle = new Rectangle();
+-- ]])
 
-checkCodeSnippet('CLASS INCORRECT DEFINITION', [[
+checkCodeSnippet('CLASS DEFINITION WITH FIELDS', [[
   class Rectangle
-    function someMethod()
+    let x: u8;
+    let y: u8;
+    let width: u8;
+    let height: u8;
+
+    function init(x: u8, y: u8, width: u8, height: u8)
+      self.x = x;
+      self.y = y;
+      self.width = width;
+      self.height = height;
     end
   end
-  let rect: Rectangle = new Rectangle();
+
+  let rect: Rectangle = new Rectangle(10, 10, 100, 100);
 ]])
