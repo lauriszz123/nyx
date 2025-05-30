@@ -207,6 +207,12 @@ function Lexer:tokenize_colon()
 	return self:create_token('COLON', ':')
 end
 
+-- Function to tokenize a colon
+function Lexer:tokenize_and()
+	self:advance()
+	return self:create_token('AND_CHAR', '&')
+end
+
 -- Function to tokenize a semicolon
 function Lexer:tokenize_semicolon()
 	self:advance()
@@ -249,9 +255,6 @@ function Lexer:iter()
 				return self:tokenize_identifier()
 			elseif self.current_char == '"' then
 				return self:tokenize_string()
-				--			elseif self.current_char == "" then
-				--				self:advance() -- Skip the '-' character
-				--				self:tokenize_comment()
 			elseif self.current_char == ":" then
 				return self:tokenize_colon()
 			elseif self.current_char == ";" then
@@ -265,7 +268,9 @@ function Lexer:iter()
 			elseif self.current_char == "[" or self.current_char == "]" then
 				return self:tokenize_bracket()
 			elseif self.current_char == '#' then
-				return self:tokenize_hash()
+				return self:tokenize_comment()
+			elseif self.current_char == '&' then
+				return self:tokenize_and()
 			elseif self.current_char:match("[%p]") then
 				if self.current_char:match("[<>!+-/*]") then
 					return self:tokenize_operator()
@@ -284,4 +289,3 @@ end
 
 -- Return the Lexer class
 return Lexer
-

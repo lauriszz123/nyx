@@ -478,8 +478,14 @@ function Parser:parse_primary()
 			value = t.value,
 			line = t.line
 		})
+	elseif t.type == "AND_CHAR" then
+		self:advance()
+		return self:node('GetAddress', {
+			value = self:expect('Identifier'),
+			line = t.line
+		})
 	else
-		error("Unexpected token in expression: " .. t.type)
+		error("Unexpected token in expression: " .. t.type .. ':' .. t.value)
 	end
 end
 

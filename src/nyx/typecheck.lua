@@ -424,6 +424,10 @@ TypeChecker.visitor = {
 			self:addError('Unknown type: ' .. node.varType, node)
 		end
 
+		if node.isArray and node.arraySize.kind ~= 'NumberLiteral' then
+			self:addError('Array should be a fixed size, number or a constant', node)
+		end
+
 		if node.value then
 			local valueType = self:getExpressionType(node.value, node.varType)
 

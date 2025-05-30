@@ -17,6 +17,6 @@ class Heap
   end
 end
 
-functon main(): nil
+function main(): nil
   let heap: Heap = new Heap(); 
 end

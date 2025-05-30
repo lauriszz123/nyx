@@ -27,7 +27,7 @@ end
 
 local function checkCodeSnippet(desc, code)
   print('=== ' .. desc .. ' ===')
-  local results = runTypeChecker(code, true)
+  local results = runTypeChecker(code, false)
   print('Errors found:' .. #results.errors)
   print('Warnings found:' .. #results.warnings)
   print()
@@ -157,3 +157,5 @@ checkCodeSnippet('ARRAY DECLARATION', [[
 --   t.print();
 --   t.print = 0;
 -- ]])
+
+checkCodeSnippet('SOURCE CHECK', love.filesystem.read('/tests/source.nyx'))
