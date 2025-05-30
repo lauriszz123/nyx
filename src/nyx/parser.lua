@@ -37,11 +37,24 @@ function Parser:peek()
 	return self.tokens[self.position + 1]
 end
 
-function Parser:expect(type)
+function Parser:expect(type, value)
 	if self.current and self.current.type == type then
-		local token = self.current
-		self:advance()
-		return token
+		if value then
+			if self.current.value ~= value then
+				error(string.format("Expected token '%s' with value '%s' but got '%s' with value '%s' at line %d col %d",
+					type, value,
+					self.current and self.current.type or "EOF",
+					self.current and self.current.value or "NIL",
+					self.current and self.current.line or -1,
+					self.current and self.current.col or -1))
+			else
+				self:advance()
+			end
+		else
+			local token = self.current
+			self:advance()
+			return token
+		end
 	else
 		error(string.format("Expected token '%s' but got '%s' at line %d col %d",
 			type, self.current and self.current.type or "EOF",
@@ -67,10 +80,15 @@ end
 function Parser:parse_let()
 	self:expect("LET")
 	local nameTok = self:expect("IDENTIFIER")
-	local varType
+	local varType, arraySize
 	if self.current.type == "COLON" then
 		self:advance()
 		varType = self:expect("IDENTIFIER").value
+		if self.current.type == "BRACKET" then
+			self:expect('BRACKET', '[')
+			arraySize = self:parse_primary()
+			self:expect('BRACKET', ']')
+		end
 	end
 	local value
 	if self.current.type == "ASSIGN" then
@@ -83,6 +101,8 @@ function Parser:parse_let()
 		name = nameTok.value,
 		varType = varType,
 		value = value,
+		isArray = arraySize ~= nil,
+		arraySize = arraySize,
 		line = nameTok.line,
 		column = nameTok.column
 	})
