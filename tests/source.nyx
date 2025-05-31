@@ -4,7 +4,7 @@ class Heap
 
   function init()
     self.heap = {};
-    for i: u8 = 0; i < 0xFF do
+    for let i: u8 = 0, i < 0xFF do
       self.heap[i] = 0;
     end
     self.heapPtr = &heap;

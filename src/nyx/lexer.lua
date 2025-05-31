@@ -201,6 +201,12 @@ function Lexer:tokenize_parenthesis()
 	return self:create_token('PARENTHESIS', result)
 end
 
+function Lexer:tokenize_curly()
+	local result = self.current_char
+	self:advance()
+	return self:create_token('CURLY', result)
+end
+
 -- Function to tokenize a colon
 function Lexer:tokenize_colon()
 	self:advance()
@@ -267,6 +273,8 @@ function Lexer:iter()
 				return self:tokenize_parenthesis()
 			elseif self.current_char == "[" or self.current_char == "]" then
 				return self:tokenize_bracket()
+			elseif self.current_char == "{" or self.current_char == "}" then
+				return self:tokenize_curly()
 			elseif self.current_char == '#' then
 				return self:tokenize_comment()
 			elseif self.current_char == '&' then

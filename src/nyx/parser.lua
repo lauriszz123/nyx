@@ -96,7 +96,6 @@ function Parser:parse_let()
 		local expr = self:parse_expression()
 		value = expr
 	end
-	self:expect("SEMICOLON")
 	return self:node("VariableDeclaration", {
 		name = nameTok.value,
 		varType = varType,
@@ -114,7 +113,6 @@ function Parser:parse_return()
 	if self.current and self.current.type ~= "END" and self.current.type ~= "ELSE" and self.current.type ~= "CATCH" and self.current.type ~= "FINALLY" then
 		value = self:parse_expression()
 	end
-	self:expect("SEMICOLON")
 	return self:node("ReturnStatement", { value = value })
 end
 
@@ -152,8 +150,9 @@ function Parser:parse_class()
 			else
 				table.insert(members, fld)
 			end
+			self:expect('SEMICOLON')
 		else
-			error("Unexpected class member: " .. self.current.type)
+			error("Unexpected class member: " .. self.current.type .. ', line: ' .. self.current.line)
 		end
 	end
 	self:expect("END")
@@ -172,7 +171,9 @@ function Parser:parse_statement()
 	elseif t == "FUNCTION" then
 		return self:parse_function(false)
 	elseif t == "RETURN" then
-		return self:parse_return()
+		local ret = self:parse_return()
+		self:expect('SEMICOLON')
+		return ret
 	elseif t == "IF" then
 		return self:parse_if()
 	elseif t == "WHILE" then
@@ -182,9 +183,13 @@ function Parser:parse_statement()
 	elseif t == "TRY" then
 		return self:parse_try()
 	elseif t == "LET" then
-		return self:parse_let()
+		local let = self:parse_let()
+		self:expect('SEMICOLON')
+		return let
 	else
-		return self:parse_expression_statement()
+		local expr = self:parse_expression_statement()
+		self:expect('SEMICOLON')
+		return expr
 	end
 end
 
@@ -359,13 +364,11 @@ function Parser:parse_expression_statement()
 	if self.current and self.current.type == "ASSIGN" then
 		self:advance()
 		local value = self:parse_expression()
-		self:expect("SEMICOLON")
 		return self:node("AssignmentStatement", {
 			target = expr,
 			value = value
 		})
 	else
-		self:expect("SEMICOLON")
 		return self:node("ExpressionStatement", { expression = expr })
 	end
 end
@@ -426,6 +429,25 @@ function Parser:parse_call()
 	return expr
 end
 
+function Parser:parse_array_block()
+	local expressions = {}
+	while self.current and not (self.current.type == 'CURLY' and self.current.value == '}') do
+		table.insert(expressions, self:parse_expression())
+		if self.current.type == 'COMMA' then
+			self:advance()
+		elseif self.current.type == 'CURLY' then
+			break
+		else
+			error('Expected a curly or a comma when parsing the array block')
+		end
+	end
+	self:expect('CURLY', '}')
+	return self:node('ArrayBlock', {
+		list = expressions,
+		line = self.current.line
+	})
+end
+
 function Parser:parse_primary()
 	local t = self.current
 	if not t then error("Unexpected EOF in expression") end
@@ -484,6 +506,9 @@ function Parser:parse_primary()
 			value = self:expect('Identifier'),
 			line = t.line
 		})
+	elseif t.type == 'CURLY' and t.value == '{' then
+		self:advance()
+		return self:parse_array_block()
 	else
 		error("Unexpected token in expression: " .. t.type .. ':' .. t.value)
 	end
