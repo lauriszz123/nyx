@@ -202,7 +202,12 @@ function Parser:parse_function(isMethod)
 	local returnType
 	if self.current and self.current.type == "COLON" then
 		self:advance()
-		returnType = self:expect("IDENTIFIER").value
+		if self.current.type == 'NIL' then
+			self:advance()
+			returnType = 'nil'
+		else
+			returnType = self:expect("IDENTIFIER").value
+		end
 	end
 	local body = {}
 	while self.current and self.current.type ~= "END" do
@@ -462,11 +467,21 @@ function Parser:parse_primary()
 		while self.current and self.current.type == "DOT" do
 			self:advance()
 			local field = self:expect("IDENTIFIER")
+
 			expr = self:node("FieldAccess", {
 				object = expr,
 				field = field.value,
 				line = field.line
 			})
+		end
+
+		if self.current.type == 'BRACKET' and self.current.value == '[' then
+			self:advance()
+			expr = self:node('ArrayAccess', {
+				array = expr,
+				index = self:parse_expression()
+			})
+			self:expect('BRACKET', ']')
 		end
 
 		return expr
@@ -503,7 +518,7 @@ function Parser:parse_primary()
 	elseif t.type == "AND_CHAR" then
 		self:advance()
 		return self:node('GetAddress', {
-			value = self:expect('Identifier'),
+			value = self:expect('IDENTIFIER'),
 			line = t.line
 		})
 	elseif t.type == 'CURLY' and t.value == '{' then

@@ -456,7 +456,7 @@ TypeChecker.visitor = {
 			local var = self.scope:lookup(target.name)
 
 			if not var then
-				self:addError('Undefined variable: ' .. targetName, node)
+				self:addError('Undefined variable: ' .. target.name, node)
 				return
 			end
 			local valueType = self:getExpressionType(node.value)
