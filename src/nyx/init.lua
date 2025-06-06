@@ -1,9 +1,9 @@
-local class = require "middleclass"
-local Lexer = require 'src.nyx.lexer'
-local Parser = require 'src.nyx.parser'
-local TypeChecker = require 'src.nyx.typecheck'
-local Compiler = require 'src.nyx.compiler'
-local inspect = require 'inspect'
+local class = require("middleclass")
+local Lexer = require("src.nyx.lexer")
+local Parser = require("src.nyx.parser")
+local TypeChecker = require("src.nyx.validator")
+local Compiler = require("src.nyx.compiler")
+local inspect = require("inspect")
 
 local InitLang = class("Init")
 

@@ -1,22 +1,9 @@
-class Heap
-  let heap: u8[0xFF];
-  let heapPtr: ptr;
-
-  function init()
-    self.heap = {};
-    for let i: u8 = 0, i < 0xFF do
-      self.heap[i] = 0;
-    end
-    self.heapPtr = &heap;
-  end
-
-  function alloc(size: u8): ptr
-    let startAddr: ptr = heapPtr;
-    heapPtr = heapPtr + size;
-    return startAddr;
-  end
+struct Test
+  test: u8;
 end
 
-function main(): nil
-  let heap: Heap = new Heap(); 
+impl Test
+  fn new(): Test
+    self.test = 10;
+  end
 end

@@ -1,0 +1,143 @@
+
+function Parser:parse_if()
+	self:expect("IF")
+	local condition = self:parse_expression()
+	self:expect("THEN")
+
+	local then_body = {}
+	while
+		self.current
+		and self.current.type ~= "ELSE"
+		and self.current.type ~= "ELSEIF"
+		and self.current.type ~= "END"
+	do
+		table.insert(then_body, self:parse_statement())
+	end
+
+	local elseif_branches = {}
+	while self.current and self.current.type == "ELSEIF" do
+		self:advance()
+		local elseif_condition = self:parse_expression()
+		self:expect("THEN")
+		local elseif_body = {}
+		while
+			self.current
+			and self.current.type ~= "ELSEIF"
+			and self.current.type ~= "ELSE"
+			and self.current.type ~= "END"
+		do
+			table.insert(elseif_body, self:parse_statement())
+		end
+		table.insert(elseif_branches, {
+			condition = elseif_condition,
+			body = elseif_body,
+		})
+	end
+
+	local else_body = nil
+	if self.current and self.current.type == "ELSE" then
+		self:advance()
+		else_body = {}
+		while self.current and self.current.type ~= "END" do
+			table.insert(else_body, self:parse_statement())
+		end
+	end
+
+	self:expect("END")
+	return self:node("IfStatement", {
+		condition = condition,
+		then_body = then_body,
+		elseif_branches = elseif_branches,
+		else_body = else_body,
+	})
+end
+
+function Parser:parse_for()
+	self:expect("FOR")
+	local var = self:parse_let()
+	if not var or var.kind ~= "VariableDeclaration" then
+		error("Expected variable declaration in for loop")
+	end
+	self:expect("COMMA")
+	local stop = self:parse_expression()
+	local step = nil
+	if self.current and self.current.type == "COMMA" then
+		self:advance()
+		step = self:parse_expression()
+	end
+	self:expect("DO")
+
+	local body = {}
+	while self.current and self.current.type ~= "END" do
+		table.insert(body, self:parse_statement())
+	end
+
+	self:expect("END")
+	return self:node("ForStatement", {
+		var = var,
+		stop = stop,
+		step = step,
+		body = body,
+	})
+end
+
+function Parser:parse_while()
+	self:expect("WHILE")
+	local cond = self:parse_expression()
+	self:expect("DO")
+
+	local body = {}
+	while self.current and self.current.type ~= "END" do
+		table.insert(body, self:parse_statement())
+	end
+
+	self:expect("END")
+	return self:node("WhileStatement", {
+		condition = cond,
+		body = body,
+	})
+end
+
+function Parser:parse_try()
+	self:expect("TRY")
+	local tryBlock = {}
+	while
+		self.current
+		and self.current.type ~= "CATCH"
+		and self.current.type ~= "FINALLY"
+		and self.current.type ~= "END"
+	do
+		table.insert(tryBlock, self:parse_statement())
+	end
+
+	local catchBlock = nil
+	local catchVar = nil
+	if self.current and self.current.type == "CATCH" then
+		self:advance()
+		catchVar = self:expect("IDENTIFIER").value
+		local cb = {}
+		while self.current and self.current.type ~= "FINALLY" and self.current.type ~= "END" do
+			table.insert(cb, self:parse_statement())
+		end
+		catchBlock = { param = catchVar, body = cb }
+	end
+
+	local finallyBlock = nil
+	if self.current and self.current.type == "FINALLY" then
+		self:advance()
+		local fb = {}
+		while self.current and self.current.type ~= "END" do
+			table.insert(fb, self:parse_statement())
+		end
+		finallyBlock = fb
+	end
+
+	self:expect("END")
+	return self:node("TryStatement", {
+		tryBlock = tryBlock,
+		catchBlock = catchBlock,
+		finallyBlock = finallyBlock,
+	})
+end
+
+return Parser

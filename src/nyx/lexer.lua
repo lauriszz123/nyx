@@ -1,6 +1,6 @@
-local class = require 'middleclass'
+local class = require("middleclass")
 
-local Lexer = class('Lexer')
+local Lexer = class("Lexer")
 
 local keywords = {
 	["if"] = "IF",
@@ -9,7 +9,7 @@ local keywords = {
 	["elseif"] = "ELSEIF",
 	["end"] = "END",
 	["let"] = "LET",
-	["function"] = "FUNCTION",
+	["fn"] = "FUNCTION",
 	["return"] = "RETURN",
 	["while"] = "WHILE",
 	["for"] = "FOR",
@@ -30,17 +30,13 @@ local keywords = {
 	["true"] = "TRUE",
 	["false"] = "FALSE",
 	["nil"] = "NIL",
-	["class"] = "CLASS",
-	["extends"] = "EXTENDS",
-	["super"] = "SUPER",
-	["self"] = "SELF",
-	["new"] = "NEW",
+	["struct"] = "STRUCT",
+	["impl"] = "IMPL",
+	["enum"] = "ENUM",
 	["import"] = "IMPORT",
 	["as"] = "AS",
-	["static"] = "STATIC",
 	["const"] = "CONST",
-	["interface"] = "INTERFACE",
-	["abstract"] = "ABSTRACT"
+	["abstract"] = "ABSTRACT",
 }
 
 -- Constructor
@@ -87,11 +83,11 @@ end
 -- Function to tokenize a number
 function Lexer:tokenize_number()
 	local result = ""
-	if self.current_char == '0' then
+	if self.current_char == "0" then
 		result = result .. self.current_char
 		self:advance()
 
-		if self.current_char and (self.current_char == 'x' or self.current_char == 'X') then
+		if self.current_char and (self.current_char == "x" or self.current_char == "X") then
 			result = result .. self.current_char
 			self:advance()
 
@@ -100,20 +96,20 @@ function Lexer:tokenize_number()
 				self:advance()
 			end
 
-			return self:create_token('NUMBER', result)
+			return self:create_token("NUMBER", result)
 		else
 			while self.current_char and self.current_char:match("%d") do
 				result = result .. self.current_char
 				self:advance()
 			end
-			return self:create_token('NUMBER', result)
+			return self:create_token("NUMBER", result)
 		end
 	else
 		while self.current_char and self.current_char:match("%d") do
 			result = result .. self.current_char
 			self:advance()
 		end
-		return self:create_token('NUMBER', result)
+		return self:create_token("NUMBER", result)
 	end
 end
 
@@ -127,7 +123,7 @@ function Lexer:tokenize_identifier()
 	if keywords[result] then
 		return self:create_token(keywords[result], result)
 	end
-	return self:create_token('IDENTIFIER', result)
+	return self:create_token("IDENTIFIER", result)
 end
 
 -- Function to tokenize a string
@@ -139,14 +135,14 @@ function Lexer:tokenize_string()
 		self:advance()
 	end
 	self:advance() -- Skip the closing quote
-	return self:create_token('STRING', result)
+	return self:create_token("STRING", result)
 end
 
 -- Function to tokenize a single character (operator or punctuation)
 function Lexer:tokenize_single_char()
 	local char = self.current_char
 	self:advance()
-	return self:create_token('CHAR', char)
+	return self:create_token("CHAR", char)
 end
 
 -- Function to tokenize a operator or punctuation
@@ -155,18 +151,18 @@ function Lexer:tokenize_operator()
 	self:advance()
 	if op == "<" and self.current_char == "=" then
 		self:advance()
-		return self:create_token('LE', '<=')
+		return self:create_token("LE", "<=")
 	elseif op == ">" and self.current_char == "=" then
 		self:advance()
-		return self:create_token('GE', '>=')
+		return self:create_token("GE", ">=")
 	elseif op == "!" and self.current_char == "=" then
 		self:advance()
-		return self:create_token('NE', '!=')
+		return self:create_token("NE", "!=")
 	elseif op == "=" and self.current_char == ">" then
 		self:advance()
-		return self:create_token('ARROW', '=>')
+		return self:create_token("ARROW", "=>")
 	end
-	return self:create_token('OPERATOR', op)
+	return self:create_token("OPERATOR", op)
 end
 
 -- Function to tokenize a comment (single line)
@@ -181,66 +177,66 @@ function Lexer:tokenize_assign()
 	self:advance()
 	if self.current_char == "=" then
 		self:advance()
-		return self:create_token('EQ', '==')
+		return self:create_token("EQ", "==")
 	end
 	-- If it's just a single '=', return it as an assignment operator
-	return self:create_token('ASSIGN', '=')
+	return self:create_token("ASSIGN", "=")
 end
 
 -- Function to tokenize brackets
 function Lexer:tokenize_bracket()
 	local result = self.current_char
 	self:advance()
-	return self:create_token('BRACKET', result)
+	return self:create_token("BRACKET", result)
 end
 
 -- Function to tokenize parenthesis
 function Lexer:tokenize_parenthesis()
 	local result = self.current_char
 	self:advance()
-	return self:create_token('PARENTHESIS', result)
+	return self:create_token("PARENTHESIS", result)
 end
 
 function Lexer:tokenize_curly()
 	local result = self.current_char
 	self:advance()
-	return self:create_token('CURLY', result)
+	return self:create_token("CURLY", result)
 end
 
 -- Function to tokenize a colon
 function Lexer:tokenize_colon()
 	self:advance()
-	return self:create_token('COLON', ':')
+	return self:create_token("COLON", ":")
 end
 
 -- Function to tokenize a colon
 function Lexer:tokenize_and()
 	self:advance()
-	return self:create_token('AND_CHAR', '&')
+	return self:create_token("AND_CHAR", "&")
 end
 
 -- Function to tokenize a semicolon
 function Lexer:tokenize_semicolon()
 	self:advance()
-	return self:create_token('SEMICOLON', ';')
+	return self:create_token("SEMICOLON", ";")
 end
 
 -- Function to tokenize a comma
 function Lexer:tokenize_comma()
 	self:advance()
-	return self:create_token('COMMA', ',')
+	return self:create_token("COMMA", ",")
 end
 
 -- Function to tokenize a dot
 function Lexer:tokenize_dot()
 	self:advance()
-	return self:create_token('DOT', '.')
+	return self:create_token("DOT", ".")
 end
 
 -- Function to tokenize a hash
 function Lexer:tokenize_hash()
 	self:advance()
-	return self:create_token('HASH', '#')
+	return self:create_token("HASH", "#")
 end
 
 function Lexer:reset()
@@ -275,9 +271,9 @@ function Lexer:iter()
 				return self:tokenize_bracket()
 			elseif self.current_char == "{" or self.current_char == "}" then
 				return self:tokenize_curly()
-			elseif self.current_char == '#' then
+			elseif self.current_char == "#" then
 				return self:tokenize_comment()
-			elseif self.current_char == '&' then
+			elseif self.current_char == "&" then
 				return self:tokenize_and()
 			elseif self.current_char:match("[%p]") then
 				if self.current_char:match("[<>!+-/*]") then

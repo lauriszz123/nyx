@@ -1,12 +1,12 @@
 # Nyx Language Design
 
-Nyx is a statically-typed, class-based language inspired by Lua, intended for easy compilation to a CHIP-8 style VM architecture.
+Nyx is a statically-typed, language inspired by Lua, intended for easy compilation to a CHIP-8, 6502 style VM architecture.
 
 ---
 
 ## 1. Philosophy
 - Minimalist core syntax, expandable via libraries.
-- All types are implemented as classes.
+- All types are implemented as structs.
 - No dynamic types at the core level.
 - Self-hostable: even `Array`, `Table`, `Heap`, etc. are written in Nyx.
 - Designed for low-level VMs: operations are easy to compile to CHIP-8-like opcodes (A, B, H, L registers).
@@ -15,31 +15,27 @@ Nyx is a statically-typed, class-based language inspired by Lua, intended for ea
 
 ## 2. Core Syntax
 
-### 2.1 Classes and Interfaces
+### 2.1 Structs
 ```lua
-class Name [extends Super] do
-  field: Type = value
-  local privateField: Type = value
-
-  function methodName(params): ReturnType do
-    ...
-  end
+struct Name
+  field: Type
+  local privateField: Type
 end
 ```
-- `class` defines a new class.
-- `extends` allows single inheritance.
+- `struct` defines a new struct.
 - Fields assigned directly are public.
 - Fields defined via `local` are private.
 
 ### 2.2 Variables
 ```lua
 local x: Type = value    -- Private or local
-x: Type = value          -- Public if inside class
+x: Type = value          -- Public
 ```
 
 ### 2.3 Functions
+Functions are pretty similair to Lua, but with statically-typed sugar.
 ```lua
-function name(params): ReturnType do
+function name(params: Types, ...): ReturnType do
   ...
 end
 ```
@@ -79,14 +75,14 @@ end
 
 ## 3. Memory Model
 - Memory is accessed through VM primitives:
-  - `peek(addr: Pointer): UInt8`
-  - `poke(addr: Pointer, value: UInt8): void`
+  - `peek(addr: Pointer): u8`
+  - `poke(addr: Pointer, value: u8): void`
 - Userland `Heap` class manages allocations:
 ```lua
-class Heap do
-  static freePtr: Pointer = HEAP_START
+struct Heap
+  static freePtr: ptr = HEAP_START
 
-  static function alloc(size: UInt16): Pointer
+  function alloc(size: u8): Pointer
     if freePtr + size > HEAP_END then
       error("Out of memory")
     end
@@ -111,8 +107,8 @@ end
 ---
 
 ## 5. Type System
-- All types are defined by classes.
-- No separate `type` keyword; everything is a `class`.
+- All types are defined by structs.
+- No separate `type` keyword; everything is a `struct`.
 - Functions can be typed for parameters and return types.
 - Generics supported manually: e.g., `Array<T>`
 - Interfaces supported for structural typing.
@@ -155,4 +151,4 @@ end
 
 ---
 
-This document outlines the foundation for LiluaX as discussed and implemented!
+This document outlines the foundation for Nyx!
