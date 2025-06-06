@@ -26,7 +26,6 @@ function Validator:addError(message, node)
 	local error = {
 		message = message,
 		line = node.line or -1,
-		column = node.column or -1,
 	}
 	table.insert(self.errors, error)
 end
@@ -35,7 +34,6 @@ function Validator:addWarning(message, node)
 	local warning = {
 		message = message,
 		line = node.line or -1,
-		column = node.column or -1,
 	}
 	table.insert(self.warnings, warning)
 end
@@ -116,62 +114,9 @@ function Validator:getExpressionType(node, against)
 		return self:checkUnaryExpression(node)
 	elseif node.kind == "FieldAccess" then
 		return self:checkFieldAccess(node)
-	elseif node.kind == "NewInstance" then
-		return self:checkNewInstance(node.call)
 	else
 		return "any"
 	end
-end
-
-function Validator:checkNewInstance(node)
-	if node.kind == "CallExpression" then
-		local className = node.callee.name
-		local class = self.scope:lookup(className)
-
-		if not class and class.isClass ~= nil then
-			self:addError("Cannot instantiate undefined class: " .. className, node)
-			return "any"
-		end
-
-		local constructor = class.info.methods["init"]
-		if constructor then
-			if #node.arguments ~= #constructor.params then
-				self:addError(
-					string.format(
-						"Constructor %s expects %d arguments, got %d",
-						className,
-						#constructor.params,
-						#node.arguments
-					),
-					node
-				)
-			else
-				for i, arg in ipairs(node.arguments) do
-					if constructor.params[i] then
-						local expectedType = constructor.params[i].type
-						local actualType = self:getExpressionType(arg)
-
-						if not self:isTypeCompatible(expectedType, actualType) then
-							self:addError(
-								string.format(
-									"Constructor argument %d: expected %s, got %s",
-									i,
-									expectedType,
-									actualType
-								)
-							)
-						end
-					end
-				end
-			end
-
-			return className
-		else
-			self:addError("No constructor found for class: " .. className, node)
-		end
-	end
-
-	return "any"
 end
 
 function Validator:checkBinaryExpression(node)
@@ -303,25 +248,8 @@ function Validator:checkFieldAccess(node)
 	local objectType = self:getExpressionType(node.object)
 	local fieldName = node.field
 
-	local klass = self.scope:lookup(objectType)
-	if not klass then
-		self:addError("Cannot access field of non-object type: " .. objectType, node)
-		return "any"
-	end
-
-	if not klass.isStruct then
-		self:addError("Object is not a struct, type: " .. klass.type, node)
-		return "any"
-	end
-
-	if klass.info.methods[fieldName] then
-		return "function"
-	end
-
-	if not klass.info.fields[fieldName] then
-		self:addError(string.format("Class '%s' has no field '%s'", objectType, fieldName), node)
-		return "any"
-	end
+	local struct = self.scope:lookup(objectType)
+	return "any"
 end
 
 function Validator:isTypeCompatible(expected, actual)
@@ -467,13 +395,13 @@ end
 
 function Validator:printResults()
 	if #self.errors > 0 then
-		print("=== ERRORS ===")
+		print("=== VALIDATOR ERRORS ===")
 		for _, err in ipairs(self.errors) do
 			print(string.format("Error at line %d: %s", err.line, err.message))
 		end
 	end
 	if #self.warnings > 0 then
-		print("=== WARNINGS ===")
+		print("=== VALIDATOR WARNINGS ===")
 		for _, warn in ipairs(self.warnings) do
 			print(string.format("Warning at line %d: %s", warn.line, warn.message))
 		end

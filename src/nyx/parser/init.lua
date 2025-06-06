@@ -20,6 +20,7 @@ function Parser:addError(message, node)
 		message = message,
 		line = node.line,
 	})
+	error()
 end
 
 function Parser:advance()
@@ -35,16 +36,15 @@ function Parser:expect(type, value)
 	if self.current and self.current.type == type then
 		if value then
 			if self.current.value ~= value then
-				error(
+				self:addError(
 					string.format(
-						"Expected token '%s' with value '%s' but got '%s' with value '%s' at line %d col %d",
+						"Expected token '%s' with value '%s' but got '%s' with value '%s'!",
 						type,
 						value,
 						self.current and self.current.type or "EOF",
-						self.current and self.current.value or "NIL",
-						self.current and self.current.line or -1,
-						self.current and self.current.col or -1
-					)
+						self.current and self.current.value or "NIL"
+					),
+					self.current
 				)
 			else
 				self:advance()
@@ -55,14 +55,9 @@ function Parser:expect(type, value)
 			return token
 		end
 	else
-		error(
-			string.format(
-				"Expected token '%s' but got '%s' at line %d col %d",
-				type,
-				self.current and self.current.type or "EOF",
-				self.current and self.current.line or -1,
-				self.current and self.current.col or -1
-			)
+		self:addError(
+			string.format("Expected token '%s' but got '%s'!", type, self.current and self.current.type or "EOF"),
+			self.current
 		)
 	end
 end
@@ -73,12 +68,34 @@ function Parser:node(kind, props)
 end
 
 -- Entry point
-function Parser:parse()
+function Parser:parse_top()
 	local nodes = {}
 	while self.current do
 		table.insert(nodes, StatementParser.parse(self))
 	end
 	return self:node("Program", { body = nodes })
+end
+
+function Parser:parse()
+	local ok, _ = pcall(self.parse_top, self)
+	if not ok then
+		return
+	end
+end
+
+function Parser:hasErrors()
+	return #self.errors > 0
+end
+
+function Parser:printResults()
+	if self:hasErrors() then
+		print("=== PARSER ERRORS ===")
+		for _, err in ipairs(self.errors) do
+			print(string.format("Error at line %d: %s", err.line, err.message))
+		end
+	else
+		print("No issues found!")
+	end
 end
 
 return Parser

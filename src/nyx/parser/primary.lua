@@ -12,7 +12,7 @@ end
 function PrimaryParser:parse()
 	local t = self.current
 	if not t then
-		error("Unexpected EOF in expression")
+		self:addError("Unexpected EOF in expression", t)
 	end
 	if t.type == "IDENTIFIER" then
 		self:advance()
@@ -64,7 +64,7 @@ function PrimaryParser:parse()
 			line = t.line,
 		})
 	else
-		error("Unexpected token in expression: " .. t.type .. ":" .. t.value)
+		self:addError("Unexpected token in expression: " .. t.type .. ":" .. t.value, t)
 	end
 end
 

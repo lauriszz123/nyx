@@ -1,9 +1,3 @@
 struct Test
   test: u8;
 end
-
-impl Test
-  fn new(): Test
-    self.test = 10;
-  end
-end

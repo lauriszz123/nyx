@@ -13,6 +13,11 @@ local function runTypeChecker(source, printAst)
 	local parser = Parser(lexer)
 	local ast = parser:parse()
 
+	if parser:hasErrors() then
+		parser:printResults()
+		return
+	end
+
 	if printAst then
 		print(inspect(ast))
 	end
@@ -28,10 +33,12 @@ end
 local function checkCodeSnippet(desc, code)
 	print("=== " .. desc .. " ===")
 	local results = runTypeChecker(code, false)
-	print("Errors found:" .. #results.errors)
-	print("Warnings found:" .. #results.warnings)
-	print()
-	return results
+	if results then
+		print("Errors found:" .. #results.errors)
+		print("Warnings found:" .. #results.warnings)
+		print()
+		return results
+	end
 end
 
 checkCodeSnippet(
@@ -113,4 +120,4 @@ end
 -- ]]
 -- )
 
--- checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))
+checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))

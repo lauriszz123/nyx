@@ -1,27 +1,31 @@
 local ExpressionParser = require("src.nyx.parser.expression")
+local PrimaryParser = require("src.nyx.parser.primary")
 
 local LetParser = {}
 
 function LetParser:parse()
 	self:expect("LET")
+
 	local nameTok = self:expect("IDENTIFIER")
-	local varType, arraySize
-	if self.current.type == "COLON" then
-		self:advance()
-		varType = self:expect("IDENTIFIER").value
-		if self.current.type == "BRACKET" then
-			self:expect("BRACKET", "[")
-			arraySize = self:parse_primary()
-			self:expect("BRACKET", "]")
-		end
+	self:expect("COLON")
+	local varType = self:expect("IDENTIFIER").value
+
+	local arraySize
+	if self.current.type == "BRACKET" then
+		self:expect("BRACKET", "[")
+		arraySize = PrimaryParser.parse(self)
+		self:expect("BRACKET", "]")
 	end
+
 	local value
 	if self.current.type == "ASSIGN" then
 		self:advance()
 		local expr = ExpressionParser.parse(self)
 		value = expr
 	end
+
 	self:expect("SEMICOLON")
+
 	return self:node("VariableDeclaration", {
 		name = nameTok.value,
 		varType = varType,
