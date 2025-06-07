@@ -77,10 +77,12 @@ function Parser:parse_top()
 end
 
 function Parser:parse()
-	local ok, _ = pcall(self.parse_top, self)
+	local ok, ast = pcall(self.parse_top, self)
 	if not ok then
 		return
 	end
+
+	return ast
 end
 
 function Parser:hasErrors()
