@@ -30,53 +30,6 @@ function Validator:getArithmeticResultType(leftType, rightType, op)
 	end
 end
 
-function Validator:getExpressionType(node, against)
-	if node.kind == "NumberLiteral" then
-		if against and against == "bool" and (node.value == 0 or node.value == 1) then
-			return "bool"
-		end
-		if node.value >= 0 and node.value <= 0xFF then
-			if against then
-				if against == "s8" and node.value <= 127 then
-					return "s8"
-				elseif against == "ptr" then
-					return "ptr"
-				else
-					return "u8"
-				end
-			else
-				return "u8"
-			end
-		elseif node.value >= -128 and node.value <= 127 then
-			return "s8"
-		elseif node.value >= 0 and node.value <= 0xFFFF then
-			return "ptr"
-		end
-	elseif node.kind == "StringLiteral" then
-		return "str"
-	elseif node.kind == "BooleanLiteral" then
-		return "bool"
-	elseif node.kind == "Identifier" then
-		local var = self.scope:lookup(node.name)
-		if var then
-			return var.type
-		else
-			self:addError("Undefined variable: " .. node.name, node)
-			return "any"
-		end
-	elseif node.kind == "BinaryExpression" then
-		return self:checkBinaryExpression(node)
-	elseif node.kind == "CallExpression" then
-		return self:checkCallExpression(node)
-	elseif node.kind == "UnaryExpression" then
-		return self:checkUnaryExpression(node)
-	elseif node.kind == "FieldAccess" then
-		return self:checkFieldAccess(node)
-	else
-		return "any"
-	end
-end
-
 function Validator:checkBinaryExpression(node)
 	local leftType = self:getExpressionType(node.left)
 	local rightType = self:getExpressionType(node.right)

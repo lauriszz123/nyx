@@ -22,12 +22,11 @@ local function runTypeChecker(source, printAst)
 		print(inspect(ast))
 	end
 
+	---@type Validator
 	local validator = Validator()
-	local results = validator:check(ast)
+	validator:validate(ast)
 
 	validator:printResults()
-
-	return results
 end
 
 local function checkCodeSnippet(desc, code)

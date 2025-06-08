@@ -1,3 +1,4 @@
+---@class NyxTypes
 local Types = {}
 
 local BUILT_IN_TYPES = {
@@ -9,11 +10,15 @@ local BUILT_IN_TYPES = {
 	["nil"] = true,
 }
 
+Types.BUILT_IN = BUILT_IN_TYPES
+
+---@param scope Scope
+---@param typeName string
 function Types.isValidType(scope, typeName)
 	return BUILT_IN_TYPES[typeName] or scope:structExists(typeName)
 end
 
-function Types.sNumericType(typeName)
+function Types.isNumericType(typeName)
 	return typeName == "u8" or typeName == "s8" or typeName == "ptr"
 end
 

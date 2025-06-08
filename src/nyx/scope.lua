@@ -11,8 +11,8 @@ function Scope:initialize(parent)
 	self.stackPtr = 1
 end
 
-function Scope:isLocal(isLocal)
-	self.isLocalScope = isLocal
+function Scope:setLocal()
+	self.isLocalScope = true
 end
 
 function Scope:lookup(name)
@@ -25,18 +25,6 @@ function Scope:lookup(name)
 	end
 end
 
-function Scope:declareFunction(node)
-	self.functions[node.name] = {
-		params = node.params,
-		returnType = node.returnType,
-		body = node.body,
-	}
-end
-
-function Scope:getFunction(name)
-	return self.functions[name]
-end
-
 function Scope:getGlobalScope()
 	local scope = self
 	while scope ~= nil do
@@ -47,18 +35,32 @@ function Scope:getGlobalScope()
 	end
 end
 
-function Scope:declareClass(name, object)
-	local global = self:getGlobalScope()
-	global.variables[name] = {
-		isClass = true,
-		info = object,
+function Scope:declareFunction(name, argc, retType)
+	if self.functions[name] then
+		error("Function " .. name .. " already declared in this scope")
+	end
+
+	self.functions[name] = {
+		argc = argc,
+		returnType = retType,
 	}
 end
 
-function Scope:classExists(cls)
+function Scope:getFunction(name)
+	return self.functions[name]
+end
+
+function Scope:declareStruct(name)
 	local global = self:getGlobalScope()
-	local var = global:lookup(cls)
-	if var and var.isClass then
+	global.variables[name] = {
+		isStruct = true,
+	}
+end
+
+function Scope:structExists(struct)
+	local global = self:getGlobalScope()
+	local var = global:lookup(struct)
+	if var and var.isStruct then
 		return true
 	end
 
@@ -72,24 +74,13 @@ function Scope:declare(name, typ, address)
 
 	self.variables[name] = {
 		type = typ,
-		isLocal = false,
-		address = address,
-	}
-end
-
-function Scope:declareLocal(name, typ, index)
-	if self.variables[name] then
-		error("Variable " .. name .. " already declared in this scope")
-	end
-
-	self.variables[name] = {
-		type = typ,
-		isLocal = true,
-		index = index or self.stackPtr,
+		position = address,
 	}
 
-	if not index then
-		self.stackPtr = self.stackPtr + 1
+	if self.isLocalScope then
+		self.variables[name].isLocal = true
+	else
+		self.variables[name].isLocal = false
 	end
 end
 

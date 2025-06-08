@@ -1,8 +1,9 @@
+---@type NyxTypes
 local Types = require("src.nyx.validator.types")
 
 ---@param self Validator
 return function(self, node)
-	if node.varType and not Types.isValidType(node.varType) then
+	if node.varType and not Types.isValidType(self.scope, node.varType) then
 		self:addError("Unknown type: " .. node.varType, node)
 	end
 
@@ -11,7 +12,7 @@ return function(self, node)
 	end
 
 	if node.value then
-		local valueType = self:getExpressionType(node.value, node.varType)
+		local valueType = self.expression.getExpressionType(self.scope, node.value, node.varType)
 
 		if not Types.isTypeCompatible(node.varType, valueType) then
 			self:addError(string.format("Cannot assign %s to variable of type %s", valueType, node.varType), node)

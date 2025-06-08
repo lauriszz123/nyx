@@ -11,7 +11,8 @@ function Validator:initialize()
 	self.scope = Scope()
 	self.errors = {}
 	self.currentFunction = nil
-	self.visitor = require("src.nyx.validator.visitor")
+	self.visitor = require("src.nyx.validator.statements")
+	self.expression = require("src.nyx.validator.expression")
 end
 
 function Validator:addError(message, node)
