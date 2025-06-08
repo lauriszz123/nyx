@@ -1,50 +1,8 @@
 local class = require("middleclass")
 local AST = require("src.nyx.ast")
 local Scope = require("src.nyx.scope")
-local inspect = require("inspect")
 
 local Validator = class("Validator")
-
-local BUILT_IN_TYPES = {
-	["u8"] = true,
-	["s8"] = true,
-	["str"] = true,
-	["ptr"] = true,
-	["bool"] = true,
-	["nil"] = true,
-}
-
--- Initialize with a fresh scope
-function Validator:initialize()
-	self.scope = Scope()
-	self.errors = {}
-	self.warnings = {}
-	self.currentFunction = nil
-end
-
-function Validator:addError(message, node)
-	local error = {
-		message = message,
-		line = node.line or -1,
-	}
-	table.insert(self.errors, error)
-end
-
-function Validator:addWarning(message, node)
-	local warning = {
-		message = message,
-		line = node.line or -1,
-	}
-	table.insert(self.warnings, warning)
-end
-
-function Validator:isValidType(typeName)
-	return BUILT_IN_TYPES[typeName] or self.scope:classExists(typeName)
-end
-
-function Validator:isNumericType(typeName)
-	return typeName == "u8" or typeName == "s8" or typeName == "ptr"
-end
 
 function Validator:getArithmeticResultType(leftType, rightType, op)
 	if not (self:isNumericType(leftType) and self:isNumericType(rightType)) then
@@ -252,43 +210,7 @@ function Validator:checkFieldAccess(node)
 	return "any"
 end
 
-function Validator:isTypeCompatible(expected, actual)
-	return expected == actual
-end
-
 Validator.visitor = {
-	["Program"] = function(node, self)
-		for _, stmt in ipairs(node.body) do
-			if stmt.kind == "FunctionDeclaration" then
-				self.scope:declareFunction(stmt)
-			end
-		end
-
-		for _, stmt in ipairs(node.body) do
-			AST.visit(stmt, self.visitor, self)
-		end
-	end,
-
-	["VariableDeclaration"] = function(node, self)
-		if node.varType and not self:isValidType(node.varType) then
-			self:addError("Unknown type: " .. node.varType, node)
-		end
-
-		if node.isArray and node.arraySize.kind ~= "NumberLiteral" then
-			self:addError("Array should be a fixed size, number or a constant", node)
-		end
-
-		if node.value then
-			local valueType = self:getExpressionType(node.value, node.varType)
-
-			if not self:isTypeCompatible(node.varType, valueType) then
-				self:addError(string.format("Cannot assign %s to variable of type %s", valueType, node.varType), node)
-			end
-		end
-
-		self.scope:declare(node.name, node.varType)
-	end,
-
 	["AssignmentStatement"] = function(node, self)
 		local target = node.target
 		if target.kind == "FieldAccess" then
@@ -340,7 +262,7 @@ Validator.visitor = {
 
 		local hasReturn = false
 		for _, stmt in ipairs(node.body) do
-			AST.visit(stmt, self.visitor, self)
+			AST.visit(self, stmt)
 			if stmt.kind == "ReturnStatement" then
 				hasReturn = true
 			end
@@ -375,41 +297,6 @@ Validator.visitor = {
 	["ExpressionStatement"] = function(node, self)
 		self:getExpressionType(node.expression)
 	end,
-
-	["FieldDeclaration"] = function(node, self)
-		if node.varType and not self:isValidType(node.varType) then
-			self:addError("Unknown field type: " .. node.varType, node)
-		end
-	end,
 }
-
--- Entry point: typecheck an AST
-function Validator:check(node)
-	AST.visit(node, self.visitor, self)
-	return {
-		errors = self.errors,
-		warnings = self.warnings,
-		hasErrors = #self.errors > 0,
-	}
-end
-
-function Validator:printResults()
-	if #self.errors > 0 then
-		print("=== VALIDATOR ERRORS ===")
-		for _, err in ipairs(self.errors) do
-			print(string.format("Error at line %d: %s", err.line, err.message))
-		end
-	end
-	if #self.warnings > 0 then
-		print("=== VALIDATOR WARNINGS ===")
-		for _, warn in ipairs(self.warnings) do
-			print(string.format("Warning at line %d: %s", warn.line, warn.message))
-		end
-	end
-
-	if #self.errors == 0 and #self.warnings == 0 then
-		print("No issues found!")
-	end
-end
 
 return Validator

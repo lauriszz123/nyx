@@ -1,5 +1,6 @@
 local class = require("middleclass")
 
+---@class Scope
 local Scope = class("Scope")
 
 function Scope:initialize(parent)
@@ -28,7 +29,7 @@ function Scope:declareFunction(node)
 	self.functions[node.name] = {
 		params = node.params,
 		returnType = node.returnType,
-		body = node.body
+		body = node.body,
 	}
 end
 
@@ -50,7 +51,7 @@ function Scope:declareClass(name, object)
 	local global = self:getGlobalScope()
 	global.variables[name] = {
 		isClass = true,
-		info = object
+		info = object,
 	}
 end
 
@@ -72,7 +73,7 @@ function Scope:declare(name, typ, address)
 	self.variables[name] = {
 		type = typ,
 		isLocal = false,
-		address = address
+		address = address,
 	}
 end
 
@@ -84,7 +85,7 @@ function Scope:declareLocal(name, typ, index)
 	self.variables[name] = {
 		type = typ,
 		isLocal = true,
-		index = index or self.stackPtr
+		index = index or self.stackPtr,
 	}
 
 	if not index then
