@@ -1,6 +1,8 @@
+local Types = require("src.nyx.validator.types")
+
 ---@param self Validator
 return function(self, node)
-	if node.varType and not self:isValidType(node.varType) then
+	if node.varType and not Types.isValidType(node.varType) then
 		self:addError("Unknown type: " .. node.varType, node)
 	end
 
@@ -11,14 +13,7 @@ return function(self, node)
 	if node.value then
 		local valueType = self:getExpressionType(node.value, node.varType)
 
-		if not self:isTypeCompatible(node.varType, valueType) then
-			if #self.warnings > 0 then
-				print("=== VALIDATOR WARNINGS ===")
-				for _, warn in ipairs(self.warnings) do
-					print(string.format("Warning at line %d: %s", warn.line, warn.message))
-				end
-			end
-
+		if not Types.isTypeCompatible(node.varType, valueType) then
 			self:addError(string.format("Cannot assign %s to variable of type %s", valueType, node.varType), node)
 		end
 	end
