@@ -4,6 +4,7 @@ local ReturnStatement = {}
 
 function ReturnStatement:parse()
 	self:expect("RETURN")
+	local line = self.current.line
 	local value
 	if
 		self.current
@@ -15,7 +16,7 @@ function ReturnStatement:parse()
 		value = ExpressionParser.parse(self)
 	end
 	self:expect("SEMICOLON")
-	return self:node("ReturnStatement", { value = value })
+	return self:node("ReturnStatement", { value = value, line = line })
 end
 
 return ReturnStatement

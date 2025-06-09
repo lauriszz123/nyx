@@ -1,16 +1,15 @@
-local CallValidator = {}
-
 ---@param self Validator
-function CallValidator.checkCallExpression(self, node)
+return function(self, node)
 	local callee = node.callee
+	local funcName = callee.name
+	local func
 	if callee.kind == "FieldAccess" then
 		local fieldType = self.expression.checkFieldAccess(self, callee)
 		if fieldType ~= "function" then
 			self:addError(string.format("Field %s is not a method", callee.field), node)
 		end
 	else
-		local funcName = callee.name
-		local func = self.scope:getFunction(funcName)
+		func = self.scope:getFunction(funcName)
 
 		if not func then
 			self:addError("Undefined function: " .. funcName, node)
@@ -28,7 +27,7 @@ function CallValidator.checkCallExpression(self, node)
 	for i, arg in ipairs(node.arguments) do
 		if func.params[i] then
 			local expectedType = func.params[i].type or "any"
-			local actualType = self.expression.getExpressionType(self.scope, arg, expectedType)
+			local actualType = self.expression.getExpressionType(self, arg, expectedType)
 
 			if expectedType ~= actualType then
 				self:addError(
@@ -41,5 +40,3 @@ function CallValidator.checkCallExpression(self, node)
 
 	return func.returnType or "any"
 end
-
-return CallValidator

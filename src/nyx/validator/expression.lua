@@ -1,10 +1,12 @@
+local BinaryValidator = require("src.nyx.validator.binary")
+
 ---@class ExpressionValidator
 local ExpressionValidator = {}
 
----@param scope Scope
+---@param self Validator
 ---@param node table
----@param against string
-function ExpressionValidator.getExpressionType(scope, node, against)
+---@param against string|nil
+function ExpressionValidator.getExpressionType(self, node, against)
 	if node.kind == "NumberLiteral" then
 		if against and against == "bool" and (node.value == 0 or node.value == 1) then
 			return "bool"
@@ -31,7 +33,7 @@ function ExpressionValidator.getExpressionType(scope, node, against)
 	elseif node.kind == "BooleanLiteral" then
 		return "bool"
 	elseif node.kind == "Identifier" then
-		local var = scope:lookup(node.name)
+		local var = self.scope:lookup(node.name)
 		if var then
 			return var.type
 		else
@@ -39,16 +41,20 @@ function ExpressionValidator.getExpressionType(scope, node, against)
 			return "any"
 		end
 	elseif node.kind == "BinaryExpression" then
-		return ExpressionValidator.checkBinaryExpression(node)
+		return self.expression.checkBinaryExpression(self, node)
 	elseif node.kind == "CallExpression" then
-		return ExpressionValidator.checkCallExpression(node)
+		return self.expression.checkCallExpression(self, node)
 	elseif node.kind == "UnaryExpression" then
-		return ExpressionValidator.checkUnaryExpression(node)
+		return self.expression.checkUnaryExpression(self, node)
 	elseif node.kind == "FieldAccess" then
-		return ExpressionValidator.checkFieldAccess(node)
+		return self.expression.checkFieldAccess(self, node)
 	else
 		return "any"
 	end
 end
+
+ExpressionValidator.checkBinaryExpression = require("src.nyx.validator.binary")
+ExpressionValidator.checkCallExpression = require("src.nyx.validator.call")
+ExpressionValidator.checkUnaryExpression = require("src.nyx.validator.unary")
 
 return ExpressionValidator

@@ -11,7 +11,7 @@ return function(self, node)
 	local actualType = "nil"
 
 	if node.value then
-		actualType = self.expression.getExpressionType(self.scope, node, node.value)
+		actualType = self.expression.getExpressionType(self, node.value)
 	end
 
 	if not Types.isTypeCompatible(expectedType, actualType) then

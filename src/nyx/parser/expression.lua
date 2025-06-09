@@ -42,9 +42,10 @@ end
 local function parse_unary(self)
 	if self.current.type == "NOT" or (self.current.type == "OPERATOR" and self.current.value == "-") then
 		local op = self.current.value
+		local line = self.current.line
 		self:advance()
 		local expr = parse_unary(self)
-		return self:node("UnaryExpression", { operator = op, argument = expr })
+		return self:node("UnaryExpression", { operator = op, argument = expr, line = line })
 	end
 	return parse_call(self)
 end
@@ -57,6 +58,7 @@ local function parse_binary(self, minPrec)
 			break
 		end
 		local op = tok.value
+		local line = tok.line
 		local info = precedences[op]
 		if not info or info.prec < minPrec then
 			break
@@ -68,8 +70,7 @@ local function parse_binary(self, minPrec)
 			operator = op,
 			left = left,
 			right = right,
-			line = op.line,
-			column = op.column,
+			line = line,
 		})
 	end
 	return left

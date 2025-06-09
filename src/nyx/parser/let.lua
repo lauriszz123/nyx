@@ -33,7 +33,6 @@ function LetParser:parse()
 		isArray = arraySize ~= nil,
 		arraySize = arraySize,
 		line = nameTok.line,
-		column = nameTok.column,
 	})
 end
 

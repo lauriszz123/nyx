@@ -35,13 +35,13 @@ function Scope:getGlobalScope()
 	end
 end
 
-function Scope:declareFunction(name, argc, retType)
+function Scope:declareFunction(name, params, retType)
 	if self.functions[name] then
 		error("Function " .. name .. " already declared in this scope")
 	end
 
 	self.functions[name] = {
-		argc = argc,
+		params = params,
 		returnType = retType,
 	}
 end

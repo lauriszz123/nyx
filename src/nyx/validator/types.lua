@@ -26,4 +26,30 @@ function Types.isTypeCompatible(expected, actual)
 	return expected == actual
 end
 
+function Types.getArithmeticResultType(leftType, rightType, op)
+	if not (Types.isNumericType(leftType) and Types.isNumericType(rightType)) then
+		return nil
+	end
+
+	if leftType == "ptr" or rightType == "ptr" then
+		if op == "+" or op == "-" then
+			if leftType == "ptr" and Types.isNumericType(rightType) then
+				return "ptr"
+			elseif rightType == "ptr" and Types.isNumericType(leftType) then
+				return "ptr"
+			elseif leftType == "ptr" and rightType == "ptr" and op == "-" then
+				return "u8"
+			end
+
+			return nil
+		end
+	end
+
+	if leftType == "s8" or rightType == "s8" then
+		return "s8"
+	else
+		return "u8"
+	end
+end
+
 return Types
