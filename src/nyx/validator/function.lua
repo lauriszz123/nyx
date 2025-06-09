@@ -2,6 +2,7 @@ local AST = require("src.nyx.ast")
 local Scope = require("src.nyx.scope")
 local Types = require("src.nyx.validator.types")
 
+---@param self Validator
 return function(self, node)
 	if node.returnType and not Types.isValidType(self.scope, node.returnType) then
 		self:addError("Unknown return type: " .. node.returnType, node)
@@ -22,12 +23,8 @@ return function(self, node)
 		self.scope:declare(param.name, param.type)
 	end
 
-	local hasReturn = false
 	for _, stmt in ipairs(node.body) do
 		AST.visit(self, stmt)
-		if stmt.kind == "ReturnStatement" then
-			hasReturn = true
-		end
 	end
 
 	self.scope = oldScope

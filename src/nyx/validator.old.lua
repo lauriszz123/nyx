@@ -114,47 +114,6 @@ function Validator:checkUnaryExpression(node)
 	end
 end
 
-function Validator:checkCallExpression(node)
-	local callee = node.callee
-	if callee.kind == "FieldAccess" then
-		local fieldType = self:checkFieldAccess(callee)
-		if fieldType ~= "function" then
-			self:addError(string.format("Field %s is not a method", callee.field), node)
-		end
-	else
-		local funcName = callee.name
-		local func = self.scope:getFunction(funcName)
-
-		if not func then
-			self:addError("Undefined function: " .. funcName, node)
-			return "any"
-		end
-
-		if #node.arguments ~= #func.params then
-			self:addError(
-				string.format("Function %s expects %d arguments, got %d", funcName, #func.params, #node.arguments),
-				node
-			)
-		end
-
-		for i, arg in ipairs(node.arguments) do
-			if func.params[i] then
-				local expectedType = func.params[i].type or "any"
-				local actualType = self:getExpressionType(arg)
-
-				if expectedType ~= actualType then
-					self:addError(
-						string.format("Argument %d to '%s': expected %s, got %s", i, funcName, expectedType, actualType),
-						node
-					)
-				end
-			end
-		end
-
-		return func.returnType or "any"
-	end
-end
-
 function Validator:checkFieldAccess(node)
 	local objectType = self:getExpressionType(node.object)
 	local fieldName = node.field
@@ -190,60 +149,6 @@ Validator.visitor = {
 					node
 				)
 			end
-		end
-	end,
-
-	["FunctionDeclaration"] = function(node, self)
-		if node.returnType and not self:isValidType(node.returnType) then
-			self:addError("Unknown return type: " .. node.returnType, node)
-		end
-
-		for _, param in ipairs(node.params) do
-			if param.type and not self:isValidType(param.type) then
-				self:addError("Unknown parameter type: " .. param.type, node)
-			end
-		end
-
-		local oldScope = self.scope
-		local oldCurrFunc = self.currentFunction
-		self.scope = Scope(self.scope)
-		self.currentFunction = node
-
-		for _, param in ipairs(node.params) do
-			self.scope:declareLocal(param.name, param.type)
-		end
-
-		local hasReturn = false
-		for _, stmt in ipairs(node.body) do
-			AST.visit(self, stmt)
-			if stmt.kind == "ReturnStatement" then
-				hasReturn = true
-			end
-		end
-
-		if node.returnType and node.returnType ~= "nil" and not hasReturn then
-			self:addWarning("Function '" .. node.name .. "' may not return a value", node)
-		end
-
-		self.scope = oldScope
-		self.currentFunction = oldCurrFunc
-	end,
-
-	["ReturnStatement"] = function(node, self)
-		if not self.currentFunction then
-			self:addError("Return statement outside of function", node)
-			return
-		end
-
-		local expectedType = self.currentFunction.returnType or "nil"
-		local actualType = "nil"
-
-		if node.value then
-			actualType = self:getExpressionType(node.value)
-		end
-
-		if not self:isTypeCompatible(expectedType, actualType) then
-			self:addError(string.format("Return type mismatch: expected %s, got %s", expectedType, actualType), node)
 		end
 	end,
 
