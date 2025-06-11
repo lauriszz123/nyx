@@ -50,10 +50,11 @@ function Scope:getFunction(name)
 	return self.functions[name]
 end
 
-function Scope:declareStruct(name)
+function Scope:declareStruct(name, body)
 	local global = self:getGlobalScope()
 	global.variables[name] = {
 		isStruct = true,
+		body = body,
 	}
 end
 

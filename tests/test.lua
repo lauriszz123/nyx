@@ -53,6 +53,24 @@ checkCodeSnippet(
 )
 
 checkCodeSnippet(
+	"VALID CODE ASSIGNMENT",
+	[[
+  let x: u8 = 10;
+
+  x = 10 * 2;
+]]
+)
+
+checkCodeSnippet(
+	"INVALID CODE ASSIGNMENT",
+	[[
+  let x: str;
+
+  x = 10 * 2;
+]]
+)
+
+checkCodeSnippet(
 	"TYPE MISMATCH",
 	[[
   let x: u8 = "not a number";
@@ -109,6 +127,28 @@ checkCodeSnippet(
 	[[
 struct Test
 	test: u8;
+end
+]]
+)
+
+checkCodeSnippet(
+	"INVALID STRUCT DECLARATION FIELDS",
+	[[
+struct Test
+	test: unknown;
+end
+]]
+)
+
+checkCodeSnippet(
+	"STRUCT DECLARATION 2",
+	[[
+struct Test1
+	test: u8;
+end
+struct Test2
+	testStruct: Test1;
+	value: u8;
 end
 ]]
 )

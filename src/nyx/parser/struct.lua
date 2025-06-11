@@ -12,15 +12,17 @@ function StructParser:parse()
 		table.insert(
 			body,
 			self:node("StructField", {
-				name = varName,
-				type = varType,
+				name = varName.value,
+				type = varType.value,
+				line = varName.line,
 			})
 		)
 	end
 	self:expect("END")
 	return self:node("StructDeclaration", {
-		name = name,
+		name = name.value,
 		body = body,
+		line = name.line,
 	})
 end
 
