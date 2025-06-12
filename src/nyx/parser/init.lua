@@ -1,6 +1,7 @@
 local class = require("middleclass")
 local AST = require("src.nyx.ast")
 local StatementParser = require("src.nyx.parser.statement")
+local ERRORS = require("src.nyx.parser.errMessages")
 
 local Parser = class("Parser")
 
@@ -32,20 +33,18 @@ function Parser:peek()
 	return self.tokens[self.position + 1]
 end
 
-function Parser:expect(type, value)
+function Parser:expect(type, value, errFunc)
+	local errMessage
 	if self.current and self.current.type == type then
 		if value then
 			if self.current.value ~= value then
-				self:addError(
-					string.format(
-						"Expected token '%s' with value '%s' but got '%s' with value '%s'!",
-						type,
-						value,
-						self.current and self.current.type or "EOF",
-						self.current and self.current.value or "NIL"
-					),
-					self.current
+				errMessage = (errFunc or ERRORS.ERR_TOK_VAL)(
+					type,
+					self.current and self.current.type or "EOF",
+					value,
+					self.current and self.current.value or "EOF"
 				)
+				self:addError(errMessage, self.current)
 			else
 				self:advance()
 			end
@@ -55,10 +54,8 @@ function Parser:expect(type, value)
 			return token
 		end
 	else
-		self:addError(
-			string.format("Expected token '%s' but got '%s'!", type, self.current and self.current.type or "EOF"),
-			self.current
-		)
+		errMessage = (errFunc or ERRORS.ERR_TOK)(type, self.current and self.current.type or "EOF")
+		self:addError(errMessage, self.current)
 	end
 end
 
@@ -79,6 +76,7 @@ end
 function Parser:parse()
 	local ok, ast = pcall(self.parse_top, self)
 	if not ok then
+		print("error: ", ast)
 		return
 	end
 

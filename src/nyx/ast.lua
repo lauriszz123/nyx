@@ -18,7 +18,7 @@ function AST.visit(self, node)
 	if handler then
 		return handler(self, node)
 	else
-		error("No visitor handler for node kind: " .. node.kind)
+		error("No visitor handler for node kind: " .. node.kind, 0)
 	end
 end
 

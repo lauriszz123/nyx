@@ -1,3 +1,5 @@
+local ERR_MESSAGE = require("src.nyx.parser.errMessages")
+
 local StatementParser
 
 local FunctionParser = {}
@@ -31,8 +33,8 @@ local function parseParameters(self)
 	return params
 end
 
-function FunctionParser:parse()
-	self:expect("FUNCTION")
+function FunctionParser:parse(inImpl)
+	self:expect("FUNCTION", nil, inImpl == true and ERR_MESSAGE.IN_IMPL)
 	local name = self:expect("IDENTIFIER").value
 	self:expect("PARENTHESIS") -- '('
 	local params = parseParameters(self)

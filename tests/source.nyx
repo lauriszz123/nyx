@@ -1,3 +1,12 @@
-struct Test
-  test: u8;
+let hello: str = "Hello, world!";
+
+struct Core
+
 end
+
+impl Core
+  fn print(toPrint: str)
+  end
+end
+
+Core.print(hello);

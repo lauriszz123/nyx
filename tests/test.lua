@@ -14,30 +14,30 @@ local function runTypeChecker(source, printAst)
 	local ast = parser:parse()
 
 	if parser:hasErrors() then
+		print()
 		parser:printResults()
+		print()
 		return
 	end
 
 	if printAst then
+		print()
 		print(inspect(ast))
+		print()
 	end
 
 	---@type Validator
 	local validator = Validator()
 	validator:validate(ast)
 
+	print()
 	validator:printResults()
+	print()
 end
 
 local function checkCodeSnippet(desc, code)
 	print("=== " .. desc .. " ===")
-	local results = runTypeChecker(code, false)
-	if results then
-		print("Errors found:" .. #results.errors)
-		print("Warnings found:" .. #results.warnings)
-		print()
-		return results
-	end
+	runTypeChecker(code, false)
 end
 
 checkCodeSnippet(

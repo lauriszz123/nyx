@@ -24,7 +24,14 @@ function Validator:addError(message, node)
 end
 
 function Validator:validate(ast)
-	AST.visit(self, ast)
+	local ok, err = pcall(AST.visit, self, ast)
+	if not ok then
+		local error = {
+			message = err,
+			line = 0,
+		}
+		table.insert(self.errors, error)
+	end
 end
 
 function Validator:printResults()

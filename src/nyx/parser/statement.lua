@@ -1,4 +1,5 @@
 local StructParser = require("src.nyx.parser.struct")
+local ImplParser = require("src.nyx.parser.impl")
 local FunctionParser = require("src.nyx.parser.function")
 local LetParser = require("src.nyx.parser.let")
 local ReturnParser = require("src.nyx.parser.return")
@@ -11,7 +12,7 @@ function StatementParser:parse()
 	if t == "STRUCT" then
 		return StructParser.parse(self)
 	elseif t == "IMPL" then
-		return self:parse_impl()
+		return ImplParser.parse(self)
 	elseif t == "FUNCTION" then
 		return FunctionParser.parse(self)
 	elseif t == "RETURN" then
