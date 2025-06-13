@@ -7,7 +7,7 @@ function ImplParser:parse()
 	local name = self:expect("IDENTIFIER")
 	local body = {}
 	while self.current and self.current.type ~= "END" do
-		table.insert(body, self:node("ImplMethod", FunctionParser.parse(self, true)))
+		table.insert(body, FunctionParser.parse(self, true))
 	end
 	self:expect("END")
 	return self:node("ImplDeclaration", {

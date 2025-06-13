@@ -1,5 +1,3 @@
-local BinaryValidator = require("src.nyx.validator.binary")
-
 ---@class ExpressionValidator
 local ExpressionValidator = {}
 

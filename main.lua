@@ -1,10 +1,7 @@
-local VM = require 'src.vm'
-local Nyx = require 'src.nyx'
-local Assembler = require 'src.nyx.assembler'
-local inspect = require 'inspect'
-require 'tests.test'
-
-local vm
+-- local VM = require("src.vm")
+local Nyx = require("src.nyx")
+local Assembler = require("src.nyx.assembler")
+local inspect = require("inspect")
 
 -- Check if a table contains a specific element
 ---@param tbl table A table to check
@@ -19,8 +16,8 @@ function table.contains(tbl, element)
 end
 
 function love.load()
+	require("tests.test")
+	love.event.quit()
 end
 
-function love.update(dt)
-
-end
+function love.update(dt) end
