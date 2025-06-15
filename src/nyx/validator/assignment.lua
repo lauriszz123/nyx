@@ -4,9 +4,9 @@ local Types = require("src.nyx.validator.types")
 return function(self, node)
 	local target = node.target
 	if target.kind == "FieldAccess" then
-		-- local fieldType = self:checkFieldAccess(target)
+		local fieldType, fieldVar = self.expression.checkFieldAccess(self, target)
 		local valueType = self.expression.getExpressionType(self, node.value)
-		if not Types.isTypeCompatible(fieldType) then
+		if not Types.isTypeCompatible(fieldType, valueType) then
 			self:addError(string.format("Field %s is of type %s, got: %s", target.field, fieldType, valueType), node)
 		end
 	else

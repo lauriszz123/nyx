@@ -41,6 +41,7 @@ function Scope:declareFunction(name, params, retType)
 	end
 
 	self.functions[name] = {
+		isFunc = true,
 		params = params,
 		returnType = retType,
 	}
@@ -50,11 +51,11 @@ function Scope:getFunction(name)
 	return self.functions[name]
 end
 
-function Scope:declareStruct(name, body)
+function Scope:declareStruct(name, fields)
 	local global = self:getGlobalScope()
 	global.variables[name] = {
 		isStruct = true,
-		body = body,
+		fields = fields,
 	}
 end
 
@@ -74,6 +75,7 @@ function Scope:declare(name, typ, address)
 	end
 
 	self.variables[name] = {
+		isGlobalVar = true,
 		type = typ,
 		position = address,
 	}

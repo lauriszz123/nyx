@@ -1,7 +1,7 @@
 let hello: str = "Hello, world!";
 
 struct Core
-
+  test: u8;
 end
 
 impl Core
@@ -9,4 +9,4 @@ impl Core
   end
 end
 
-Core.print(hello);
+Core.print();

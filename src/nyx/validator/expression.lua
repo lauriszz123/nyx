@@ -54,5 +54,6 @@ end
 ExpressionValidator.checkBinaryExpression = require("src.nyx.validator.binary")
 ExpressionValidator.checkCallExpression = require("src.nyx.validator.call")
 ExpressionValidator.checkUnaryExpression = require("src.nyx.validator.unary")
+ExpressionValidator.checkFieldAccess = require("src.nyx.validator.fieldaccess")
 
 return ExpressionValidator

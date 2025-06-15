@@ -11,6 +11,9 @@ return function(self, node)
 
 	for _, fn in ipairs(node.body) do
 		struct.methods[fn.name] = {
+			isFunc = true,
+			name = fn.name,
+			params = fn.params,
 			returnType = fn.returnType,
 		}
 		AST.visit(self, fn)
