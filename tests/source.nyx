@@ -1,12 +1,23 @@
-let hello: str = "Hello, world!";
-
-struct Core
-  test: u8;
+struct Monitor
+  location: ptr;
 end
 
-impl Core
-  fn print(toPrint: str)
+impl Monitor
+  fn new(location: ptr)
+    self.location = location;
   end
 end
 
-Core.print();
+struct Core
+  monitor: Monitor;
+end
+
+impl Core
+  fn new()
+    self.monitor = new Monitor(0x5000);
+  end
+
+  fn putChar(chr: u8)
+    poke(self.monitor.location, chr);
+  end
+end
