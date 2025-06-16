@@ -9,6 +9,7 @@ local keywords = {
 	["elseif"] = "ELSEIF",
 	["end"] = "END",
 	["let"] = "LET",
+	["new"] = "NEW",
 	["fn"] = "FUNCTION",
 	["return"] = "RETURN",
 	["while"] = "WHILE",

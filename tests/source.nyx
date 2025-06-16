@@ -3,7 +3,7 @@ struct Monitor
 end
 
 impl Monitor
-  fn new(location: ptr)
+  fn init(location: ptr)
     self.location = location;
   end
 end
@@ -13,7 +13,7 @@ struct Core
 end
 
 impl Core
-  fn new()
+  fn init()
     self.monitor = new Monitor(0x5000);
   end
 

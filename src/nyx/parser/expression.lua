@@ -50,8 +50,23 @@ local function parse_unary(self)
 	return parse_call(self)
 end
 
+local function parse_new(self)
+	if self.current.type == "NEW" then
+		local line = self.current.line
+		self:advance()
+		local objectName = self:expect("IDENTIFIER")
+		local call = parse_call(self)
+		return self:node("NewObject", {
+			objectName = objectName,
+			call = call,
+			line = line,
+		})
+	end
+	return parse_unary(self)
+end
+
 local function parse_binary(self, minPrec)
-	local left = parse_unary(self)
+	local left = parse_new(self)
 	while true do
 		local tok = self.current
 		if not tok then
