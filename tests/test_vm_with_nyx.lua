@@ -20,19 +20,24 @@ local function test(src, expected)
 	local assembler = Assembler(assembly)
 	local bytecode = assembler:assemble()
 
-	---@type VM
-	local vm = VM()
-	vm:reset(bytecode)
+	if bytecode then
+		---@type VM
+		local vm = VM()
+		vm:reset(bytecode)
 
-	while vm.running do
-		vm:step()
-	end
+		while vm.running do
+			vm:step()
+			if vm.running == false then
+				break
+			end
+		end
 
-	if expected.A then
-		printreg("A", expected.A, vm.cpu.A)
-	end
-	if expected.B then
-		printreg("B", expected.B, vm.cpu.B)
+		if expected.A then
+			printreg("A", expected.A, vm.cpu.A)
+		end
+		if expected.B then
+			printreg("B", expected.B, vm.cpu.B)
+		end
 	end
 end
 

@@ -70,7 +70,7 @@ end
 
 function VM:step()
 	local ret = self.cpu:step()
-	self:updateDevices()
+	-- self:updateDevices()
 	return ret
 end
 

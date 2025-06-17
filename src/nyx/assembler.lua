@@ -460,7 +460,7 @@ function Assembler:expect(type)
 	if self.current and self.current.type == type then
 		local token = self.current
 		self:advance()
-		return token
+		return token.value
 	else
 		self:addError(
 			string.format(
@@ -492,11 +492,11 @@ function Assembler:parseExpression()
 	end
 
 	-- Handle numbers
-	if self.current.type == "HASH" then
+	if self.current.type == "NUMBER" then
+		return tonumber(self:expect("NUMBER"))
+	elseif self.current.type == "HASH" then
 		self:advance()
-		local value = tonumber(self.current.value)
-		self:advance()
-		return value
+		return tonumber(self:expect("NUMBER"))
 		-- Handle labels
 	elseif self.current.type == "IDENTIFIER" then
 		local label = self.current.value
@@ -616,7 +616,6 @@ end
 function Assembler:processInstruction(name)
 	-- Get the instruction and handle aliases
 	local instrName = self.aliases[name] or name
-	print("Parsing instruction:", instrName)
 	local instruction = self.instructions[instrName]
 
 	if not instruction then
@@ -624,15 +623,11 @@ function Assembler:processInstruction(name)
 		return
 	end
 
-	print(inspect(instruction))
-
 	-- Parse the operand(s) based on addressing mode
 	local operand = self:parseOperand(instruction)
-	print(inspect(operand))
 
 	-- Get the opcode variant based on addressing mode
 	local opcode = instruction.variants[operand.mode]
-	print(opcode)
 
 	-- Emit the opcode
 	self:emitByte(opcode)
@@ -713,25 +708,38 @@ function Assembler:firstPass()
 			local name = self.current.value
 			self:advance()
 
-			if self.current and self.current.type == "COLON" then
-				self:advance() -- Skip the colon
-				self:processLabel(name)
-			elseif self.instructions[name] or self.aliases[name] then
-				-- This is an instruction - get the instruction definition
-				local instrName = self.aliases[name] or name
-				local instruction = self.instructions[instrName]
-				instruction.name = instrName
-
-				-- Parse the operand using the same method as in secondPass
-				local operand = self:parseOperand(instruction)
-
-				-- Update the current address based on the actual size
-				local size = instruction.sizes[operand.mode] or 1
-				self.currentAddress = self.currentAddress + size
+			if name == "DB" then
+				while self.current and self.current.type == "HASH" do
+					local num = self:parseExpression()
+					if num > 0xFF then
+						self:addError("Data must be a byte!")
+					end
+					self.currentAddress = self.currentAddress + 1
+					if self.current and self.current.type ~= "COMMA" then
+						break
+					end
+				end
 			else
-				-- Unknown identifier
-				self:addError(string.format("Unknown identifier: %s", name))
-				self:advance()
+				if self.current and self.current.type == "COLON" then
+					self:advance() -- Skip the colon
+					self:processLabel(name)
+				elseif self.instructions[name] or self.aliases[name] then
+					-- This is an instruction - get the instruction definition
+					local instrName = self.aliases[name] or name
+					local instruction = self.instructions[instrName]
+					instruction.name = instrName
+
+					-- Parse the operand using the same method as in secondPass
+					local operand = self:parseOperand(instruction)
+
+					-- Update the current address based on the actual size
+					local size = instruction.sizes[operand.mode] or 1
+					self.currentAddress = self.currentAddress + size
+				else
+					-- Unknown identifier
+					self:addError(string.format("Unknown identifier: %s", name))
+					self:advance()
+				end
 			end
 		else
 			self:advance()
@@ -758,6 +766,8 @@ function Assembler:secondPass()
 			elseif self.instructions[name] or self.aliases[name] then
 				-- Process instruction
 				self:processInstruction(name)
+			elseif name == "DB" then
+				self:emitByte(self:parseExpression())
 			else
 				-- Don't error on unknown identifiers in second pass
 				-- Could be forward references that will be resolved later
