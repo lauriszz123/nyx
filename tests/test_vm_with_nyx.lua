@@ -7,12 +7,17 @@ local function printreg(reg, a, b)
 end
 
 local function test(src, expected)
+	print("=== RUNNING TEST ===")
+	print("SOURCE:")
+	print(src)
+	print()
 	---@type Nyx
 	local nyx = Nyx()
 	local assembly = nyx:compile(src)
 	if not assembly then
 		return
 	end
+	print("ASSEMBLY:")
 	print(assembly)
 
 	---@type Assembler
@@ -40,6 +45,8 @@ local function test(src, expected)
 			printreg("B", expected.B, vm.cpu.B)
 		end
 	end
+	print("===   ===")
+	print()
 end
 
 test(

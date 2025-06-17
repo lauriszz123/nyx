@@ -22,15 +22,17 @@ function VM:reset(bytecode, offset)
 	self.cpu:reset()
 	for i = 1, #bytecode do
 		self.memory:write(offset + (i - 1), bytecode[i])
-		print(string.format("0x%04X: %02X", offset + (i - 1), bytecode[i]))
+		-- print(string.format("0x%04X: %02X", offset + (i - 1), bytecode[i]))
 	end
 	self.memory:write(0xFFFC, 0x00) -- Reset vector low byte
 	self.memory:write(0xFFFF, 0x00) -- Reset vector high byte
 
+	print()
 	print("VM reset at offset: " .. string.format("0x%04X", offset))
 	print("Bytecode loaded: " .. #bytecode .. " bytes")
 	print("Reset vector: " .. string.format("0x%04X", self.memory:read(0xFFFC) + (self.memory:read(0xFFFF) * 256)))
-	self:printState()
+	print()
+	-- self:printState()
 end
 
 function VM:updateDevices()
