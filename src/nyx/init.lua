@@ -5,6 +5,7 @@ local Validator = require("src.nyx.validator")
 local Compiler = require("src.nyx.compiler")
 local inspect = require("inspect")
 
+---@class Nyx
 local InitLang = class("Init")
 
 function InitLang:initialize()

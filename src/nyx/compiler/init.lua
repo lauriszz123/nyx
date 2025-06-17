@@ -30,7 +30,6 @@ end
 function Compiler:generate(ast)
 	assert(ast.kind == "Program", "AST must be a Program")
 	AST.visit(self, ast)
-	self:emit("HLT")
 
 	return self.code
 end

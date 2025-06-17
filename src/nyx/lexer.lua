@@ -41,7 +41,8 @@ local keywords = {
 }
 
 -- Constructor
-function Lexer:initialize(source)
+function Lexer:initialize(source, isAsm)
+	self.isAsm = isAsm
 	self.source = source
 	self.position = 1
 	self.line = 1
@@ -117,7 +118,7 @@ end
 -- Function to tokenize an identifier or keyword
 function Lexer:tokenize_identifier()
 	local result = ""
-	while self.current_char and self.current_char:match("%w") do
+	while self.current_char and self.current_char:find("[_a-zA-Z0-9]") ~= nil do
 		result = result .. self.current_char
 		self:advance()
 	end
@@ -254,7 +255,7 @@ function Lexer:iter()
 				self:skip_whitespace()
 			elseif self.current_char:match("%d") then
 				return self:tokenize_number()
-			elseif self.current_char:match("%w") then
+			elseif self.current_char:find("[_a-zA-Z]") ~= nil then
 				return self:tokenize_identifier()
 			elseif self.current_char == '"' then
 				return self:tokenize_string()
@@ -273,7 +274,11 @@ function Lexer:iter()
 			elseif self.current_char == "{" or self.current_char == "}" then
 				return self:tokenize_curly()
 			elseif self.current_char == "#" then
-				return self:tokenize_comment()
+				if self.isAsm then
+					return self:tokenize_hash()
+				else
+					return self:tokenize_comment()
+				end
 			elseif self.current_char == "&" then
 				return self:tokenize_and()
 			elseif self.current_char:match("[%p]") then

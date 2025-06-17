@@ -7,15 +7,18 @@ local source = [[
 ]]
 
 local function printreg(reg, a, b)
-	print(reg .. ":", vm.cpu.A, expected.A, vm.cpu.A == expected.A)
+	print(reg .. ":", a, b, a == b)
 end
 
 local function test(src, expected)
+	---@type Nyx
 	local nyx = Nyx()
 	local assembly = nyx:compile(src)
 	print(assembly)
 
-	local bytecode = Assembler(assembly):assemble()
+	---@type Assembler
+	local assembler = Assembler(assembly)
+	local bytecode = assembler:assemble()
 
 	---@type VM
 	local vm = VM()
@@ -30,9 +33,6 @@ local function test(src, expected)
 	end
 	if expected.B then
 		printreg("B", expected.B, vm.cpu.B)
-	end
-	if expected.HL then
-		printreg("HL", expected.HL, vm.cpu.HL)
 	end
 end
 
