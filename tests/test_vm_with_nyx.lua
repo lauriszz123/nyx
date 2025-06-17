@@ -62,7 +62,10 @@ test(
 ]],
 	{
 		A = 10,
-	}
+	},
+	function(cpu)
+		printreg("x", 10, cpu.memory:read(6))
+	end
 )
 
 test(
@@ -76,5 +79,19 @@ test(
 	},
 	function(cpu)
 		printreg("x", 20, cpu.memory:read(14))
+	end
+)
+
+test(
+	[[
+	let x: u8 = 20;
+
+	x = x + 10;
+]],
+	{
+		A = 30,
+	},
+	function(cpu)
+		printreg("x", 30, cpu.memory:read(17))
 	end
 )
