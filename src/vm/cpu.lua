@@ -24,6 +24,7 @@ function CPU:initialize(memory)
 	self.BP = 0x1FFF
 	self.PC = 0x0000
 	self.SR = FLAGS.I
+	---@type Memory
 	self.memory = memory
 	self.halted = false
 end

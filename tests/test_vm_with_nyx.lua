@@ -6,7 +6,10 @@ local function printreg(reg, a, b)
 	print(reg .. ":", a, b, a == b)
 end
 
-local function test(src, expected)
+---@param src string
+---@param expected table
+---@param expectedfunc nil | fun(cpu: CPU): nil
+local function test(src, expected, expectedfunc)
 	print("=== RUNNING TEST ===")
 	print("SOURCE:")
 	print(src)
@@ -44,6 +47,10 @@ local function test(src, expected)
 		if expected.B then
 			printreg("B", expected.B, vm.cpu.B)
 		end
+
+		if expectedfunc then
+			expectedfunc(vm.cpu)
+		end
 	end
 	print("===   ===")
 	print()
@@ -66,5 +73,8 @@ test(
 ]],
 	{
 		A = 30,
-	}
+	},
+	function(cpu)
+		printreg("x", 20, cpu.memory:read(14))
+	end
 )

@@ -7,7 +7,7 @@ local Lexer = require("src.nyx.lexer")
 local Assembler = class("Assembler")
 
 -- Constructor
-function Assembler:initialize(sourceCode)
+function Assembler:initialize(sourceCode, programOffset)
 	-- Setup instruction set
 	self:setupInstructionSet()
 
@@ -17,7 +17,7 @@ function Assembler:initialize(sourceCode)
 	-- Initialize the assembler with source code
 	self:reset(sourceCode)
 
-	self.programOffset = 0x4000 -- Default program offset
+	self.programOffset = programOffset or 0x0000 -- Default program offset
 end
 
 -- Setup instruction set in a separate method for better organization

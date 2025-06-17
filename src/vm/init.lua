@@ -20,10 +20,25 @@ function VM:reset(bytecode, offset)
 	offset = offset or 0
 	self.running = true
 	self.cpu:reset()
+
+	local count = 0
+	local currStr = ""
 	for i = 1, #bytecode do
 		self.memory:write(offset + (i - 1), bytecode[i])
-		-- print(string.format("0x%04X: %02X", offset + (i - 1), bytecode[i]))
+
+		currStr = currStr .. string.format("%02X", bytecode[i]) .. " "
+		count = count + 1
+
+		if count % 8 == 0 then
+			print(string.format("0x%04X: %s", offset + (i - 8), currStr))
+			currStr = ""
+		end
 	end
+
+	if count % 8 ~= 0 then
+		print(string.format("0x%04X: %s", offset + (count - (count % 8)), currStr))
+	end
+
 	self.memory:write(0xFFFC, 0x00) -- Reset vector low byte
 	self.memory:write(0xFFFF, 0x00) -- Reset vector high byte
 
