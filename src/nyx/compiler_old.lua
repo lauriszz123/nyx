@@ -109,10 +109,6 @@ Compiler.visitor = {
 		end
 	end,
 
-	ExpressionStatement = function(node, self)
-		AST.visit(node.expression, self.visitor, self)
-	end,
-
 	NumberLiteral = function(node, self)
 		self:emit("LDA", "#" .. node.value)
 	end,
@@ -120,23 +116,6 @@ Compiler.visitor = {
 	StringLiteral = function(node, self)
 		-- stub: load address of string literal (not implemented)
 		error("StringLiteral compilation not implemented")
-	end,
-
-	Identifier = function(node, self)
-		local var = self.scope:fetch(node.name)
-		if var.isLocal then
-			-- load local variable into A
-			if var.index < 0 then
-				-- negative index means local variable
-				self:emit("GETN #" .. string.format("%d", math.abs(var.index) + 4))
-			else
-				-- positive index means argument
-				self:emit("GET #" .. string.format("%d", var.index))
-			end
-		else
-			-- TODO: implement this logic for globals
-			self:emit("LDA ($" .. string.format("%x", var.address) .. ")")
-		end
 	end,
 
 	FieldAccess = function(node, self)
@@ -150,30 +129,7 @@ Compiler.visitor = {
 		self:emit("LD_A_HL") -- pseudo: A = [HL]
 	end,
 
-	BinaryExpression = function(node, self)
-		-- compile left into A, push
-		AST.visit(node.left, self.visitor, self)
-		self:emit("PHA")
-		-- compile right into A
-		AST.visit(node.right, self.visitor, self)
-		-- pop left into B
-		self:emit("PLB")
-		-- apply operator
-		local op = node.operator
-		if op == "+" then
-			self:emit("ADD")
-		elseif op == "-" then
-			self:emit("SUB")
-		elseif op == "*" then
-			self:emit("MUL")
-		elseif op == "/" then
-			self:emit("DIV")
-		elseif op == "==" then
-			self:emit("CMP")
-		else
-			error("Unknown binary operator: " .. op)
-		end
-	end,
+	BinaryExpression = function(node, self) end,
 
 	UnaryExpression = function(node, self)
 		AST.visit(node.argument, self.visitor, self)

@@ -70,7 +70,10 @@ end
 
 function VM:step()
 	local ret = self.cpu:step()
-	-- self:updateDevices()
+	if self.cpu.halted then
+		self.running = false
+	end
+	self:updateDevices()
 	return ret
 end
 
