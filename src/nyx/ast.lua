@@ -13,10 +13,10 @@ function ASTNode:initialize(kind, props)
 end
 
 -- Simple Visitor Dispatcher
-function AST.visit(self, node)
+function AST.visit(self, node, ...)
 	local handler = self.visitor[node.kind]
 	if handler then
-		return handler(self, node)
+		return handler(self, node, ...)
 	else
 		error("No visitor handler for node kind: " .. node.kind, 0)
 	end

@@ -35,7 +35,11 @@ function Scope:getGlobalScope()
 	end
 end
 
-function Scope:declareFunction(name, params, retType)
+---@param name string
+---@param params table
+---@param retType string
+---@param builtin fun(self)
+function Scope:declareFunction(name, params, retType, builtin)
 	if self.functions[name] then
 		error("Function " .. name .. " already declared in this scope")
 	end
@@ -44,6 +48,7 @@ function Scope:declareFunction(name, params, retType)
 		isFunc = true,
 		params = params,
 		returnType = retType,
+		builtin = builtin,
 	}
 end
 

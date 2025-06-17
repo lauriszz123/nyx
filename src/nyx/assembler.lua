@@ -45,8 +45,8 @@ function Assembler:setupInstructionSet()
 		-- Load HL with immediate address
 		["LDHL"] = {
 			opcode = 0x12,
-			addrModes = { "direct" },
-			sizes = { direct = 3 },
+			addrModes = { "immediate" },
+			sizes = { immediate = 3 },
 		},
 		-- Store accumulator to memory
 		["STA"] = {
@@ -163,13 +163,13 @@ function Assembler:setupInstructionSet()
 		},
 		["PHP"] = {
 			opcode = 0x64,
-			addrModes = { "implied" },
-			sizes = { implied = 1 },
+			addrModes = { "immediate" },
+			sizes = { immediate = 2 },
 		},
 		["PLP"] = {
 			opcode = 0x65,
-			addrModes = { "implied" },
-			sizes = { implied = 1 },
+			addrModes = { "immediate" },
+			sizes = { immediate = 2 },
 		},
 		["GETN"] = {
 			opcode = 0x66,
@@ -653,6 +653,9 @@ function Assembler:processInstruction(name)
 			-- Regular numeric value
 			if operand.mode == "direct" then
 				-- For direct addressing with a numeric address, split into low/high bytes
+				self:emitByte(byte)
+				self:emitByte(bit.rshift(byte, 8))
+			elseif instruction.sizes[operand.mode] == 3 then
 				self:emitByte(byte)
 				self:emitByte(bit.rshift(byte, 8))
 			else

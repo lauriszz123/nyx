@@ -9,6 +9,12 @@ local Validator = class("Validator")
 function Validator:initialize()
 	---@type Scope
 	self.scope = Scope()
+
+	self.scope:declareFunction("poke", {
+		{ name = "pointer", type = "ptr" },
+		{ name = "value", type = "u8" },
+	})
+
 	self.errors = {}
 	self.currentFunction = nil
 	self.visitor = require("src.nyx.validator.statements")

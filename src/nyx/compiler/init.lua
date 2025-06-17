@@ -11,6 +11,19 @@ function Compiler:initialize()
 	self.structs = {}
 
 	self.scope = Scope()
+	self.scope:declareFunction(
+		"poke",
+		{
+			{ name = "pointer", type = "ptr" },
+			{ name = "value", type = "u8" },
+		},
+		"nil",
+		function(self)
+			self:emit("PLA")
+			self:emit("PLP", "#" .. 0x1)
+			self:emit("STA", "(HL)")
+		end
+	)
 
 	self.visitor = require("src.nyx.compiler.visitor")
 end

@@ -207,7 +207,7 @@ function CPU:step()
 		self.A = self:pop()
 		self:flag(FLAGS.Z, self.A == 0)
 		return 3
-	elseif op == 0x62 then -- PHA
+	elseif op == 0x62 then -- PHB
 		self:push(self.B)
 		return 3
 	elseif op == 0x63 then -- PLB
@@ -215,15 +215,38 @@ function CPU:step()
 		self:flag(FLAGS.Z, self.B == 0)
 		return 3
 	elseif op == 0x64 then -- PHP
-		local hi = bit.band(bit.rshift(self.BP, 8), 0xFF)
-		local lo = bit.band(self.BP, 0xFF)
+		local ptrType = self:fetch()
+		local hi = 0
+		local lo = 0
+
+		if ptrType == 0x0 then
+			hi = bit.band(bit.rshift(self.BP, 8), 0xFF)
+			lo = bit.band(self.BP, 0xFF)
+		elseif ptrType == 0x1 then
+			hi = self.H
+			lo = self.L
+		elseif ptrType == 0x2 then
+			hi = bit.band(bit.rshift(self.SP, 8), 0xFF)
+			lo = bit.band(self.SP, 0xFF)
+		end
+
 		self:push(hi)
 		self:push(lo)
 		return 3
 	elseif op == 0x65 then -- PLP
+		local ptrType = self:fetch()
 		local lo = self:pop()
 		local hi = self:pop()
-		self.BP = bit.bor(bit.lshift(hi, 8), lo)
+
+		if ptrType == 0x0 then
+			self.BP = bit.bor(bit.lshift(hi, 8), lo)
+		elseif ptrType == 0x1 then
+			self.H = hi
+			self.L = lo
+		elseif ptrType == 0x2 then
+			self.SP = bit.bor(bit.lshift(hi, 8), lo)
+		end
+
 		return 3
 	elseif op == 0x66 then -- GETN
 		local index = self:fetch()

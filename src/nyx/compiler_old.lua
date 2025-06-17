@@ -34,29 +34,6 @@ end
 
 -- Visitor table mapping AST node kinds to compile methods
 Compiler.visitor = {
-	VariableDeclaration = function(node, self)
-		AST.visit(node.value, self.visitor, self)
-		if self.scope.isLocalScope then
-			self.scope:declareLocal(node.name, node.varType)
-			self:emit("PHA")
-		else
-			-- store global variable
-			self.scope:declare(node.name, node.varType, self.ramAddr)
-			self:emit("STA ($" .. string.format("%x", self.ramAddr) .. ")")
-			self.ramAddr = self.ramAddr + 1
-		end
-	end,
-
-	AssignmentStatement = function(node, self)
-		AST.visit(node.value, self.visitor, self)
-		if self.scope.isLocalScope then
-			local var = self.scope:fetch(node.target.name)
-			self:emit("SET", "#" .. var.index)
-		else
-			print("TODO: global assignment")
-		end
-	end,
-
 	FunctionDeclaration = function(node, self)
 		local fnName = self:newLabel(node.name)
 
@@ -94,25 +71,6 @@ Compiler.visitor = {
 		table.insert(self.functions, fn)
 	end,
 
-	CallExpression = function(node, self)
-		-- push args in order
-		for _, arg in ipairs(node.arguments) do
-			AST.visit(arg, self.visitor, self)
-			self:emit("PHA")
-		end
-		-- call function label
-		local fname = assert(node.callee.name, "Call target must be identifier")
-		self:emit("CALL (" .. fname .. ")")
-		-- clean up args (if your VM needs manual cleanup)
-		for _ = 1, #node.arguments do
-			self:emit("PLB")
-		end
-	end,
-
-	NumberLiteral = function(node, self)
-		self:emit("LDA", "#" .. node.value)
-	end,
-
 	StringLiteral = function(node, self)
 		-- stub: load address of string literal (not implemented)
 		error("StringLiteral compilation not implemented")
@@ -128,8 +86,6 @@ Compiler.visitor = {
 		self:emit("ADD_HL_IMM", offset)
 		self:emit("LD_A_HL") -- pseudo: A = [HL]
 	end,
-
-	BinaryExpression = function(node, self) end,
 
 	UnaryExpression = function(node, self)
 		AST.visit(node.argument, self.visitor, self)

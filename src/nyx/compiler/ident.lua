@@ -10,7 +10,6 @@ return function(self, node)
 			self:emit("GET #" .. string.format("%d", var.index))
 		end
 	else
-		-- TODO: implement this logic for globals
 		self:emit("LDA (v_" .. node.name .. ")")
 	end
 end

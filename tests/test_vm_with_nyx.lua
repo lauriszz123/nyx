@@ -95,3 +95,13 @@ test(
 		printreg("x", 30, cpu.memory:read(17))
 	end
 )
+
+test(
+	[[
+	poke(0x1000, 0xDE);
+]],
+	{},
+	function(cpu)
+		printreg("0x1000", 0xDE, cpu.memory:read(0x1000))
+	end
+)
