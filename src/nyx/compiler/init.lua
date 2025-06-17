@@ -1,4 +1,5 @@
 local class = require("middleclass")
+local Scope = require("src.nyx.scope")
 local AST = require("src.nyx.ast")
 
 local Compiler = class("Compiler")
@@ -8,6 +9,8 @@ function Compiler:initialize()
 	self.nextLabel = 0
 	self.functions = {}
 	self.structs = {}
+
+	self.scope = Scope()
 
 	self.visitor = require("src.nyx.compiler.visitor")
 end
@@ -28,6 +31,8 @@ function Compiler:generate(ast)
 	assert(ast.kind == "Program", "AST must be a Program")
 	AST.visit(self, ast)
 	self:emit("HLT")
+
+	return self.code
 end
 
 return Compiler

@@ -25,7 +25,6 @@ function InitLang:compile(source_code)
 
 	-- Compile
 	local compiler = Compiler()
-
 	return compiler:generate(ast)
 end
 

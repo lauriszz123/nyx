@@ -1,8 +1,3 @@
--- local VM = require("src.vm")
-local Nyx = require("src.nyx")
-local Assembler = require("src.nyx.assembler")
-local inspect = require("inspect")
-
 -- Check if a table contains a specific element
 ---@param tbl table A table to check
 ---@param element string|number The element to check for
@@ -17,10 +12,7 @@ end
 
 function love.load()
 	-- require("tests.test")
-	local nyx = Nyx()
-	print(nyx:compile([[
-	let x: u8 = 10;
-	]]))
+	require("tests.test_vm_with_nyx")
 
 	love.event.quit()
 end

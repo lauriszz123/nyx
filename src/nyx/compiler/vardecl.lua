@@ -7,8 +7,7 @@ return function(self, node)
 		self:emit("PHA")
 	else
 		-- store global variable
-		self.scope:declare(node.name, node.varType, self.ramAddr)
-		self:emit("STA ($" .. string.format("%x", self.ramAddr) .. ")")
-		self.ramAddr = self.ramAddr + 1
+		self.scope:declare(node.name, node.varType)
+		self:emit("STA (v_" .. node.name .. ")")
 	end
 end
