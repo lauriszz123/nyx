@@ -16,7 +16,12 @@ function table.contains(tbl, element)
 end
 
 function love.load()
-	require("tests.test")
+	-- require("tests.test")
+	local nyx = Nyx()
+	print(nyx:compile([[
+	let x: u8 = 10;
+	]]))
+
 	love.event.quit()
 end
 

@@ -1,7 +1,7 @@
 local class = require("middleclass")
 local Lexer = require("src.nyx.lexer")
 local Parser = require("src.nyx.parser")
-local TypeChecker = require("src.nyx.validator")
+local Validator = require("src.nyx.validator")
 local Compiler = require("src.nyx.compiler")
 local inspect = require("inspect")
 
@@ -13,23 +13,20 @@ end
 
 function InitLang:compile(source_code)
 	local lexer = Lexer(source_code)
-	for token in lexer:iter() do
-		print(token.type, token.value, token.line, token.col, token.col_end)
+	local parser = Parser(lexer)
+	local validator = Validator()
+	local ast = parser:parse()
+	validator:validate(ast)
+
+	if validator:hasErrors() then
+		validator:printResults()
+		return
 	end
 
-	-- Create a new lexer instance with the source code
-	lexer:reset()
-	local parser = Parser(lexer)
-	local checker = TypeChecker()
-	local ast = parser:parse()
-	local errors = checker:check(ast)
-	print(inspect(ast))
-
 	-- Compile
-	--local compiler = Compiler()
+	local compiler = Compiler()
 
-	--return compiler:compile(ast)
-	return nil, errors
+	return compiler:generate(ast)
 end
 
 function InitLang:printVersion()

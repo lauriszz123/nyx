@@ -34,6 +34,10 @@ function Validator:validate(ast)
 	end
 end
 
+function Validator:hasErrors()
+	return #self.errors > 0
+end
+
 function Validator:printResults()
 	if #self.errors > 0 then
 		print("=== VALIDATOR ERRORS ===")

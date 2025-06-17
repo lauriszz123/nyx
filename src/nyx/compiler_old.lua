@@ -1,49 +1,22 @@
 -- compiler.lua
 local class = require("middleclass")
 local Scope = require("src.nyx.scope")
-local AST   = require("src.nyx.ast")
+local AST = require("src.nyx.ast")
 
 local Compiler = class("Compiler")
 
 -- Initialize compiler state
 function Compiler:initialize(ramAddr)
 	-- emitted instructions: each is {op, args}
-	self.code       = ""
+	self.code = ""
 	-- label → instruction index
 	self.functions = {}
 	-- label index for new labels
-	self.nextLabel  = 0
+	self.nextLabel = 0
 	-- variable name → memory address
 	self.scope = Scope()
 	-- next RAM address for globals
-	self.ramAddr   = ramAddr or 0x2000
-end
-
-function Compiler:getCode()
-	return self.code
-end
-
-function Compiler:setCode(oldCode)
-	self.code = oldCode
-end
-
--- Emit an instruction, return its position
-function Compiler:emit(op, ...)
-	self.code = self.code .. op .. " " .. table.concat({...}, ", ") .. "\n"
-end
-
--- Generate a fresh label
-function Compiler:newLabel(prefix)
-	if prefix == nil then
-		self.nextLabel = self.nextLabel + 1
-		prefix = prefix .. tostring(self.nextLabel)
-	end
-	return prefix
-end
-
--- Place a label at the current code position
-function Compiler:placeLabel(label)
-	self.labels[label] = #self.code + 1
+	self.ramAddr = ramAddr or 0x2000
 end
 
 -- Entry point: compile a Program AST node
@@ -61,12 +34,6 @@ end
 
 -- Visitor table mapping AST node kinds to compile methods
 Compiler.visitor = {
-	Program = function(node, self)
-		for _, stmt in ipairs(node.body) do
-			AST.visit(stmt, self.visitor, self)
-		end
-	end,
-
 	VariableDeclaration = function(node, self)
 		AST.visit(node.value, self.visitor, self)
 		if self.scope.isLocalScope then
@@ -75,16 +42,16 @@ Compiler.visitor = {
 		else
 			-- store global variable
 			self.scope:declare(node.name, node.varType, self.ramAddr)
-			self:emit("STA ($" .. string.format("%x", self.ramAddr ) .. ")")
+			self:emit("STA ($" .. string.format("%x", self.ramAddr) .. ")")
 			self.ramAddr = self.ramAddr + 1
 		end
 	end,
 
-	AssignmentStatement = function (node, self)
+	AssignmentStatement = function(node, self)
 		AST.visit(node.value, self.visitor, self)
 		if self.scope.isLocalScope then
 			local var = self.scope:fetch(node.target.name)
-			self:emit("SET", '#' .. var.index)
+			self:emit("SET", "#" .. var.index)
 		else
 			print("TODO: global assignment")
 		end
@@ -147,7 +114,7 @@ Compiler.visitor = {
 	end,
 
 	NumberLiteral = function(node, self)
-		self:emit("LDA", '#' .. node.value)
+		self:emit("LDA", "#" .. node.value)
 	end,
 
 	StringLiteral = function(node, self)
@@ -168,7 +135,7 @@ Compiler.visitor = {
 			end
 		else
 			-- TODO: implement this logic for globals
-			self:emit("LDA ($" .. string.format("%x", var.address ) .. ")")
+			self:emit("LDA ($" .. string.format("%x", var.address) .. ")")
 		end
 	end,
 
@@ -245,7 +212,7 @@ Compiler.visitor = {
 		end
 	end,
 
---[[	WhileStatement = function(node, self)
+	--[[	WhileStatement = function(node, self)
 		local startLabel = self:newLabel("while")
 		local endLabel   = self:newLabel("wend")
 		self:placeLabel(startLabel)
