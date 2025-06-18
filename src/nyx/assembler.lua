@@ -358,15 +358,24 @@ function Assembler:setupAddressingModes()
 		-- Immediate addressing (#value)
 		immediate = {
 			pattern = function(token)
-				return token and token.type == "HASH"
+				return token and (token.type == "HASH" or token.type == "IDENTIFIER")
 			end,
 			process = function(self)
-				self:advance() -- Skip the hash
-				local value = self:parseExpression()
-				return {
-					mode = "immediate",
-					bytes = { value },
-				}
+				if self.current.type == "HASH" then
+					self:advance() -- Skip the hash
+					local value = self:parseExpression()
+					return {
+						mode = "immediate",
+						bytes = { value },
+					}
+				elseif self.current.type == "IDENTIFIER" then
+					return {
+						mode = "immediate",
+						label = value,
+					}
+				else
+					error("WTF")
+				end
 			end,
 		},
 
@@ -512,7 +521,6 @@ function Assembler:parseExpression()
 	elseif self.current.type == "IDENTIFIER" then
 		local label = self.current.value
 		self:advance()
-
 		return label
 	elseif self.current.type == "CHAR" and self.current.value == "$" then
 		self:advance() -- Skip the $ character
@@ -589,8 +597,11 @@ function Assembler:parseOperand(instruction)
 	end
 
 	-- Check for immediate addressing (#value)
-	if self.current and self.current.type == "HASH" and table.contains(instruction.addrModes, "immediate") then
-		self:advance() -- Skip hash
+	if
+		self.current
+		and (self.current.type == "HASH" or self.current.type == "IDENTIFIER")
+		and table.contains(instruction.addrModes, "immediate")
+	then
 		local value = self:parseExpression()
 		return {
 			mode = "immediate",

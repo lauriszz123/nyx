@@ -136,17 +136,26 @@ test(
 
 test(
 	[[
-	let VIDEO_MEM_CHAR: ptr = 0x3000;
-
-	fn writeChar(byte: u8)
-		poke(VIDEO_MEM_CHAR, byte);
-	end
-
-	writeChar(20 + 2 * 10 + 8);
+	let testStr: str = "Hello, world!";
 ]],
 	{},
 	function(cpu)
-		printreg("0x3000 stored", 0x30, cpu.memory:read(29))
-		printreg("0x3000 pointed to", 48, cpu.memory:read(0x3000))
+		local hello = "Hello, world!"
+		local err = false
+		printreg("str pointer", 9, cpu.memory:read(8))
+		for i = 1, #hello do
+			local byte = hello:sub(i, i):byte()
+			if byte ~= cpu.memory:read(8 + i) then
+				print("STR NOT STORED CORRECTLY!")
+				print("I:", i)
+				print(byte, cpu.memory:read(8 + i))
+				err = tru
+				break
+			end
+		end
+
+		if not err then
+			print("Passed!")
+		end
 	end
 )
