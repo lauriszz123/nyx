@@ -10,7 +10,7 @@ return function(self, node, outType)
 		AST.visit(self, arg, fnParamType)
 		if fnParamType == "u8" or fnParamType == "s8" then
 			self:emit("PHA")
-		elseif fnParamType == "ptr" then
+		elseif fnParamType == "ptr" or fnParamType == "str" then
 			self:emit("PHP #1")
 		else
 			print("Unsupported call argument: ", fnParamType)

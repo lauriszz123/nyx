@@ -149,7 +149,7 @@ test(
 				print("STR NOT STORED CORRECTLY!")
 				print("I:", i)
 				print(byte, cpu.memory:read(8 + i))
-				err = tru
+				err = true
 				break
 			end
 		end
@@ -158,4 +158,21 @@ test(
 			print("Passed!")
 		end
 	end
+)
+
+test(
+	[[
+	let VIDEO_MEM_CHAR: ptr = 0x3000;
+
+	fn writeChar(byte: u8)
+		poke(VIDEO_MEM_CHAR, byte);
+	end
+
+	fn print(string: str)
+	end
+
+	print("Hello, world!");
+]],
+	{},
+	function(cpu) end
 )
