@@ -153,10 +153,19 @@ end
 ]]
 )
 
+checkCodeSnippet(
+	"IF STATEMENT",
+	[[
+if 1 == 1 then
+	 1 + 2 * 3;
+end
+]]
+)
+
 -- checkCodeSnippet( "ARRAY DECLARATION",
 -- 	[[
 --   let arr: u8[0xFF];
 -- ]]
 -- )
 
-checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))
+-- checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))

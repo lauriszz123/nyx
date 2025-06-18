@@ -11,8 +11,8 @@ function table.contains(tbl, element)
 end
 
 function love.load()
-	-- require("tests.test")
-	require("tests.test_vm_with_nyx")
+	require("tests.test_nyx")
+	-- require("tests.test_vm_with_nyx")
 
 	love.event.quit()
 end
