@@ -133,3 +133,20 @@ test(
 		printreg("0x3000 pointed to", 0x21, cpu.memory:read(0x3000))
 	end
 )
+
+test(
+	[[
+	let VIDEO_MEM_CHAR: ptr = 0x3000;
+
+	fn writeChar(byte: u8)
+		poke(VIDEO_MEM_CHAR, byte);
+	end
+
+	writeChar(20 + 2 * 10 + 8);
+]],
+	{},
+	function(cpu)
+		printreg("0x3000 stored", 0x30, cpu.memory:read(29))
+		printreg("0x3000 pointed to", 48, cpu.memory:read(0x3000))
+	end
+)
