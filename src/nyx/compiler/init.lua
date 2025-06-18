@@ -2,10 +2,11 @@ local class = require("middleclass")
 local Scope = require("src.nyx.scope")
 local AST = require("src.nyx.ast")
 
+---@class Compiler
 local Compiler = class("Compiler")
 
 function Compiler:initialize()
-	self.code = ""
+	self.code = { "" }
 	self.nextLabel = 0
 	self.functions = {}
 	self.structs = {}
@@ -29,7 +30,16 @@ function Compiler:initialize()
 end
 
 function Compiler:emit(op, ...)
-	self.code = self.code .. op .. " " .. table.concat({ ... }, ", ") .. "\n"
+	local instr = op .. " " .. table.concat({ ... }, ", ") .. "\n"
+	self.code[#self.code] = self.code[#self.code] .. instr
+end
+
+function Compiler:pushCode()
+	table.insert(self.code, "")
+end
+
+function Compiler:popCode()
+	return table.remove(self.code, #self.code)
 end
 
 function Compiler:newLabel(prefix)
@@ -37,14 +47,24 @@ function Compiler:newLabel(prefix)
 		self.nextLabel = self.nextLabel + 1
 		prefix = prefix .. tostring(self.nextLabel)
 	end
-	return "L" .. prefix
+	return "L" .. prefix .. ":"
+end
+
+function Compiler:generateFunctions()
+	local code = self.code[#self.code]
+	code = code .. "\n"
+	for _, fn in ipairs(self.functions) do
+		code = code .. fn .. "\n"
+	end
+	self.code[#self.code] = code
 end
 
 function Compiler:generate(ast)
 	assert(ast.kind == "Program", "AST must be a Program")
 	AST.visit(self, ast)
+	self:generateFunctions()
 
-	return self.code
+	return self.code[#self.code]
 end
 
 return Compiler

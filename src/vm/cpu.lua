@@ -83,27 +83,27 @@ end
 -- Execute one instruction, return cycles used
 function CPU:step()
 	local op = self:fetch()
-	if op == 0x10 then -- LD A, #imm8
+	if op == 0x10 then -- LDA #imm8
 		local imm = self:fetch()
 		self.A = imm
 		self:flag(FLAGS.Z, self.A == 0)
 		return 2
-	elseif op == 0x11 then -- LD B, #imm8
+	elseif op == 0x11 then -- LDB #imm8
 		local imm = self:fetch()
 		self.B = imm
 		self:flag(FLAGS.Z, self.B == 0)
 		return 2
-	elseif op == 0x12 then -- LD HL, #imm16
+	elseif op == 0x12 then -- LDHL #imm16
 		local lo = self:fetch()
 		local hi = self:fetch()
 		self:setHL(bit.bor(bit.lshift(hi, 8), lo))
 		return 3
-	elseif op == 0x20 then -- LD A, (HL)
+	elseif op == 0x20 then -- LDA (HL)
 		local addr = self:getHL()
 		self.A = self.memory:read(addr)
 		self:flag(FLAGS.Z, self.A == 0)
 		return 3
-	elseif op == 0x21 then -- LD (HL), A
+	elseif op == 0x21 then -- STA (HL)
 		local addr = self:getHL()
 		self.memory:write(addr, self.A)
 		return 3
@@ -123,6 +123,20 @@ function CPU:step()
 	elseif op == 0x24 then -- SBP
 		self.BP = self.SP
 		return 1
+	elseif op == 0x25 then -- STHL (#imm16)
+		local lo = self:fetch()
+		local hi = self:fetch()
+		local addr = bit.bor(bit.lshift(hi, 8), lo)
+		self.memory:write(addr, self.H)
+		self.memory:write(addr + 1, self.L)
+		return 7
+	elseif op == 0x26 then -- LDHL (#imm16)
+		local lo = self:fetch()
+		local hi = self:fetch()
+		local addr = bit.bor(bit.lshift(hi, 8), lo)
+		self.H = self.memory:read(addr)
+		self.L = self.memory:read(addr + 1)
+		return 6
 	elseif op == 0x30 then -- ADD A, B
 		local result = self.A + self.B
 		self:flag(FLAGS.C, result > 0xFF)

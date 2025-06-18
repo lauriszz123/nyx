@@ -6,8 +6,13 @@ return function(self, node)
 	end
 	self:emit("HLT")
 
-	for varName, _ in pairs(self.scope.variables) do
+	for varName, var in pairs(self.scope.variables) do
 		self:emit("v_" .. varName .. ":")
-		self:emit("DB #00")
+		if var.type == "ptr" then
+			self:emit("DB #00")
+			self:emit("DB #00")
+		elseif var.type == "u8" or var.type == "s8" then
+			self:emit("DB #00")
+		end
 	end
 end

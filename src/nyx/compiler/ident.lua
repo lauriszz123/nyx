@@ -1,15 +1,20 @@
+---@param self Compiler
 return function(self, node)
 	local var = self.scope:lookup(node.name)
 	if var.isLocal then
+		local index = "#" .. string.format("%d", var.index)
+		print(node.name .. " INDEX:", index)
 		-- load local variable into A
-		if var.index < 0 then
-			-- negative index means local variable
-			self:emit("GETN #" .. string.format("%d", math.abs(var.index) + 4))
+		if var.isArg then
+			self:emit("GETN", index)
 		else
-			-- positive index means argument
-			self:emit("GET #" .. string.format("%d", var.index))
+			self:emit("GET", index)
 		end
 	else
-		self:emit("LDA (v_" .. node.name .. ")")
+		if var.type == "u8" or var.type == "s8" then
+			self:emit("LDA (v_" .. node.name .. ")")
+		elseif var.type == "ptr" then
+			self:emit("LDHL (v_" .. node.name .. ")")
+		end
 	end
 end

@@ -1,6 +1,5 @@
 -- compiler.lua
 local class = require("middleclass")
-local Scope = require("src.nyx.scope")
 local AST = require("src.nyx.ast")
 
 local Compiler = class("Compiler")
@@ -34,42 +33,6 @@ end
 
 -- Visitor table mapping AST node kinds to compile methods
 Compiler.visitor = {
-	FunctionDeclaration = function(node, self)
-		local fnName = self:newLabel(node.name)
-
-		local code = self:getCode()
-		self:setCode("")
-
-		self:emit(fnName .. ":")
-		self:emit("PHP")
-		self:emit("SBP")
-
-		-- create a new scope for the function
-		self.scope = Scope(self.scope)
-		self.scope:isLocal(true)
-
-		-- parameters
-		for i, param in ipairs(node.params) do
-			self.scope:declareLocal(param.name, param.varType, -(#node.params - (i - 1)))
-		end
-
-		-- compile body
-		for _, stmt in ipairs(node.body) do
-			AST.visit(stmt, self.visitor, self)
-		end
-
-		-- return (drops into caller)
-		self:emit("PLP") -- pop base pointer
-		self:emit("RET")
-
-		-- restore scope
-		self.scope = self.scope.parent
-
-		-- restore the program code
-		local fn = self:getCode()
-		self:setCode(code)
-		table.insert(self.functions, fn)
-	end,
 
 	StringLiteral = function(node, self)
 		-- stub: load address of string literal (not implemented)

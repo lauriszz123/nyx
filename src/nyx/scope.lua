@@ -9,6 +9,8 @@ function Scope:initialize(parent)
 	self.isLocalScope = false
 	self.functions = {}
 	self.stackPtr = 1
+	self.paramIndex = 4
+	self.stackIndex = 0
 end
 
 function Scope:setLocal()
@@ -38,7 +40,7 @@ end
 ---@param name string
 ---@param params table
 ---@param retType string
----@param builtin fun(self)
+---@param builtin nil|fun(self)
 function Scope:declareFunction(name, params, retType, builtin)
 	if self.functions[name] then
 		error("Function " .. name .. " already declared in this scope")
@@ -53,7 +55,13 @@ function Scope:declareFunction(name, params, retType, builtin)
 end
 
 function Scope:getFunction(name)
-	return self.functions[name]
+	local curr = self
+	while curr do
+		if curr.functions[name] then
+			return curr.functions[name]
+		end
+		curr = curr.parent
+	end
 end
 
 function Scope:declareStruct(name, fields)
@@ -74,22 +82,31 @@ function Scope:structExists(struct)
 	return false
 end
 
-function Scope:declare(name, typ, address)
+function Scope:declare(name, typ, isArg)
 	if self.variables[name] then
 		error("Variable " .. name .. " already declared in this scope")
 	end
-
-	self.variables[name] = {
+	local var = {
 		isGlobalVar = true,
 		type = typ,
-		position = address,
+		isArg = isArg or false,
 	}
 
 	if self.isLocalScope then
-		self.variables[name].isLocal = true
+		var.isLocal = true
+
+		if var.isArg then
+			var.index = self.paramIndex + 1
+			self.paramIndex = self.paramIndex + 1
+		else
+			var.index = self.stackIndex
+			self.stackIndex = self.stackIndex + 1
+		end
 	else
-		self.variables[name].isLocal = false
+		var.isLocal = false
 	end
+
+	self.variables[name] = var
 end
 
 return Scope

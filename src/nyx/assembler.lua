@@ -45,14 +45,19 @@ function Assembler:setupInstructionSet()
 		-- Load HL with immediate address
 		["LDHL"] = {
 			opcode = 0x12,
-			addrModes = { "immediate" },
-			sizes = { immediate = 3 },
+			addrModes = { "immediate", "direct" },
+			sizes = { immediate = 3, direct = 3 },
 		},
 		-- Store accumulator to memory
 		["STA"] = {
 			opcode = 0x21,
 			addrModes = { "register_indirect", "direct" },
 			sizes = { register_indirect = 1, direct = 3 },
+		},
+		["STHL"] = {
+			opcode = 0x25,
+			addrModes = { "direct" },
+			sizes = { direct = 3 },
 		},
 		["SBP"] = {
 			opcode = 0x24,
@@ -291,6 +296,12 @@ function Assembler:setupInstructionSet()
 					opVariant = 0x20
 				elseif mode == "direct" then
 					opVariant = 0x22
+				end
+			elseif name == "LDHL" then
+				if mode == "immediate" then
+					opVariant = 0x12
+				elseif mode == "direct" then
+					opVariant = 0x26
 				end
 				-- For STA, adjust opcode based on addressing mode
 			elseif name == "STA" then
