@@ -13,7 +13,11 @@ function Validator:initialize()
 	self.scope:declareFunction("poke", {
 		{ name = "pointer", type = "ptr" },
 		{ name = "value", type = "u8" },
-	})
+	}, "nil")
+	self.scope:declareFunction("peek", {
+		{ name = "pointer", type = "ptr" },
+		{ name = "offset", type = "u8" },
+	}, "u8")
 
 	self.errors = {}
 	self.currentFunction = nil

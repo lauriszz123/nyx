@@ -162,10 +162,130 @@ end
 ]]
 )
 
+checkCodeSnippet(
+	"IF STATEMENT GOOD AND BAD",
+	[[
+let int: u8 = 10;
+let string: str = "Some string!";
+
+if 1 then
+end
+if 0 then
+end
+
+if 2 then
+end
+
+if int then
+end
+
+if string then
+end
+]]
+)
+
+checkCodeSnippet(
+	"IF/ELSE STATEMENT",
+	[[
+if 1 then
+else
+end
+]]
+)
+
+checkCodeSnippet(
+	"IF/ELSE IF/ELSE STATEMENT",
+	[[
+if 1 then
+elseif 0 then
+else
+end
+
+if 1 then
+elseif 0 then
+end
+]]
+)
+
+checkCodeSnippet(
+	"IF/ELSE IF/ELSE STATEMENT GOOD AND BAD",
+	[[
+if 1 then
+elseif 0 then
+else
+end
+
+if 3 then
+elseif 0 then
+else
+end
+
+if 1 then
+elseif 3 then
+else
+end
+]]
+)
+
+checkCodeSnippet(
+	"WHILE CONDITION",
+	[[
+while 1 do
+end
+]]
+)
+
+checkCodeSnippet(
+	"WHILE CONDITION BAD",
+	[[
+let x: ptr = 0x3000;
+
+while 3 do
+end
+
+
+while "str" do
+end
+
+while x do
+end
+]]
+)
+
+checkCodeSnippet(
+	"FOR CONDITION",
+	[[
+fn test(x: u8)
+	x = x * 2;
+end
+
+for x = 1, 10 do
+	test(x);
+end
+]]
+)
+
+checkCodeSnippet(
+	"FOR CONDITION BAD",
+	[[
+fn test(x: u8)
+	x = x * 2;
+end
+
+for x = 0x1000, 10 do
+	test(x);
+end
+
+for x = 0, 0x1000 do
+	test(x);
+end
+]]
+)
+
 -- checkCodeSnippet( "ARRAY DECLARATION",
 -- 	[[
 --   let arr: u8[0xFF];
 -- ]]
 -- )
 
--- checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))
+checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))

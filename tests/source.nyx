@@ -1,23 +1,26 @@
-struct Monitor
-  location: ptr;
+let VIDEO_MEM_CHAR: ptr = 0x3000;
+
+fn writeChar(byte: u8)
+	poke(VIDEO_MEM_CHAR, byte);
 end
 
-impl Monitor
-  fn init(location: ptr)
-    self.location = location;
-  end
+fn strlen(string: str)
+	let len: u8 = 0;
+	let currChar: u8 = peek(string, len);
+
+	while currCharr != 0x00 do
+		len = len + 1;
+		currChar = peek(string, len);
+	end
+
+	return len;
 end
 
-struct Core
-  monitor: Monitor;
+fn print(string: str)
+	for i=0, strlen(string) do
+		writeChar(peek(string, i));
+	end
+	writeChar(0x0A);
 end
 
-impl Core
-  fn init()
-    self.monitor = new Monitor(0x5000);
-  end
-
-  fn putChar(chr: u8)
-    poke(self.monitor.location, chr);
-  end
-end
+print("Hello, world!");

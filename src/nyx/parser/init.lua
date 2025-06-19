@@ -3,6 +3,7 @@ local AST = require("src.nyx.ast")
 local StatementParser = require("src.nyx.parser.statement")
 local ERRORS = require("src.nyx.parser.errMessages")
 
+---@class BaseParser
 local Parser = class("Parser")
 
 function Parser:initialize(lexer)

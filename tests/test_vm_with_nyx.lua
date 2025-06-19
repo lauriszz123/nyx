@@ -159,20 +159,3 @@ test(
 		end
 	end
 )
-
-test(
-	[[
-	let VIDEO_MEM_CHAR: ptr = 0x3000;
-
-	fn writeChar(byte: u8)
-		poke(VIDEO_MEM_CHAR, byte);
-	end
-
-	fn print(string: str)
-	end
-
-	print("Hello, world!");
-]],
-	{},
-	function(cpu) end
-)
