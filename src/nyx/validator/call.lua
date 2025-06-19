@@ -32,18 +32,18 @@ return function(self, node)
 	for _, info in ipairs(func.info) do
 		local funcArgs = {}
 
-		for i, arg in ipairs(node.arguments) do
-			local param = info.params[i]
-			if param then
+		for i, param in ipairs(info.params) do
+			local arg = node.arguments[i]
+			if arg then
 				local actualType = self.expression.getExpressionType(self, arg, param.type)
 				args[i] = actualType
-				table.insert(funcArgs, param.type)
 				if Types.isTypeCompatible(param.type, actualType) then
 					if i == #node.arguments then
 						return info.returnType or "any"
 					end
 				end
 			end
+			table.insert(funcArgs, param.type)
 		end
 
 		table.insert(allFuncArgs, funcArgs)
