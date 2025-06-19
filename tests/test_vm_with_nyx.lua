@@ -159,3 +159,27 @@ test(
 		end
 	end
 )
+
+test(
+	[[
+	fn variants(byte: u8)
+	end
+	fn variants(pointer: ptr)
+	end
+]],
+	{},
+	function(cpu) end
+)
+
+test(
+	[[
+	fn variants(byte: u8)
+	end
+	fn variants(pointer: ptr)
+	end
+
+	variants(0x1000);
+]],
+	{},
+	function(cpu) end
+)

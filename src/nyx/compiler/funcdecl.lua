@@ -2,8 +2,8 @@ local AST = require("src.nyx.ast")
 local Scope = require("src.nyx.scope")
 
 return function(self, node)
-	local fnName = node.name .. ":"
-	self.scope:declareFunction(node.name, node.params, node.retType)
+	local variant = self.scope:declareFunction(node.name, node.params, node.retType)
+	local fnName = node.name .. "_" .. variant .. ":"
 
 	self:pushCode()
 	self:emit(fnName)

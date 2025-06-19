@@ -71,14 +71,16 @@ function Compiler:generateFunctions()
 end
 
 function Compiler:generateStrings()
-	for _, str in ipairs(self.strings) do
-		self:emit(str.name .. ":")
-		for i = 1, #str.value do
-			local chr = str.value:sub(i, i)
-			self:emit("DB", "#" .. string.byte(chr))
+	if #self.strings > 0 then
+		for _, str in ipairs(self.strings) do
+			self:emit(str.name .. ":")
+			for i = 1, #str.value do
+				local chr = str.value:sub(i, i)
+				self:emit("DB", "#" .. string.byte(chr))
+			end
 		end
+		self:emit("DB", "#" .. 0)
 	end
-	self:emit("DB", 0)
 end
 
 function Compiler:generate(ast)

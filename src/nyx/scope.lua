@@ -54,6 +54,8 @@ function Scope:declareFunction(name, params, retType, builtin)
 	})
 
 	self.functions[name] = func
+
+	return #func.info
 end
 
 function Scope:getFunction(name, variant)

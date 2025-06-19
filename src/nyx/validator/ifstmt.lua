@@ -3,7 +3,7 @@ local AST = require("src.nyx.ast")
 local Types = require("src.nyx.validator.types")
 
 ---@param self Validator
-function if_validator(self, node)
+local function if_validator(self, node)
 	local condType = self.expression.getExpressionType(self, node.condition, "bool")
 	if not Types.isTypeCompatible("bool", condType) then
 		self:addError("Expected a boolean expression, got: " .. condType, node)

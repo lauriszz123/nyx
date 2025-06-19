@@ -1,6 +1,7 @@
 local AST = require("src.nyx.ast")
 
 return function(self, node, outType)
+	outType = outType or "u8"
 	if outType == "u8" or outType == "s8" then
 		-- compile right into A, push
 		AST.visit(self, node.right, outType)
