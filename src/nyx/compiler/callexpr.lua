@@ -1,8 +1,11 @@
 local AST = require("src.nyx.ast")
 
-return function(self, node, outType)
+local function findFnInfo(fn, i, arg) end
+
+---@param self Compiler
+return function(self, node)
 	local fname = node.callee.name
-	local fn = self.scope:getFunction(fname)
+	local fn = self.scope:getFunction(fname, node.variant)
 
 	-- push args in order
 	for i, arg in ipairs(node.arguments) do

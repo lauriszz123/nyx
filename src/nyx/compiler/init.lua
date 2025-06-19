@@ -12,6 +12,7 @@ function Compiler:initialize()
 	self.structs = {}
 	self.strings = {}
 
+	---@type Scope
 	self.scope = Scope()
 	self.scope:declareFunction(
 		"poke",

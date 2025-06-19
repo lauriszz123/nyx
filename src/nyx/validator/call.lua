@@ -29,7 +29,7 @@ return function(self, node)
 	local args = {}
 	local allFuncArgs = {}
 
-	for _, info in ipairs(func.info) do
+	for j, info in ipairs(func.info) do
 		local funcArgs = {}
 
 		for i, param in ipairs(info.params) do
@@ -39,6 +39,7 @@ return function(self, node)
 				args[i] = actualType
 				if Types.isTypeCompatible(param.type, actualType) then
 					if i == #node.arguments then
+						node.variant = j
 						return info.returnType or "any"
 					end
 				end

@@ -56,11 +56,15 @@ function Scope:declareFunction(name, params, retType, builtin)
 	self.functions[name] = func
 end
 
-function Scope:getFunction(name)
+function Scope:getFunction(name, variant)
 	local curr = self
 	while curr do
 		if curr.functions[name] then
-			return curr.functions[name]
+			if variant then
+				return curr.functions[name].info[variant]
+			else
+				return curr.functions[name]
+			end
 		end
 		curr = curr.parent
 	end
