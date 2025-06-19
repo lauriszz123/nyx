@@ -15,7 +15,9 @@ return function(self, node)
 	end
 
 	self.scope:declareFunction(node.name, node.params, node.returnType)
-	self.currentFunction = self.scope:getFunction(node.name)
+	self.currentFunction = {
+		returnType = node.returnType,
+	}
 
 	local oldScope = self.scope
 	---@type Scope

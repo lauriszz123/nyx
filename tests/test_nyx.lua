@@ -322,4 +322,4 @@ test(0x1000);
 -- ]]
 -- )
 
--- checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))
+checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))

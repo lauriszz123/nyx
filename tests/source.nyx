@@ -4,11 +4,11 @@ fn writeChar(byte: u8)
 	poke(VIDEO_MEM_CHAR, byte);
 end
 
-fn strlen(string: str)
+fn strlen(string: str): u8
 	let len: u8 = 0;
 	let currChar: u8 = peek(string, len);
 
-	while currCharr != 0x00 do
+	while currChar != 0x00 do
 		len = len + 1;
 		currChar = peek(string, len);
 	end

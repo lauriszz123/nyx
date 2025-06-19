@@ -16,6 +16,13 @@ function Validator:initialize()
 	}, "nil")
 	self.scope:declareFunction("peek", {
 		{ name = "pointer", type = "ptr" },
+	}, "u8")
+	self.scope:declareFunction("peek", {
+		{ name = "pointer", type = "ptr" },
+		{ name = "offset", type = "u8" },
+	}, "u8")
+	self.scope:declareFunction("peek", {
+		{ name = "string", type = "str" },
 		{ name = "offset", type = "u8" },
 	}, "u8")
 
