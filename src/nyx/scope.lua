@@ -42,16 +42,18 @@ end
 ---@param retType string
 ---@param builtin nil|fun(self)
 function Scope:declareFunction(name, params, retType, builtin)
-	if self.functions[name] then
-		error("Function " .. name .. " already declared in this scope")
-	end
-
-	self.functions[name] = {
+	local func = self.functions[name] or {
 		isFunc = true,
+		info = {},
+	}
+
+	table.insert(func.info, {
 		params = params,
 		returnType = retType,
 		builtin = builtin,
-	}
+	})
+
+	self.functions[name] = func
 end
 
 function Scope:getFunction(name)

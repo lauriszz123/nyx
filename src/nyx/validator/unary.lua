@@ -1,4 +1,3 @@
----@param self Validator
 local Types = require("src.nyx.validator.types")
 
 ---@param self Validator

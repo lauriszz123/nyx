@@ -1,3 +1,5 @@
+local Types = require("src.nyx.validator.types")
+
 ---@param self Validator
 return function(self, node)
 	local callee = node.callee
@@ -24,32 +26,40 @@ return function(self, node)
 		return "any"
 	end
 
-	if #node.arguments ~= #func.params then
-		self:addError(
-			string.format("Function %s expects %d arguments, got %d", funcName, #func.params, #node.arguments),
-			node
-		)
-	end
+	local args = {}
+	local allFuncArgs = {}
 
-	for i, arg in ipairs(node.arguments) do
-		if func.params[i] then
-			local expectedType = func.params[i].type or "any"
-			local actualType = self.expression.getExpressionType(self, arg, expectedType)
+	for _, info in ipairs(func.info) do
+		local funcArgs = {}
 
-			if expectedType ~= actualType then
-				self:addError(
-					string.format(
-						"Argument %d in function '%s': expected %s, got %s",
-						i,
-						funcName,
-						expectedType,
-						actualType
-					),
-					node
-				)
+		for i, arg in ipairs(node.arguments) do
+			local param = info.params[i]
+			if param then
+				local actualType = self.expression.getExpressionType(self, arg, param.type)
+				args[i] = actualType
+				table.insert(funcArgs, param.type)
+				if Types.isTypeCompatible(param.type, actualType) then
+					if i == #node.arguments then
+						return info.returnType or "any"
+					end
+				end
 			end
 		end
+
+		table.insert(allFuncArgs, funcArgs)
 	end
 
-	return func.returnType or "any"
+	local fstrarg = ""
+	for _, fparams in ipairs(allFuncArgs) do
+		fstrarg = fstrarg .. funcName .. "("
+		for _, farg in ipairs(fparams) do
+			fstrarg = fstrarg .. farg .. ", "
+		end
+		fstrarg = fstrarg:sub(1, #fstrarg - 2) .. ")\n"
+	end
+	local paramargs = table.concat(args, ", ")
+	self:addError(
+		string.format("%s(%s) did not find correct arguments for functions:\n%s", funcName, paramargs, fstrarg),
+		node
+	)
 end

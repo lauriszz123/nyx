@@ -33,12 +33,6 @@ end
 
 -- Visitor table mapping AST node kinds to compile methods
 Compiler.visitor = {
-
-	StringLiteral = function(node, self)
-		-- stub: load address of string literal (not implemented)
-		error("StringLiteral compilation not implemented")
-	end,
-
 	FieldAccess = function(node, self)
 		-- compile object address into A
 		AST.visit(node.object, self.visitor, self)

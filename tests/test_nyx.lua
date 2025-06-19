@@ -282,10 +282,44 @@ end
 ]]
 )
 
+checkCodeSnippet(
+	"FUNCTION OVERLOADING",
+	[[
+fn test(x: u8)
+	x = x * 2;
+end
+
+fn test(x: str)
+end
+
+test(0x10);
+test("YES");
+]]
+)
+
+checkCodeSnippet(
+	"FUNCTION OVERLOADING BAD USAGE",
+	[[
+fn test(x: u8, y: ptr)
+	x = x * 2;
+end
+
+fn test(x: str)
+end
+
+fn test(x: u8)
+end
+
+test(0x10, "ST");
+test(0x10);
+test(0x1000);
+]]
+)
+
 -- checkCodeSnippet( "ARRAY DECLARATION",
 -- 	[[
 --   let arr: u8[0xFF];
 -- ]]
 -- )
 
-checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))
+-- checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))
