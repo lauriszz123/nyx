@@ -35,7 +35,7 @@ x: Type = value          -- Public
 ### 2.3 Functions
 Functions are pretty similair to Lua, but with statically-typed sugar.
 ```lua
-function name(params: Types, ...): ReturnType do
+function name(params: Types, ...): ReturnType
   ...
 end
 ```
