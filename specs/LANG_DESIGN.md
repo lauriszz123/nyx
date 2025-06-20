@@ -40,6 +40,18 @@ function name(params: Types, ...): ReturnType
 end
 ```
 
+Also the functions can be overloaded:
+```lua
+function peek(pointer: ptr): ReturnType
+end
+
+function peek(string: str): ReturnType
+end
+
+function peek(anyName: AnyType, ...): ReturnType
+end
+```
+
 ### 2.4 Control Flow
 ```lua
 if condition then
@@ -54,7 +66,7 @@ while condition do
   ...
 end
 
-for i = start, stop, step do
+for i = start, stop [, step] do
   ...
 end
 
