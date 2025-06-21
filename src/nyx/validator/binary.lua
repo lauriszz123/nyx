@@ -29,12 +29,8 @@ return function(self, node)
 		end
 
 		return "bool"
-	elseif op == "<" and op == ">" and op == "<=" and op == ">=" then
+	elseif op == "<" or op == ">" or op == "<=" or op == ">=" then
 		if Types.isNumericType(leftType) and Types.isNumericType(rightType) then
-			return "bool"
-		elseif leftType == "str" and rightType == "str" then
-			return "bool"
-		elseif leftType == "ptr" and rightType == "ptr" then
 			return "bool"
 		else
 			self:addError(string.format("Invalid operands for '%s': %s, %s", op, leftType, rightType), node)

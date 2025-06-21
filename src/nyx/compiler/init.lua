@@ -56,7 +56,7 @@ end
 function Compiler:newLabel(prefix)
 	if prefix == nil then
 		self.nextLabel = self.nextLabel + 1
-		prefix = prefix .. tostring(self.nextLabel)
+		prefix = tostring(self.nextLabel)
 	end
 	return "L" .. prefix .. ":"
 end

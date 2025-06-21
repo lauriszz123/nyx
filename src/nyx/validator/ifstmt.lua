@@ -17,7 +17,7 @@ local function if_validator(self, node)
 		if node.body_false.kind == "IfStatement" then
 			if_validator(self, node.body_false)
 		else
-			for _, stmt in ipairs(node.body_true) do
+			for _, stmt in ipairs(node.body_false) do
 				AST.visit(self, stmt)
 			end
 		end

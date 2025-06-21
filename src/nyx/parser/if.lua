@@ -35,7 +35,7 @@ function IfStatement:parse(isElseIf)
 		self:expect("ELSE")
 		elseBody = {}
 		while self.current and self.current.type ~= "END" do
-			table.insert(body, getStatementParser().parse(self))
+			table.insert(elseBody, getStatementParser().parse(self))
 		end
 		self:expect("END")
 	elseif self.current.type == "ELSEIF" then

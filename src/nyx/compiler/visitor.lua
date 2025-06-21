@@ -3,6 +3,7 @@ local Visitor = {}
 Visitor.Program = require("src.nyx.compiler.program")
 Visitor.VariableDeclaration = require("src.nyx.compiler.vardecl")
 Visitor.FunctionDeclaration = require("src.nyx.compiler.funcdecl")
+Visitor.IfStatement = require("src.nyx.compiler.ifstmt")
 Visitor.AssignmentStatement = require("src.nyx.compiler.assgnstmt")
 Visitor.ExpressionStatement = require("src.nyx.compiler.exprstat")
 Visitor.CallExpression = require("src.nyx.compiler.callexpr")

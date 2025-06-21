@@ -151,20 +151,23 @@ end
 function Lexer:tokenize_operator()
 	local op = self.current_char
 	self:advance()
+
 	if op == "<" then
-		self:advance()
 		if self.current_char == "-" then
+			self:advance()
 			return self:create_token("ARROW", "<-")
 		elseif self.current_char == "=" then
-			return self:create_token("LE", "<=")
+			self:advance()
+			return self:create_token("OPERATOR", "<=")
 		end
 	elseif op == ">" and self.current_char == "=" then
 		self:advance()
-		return self:create_token("GE", ">=")
+		return self:create_token("OPERATOR", ">=")
 	elseif op == "!" and self.current_char == "=" then
 		self:advance()
-		return self:create_token("NE", "!=")
+		return self:create_token("OPERATOR", "!=")
 	end
+
 	return self:create_token("OPERATOR", op)
 end
 
@@ -180,7 +183,7 @@ function Lexer:tokenize_assign()
 	self:advance()
 	if self.current_char == "=" then
 		self:advance()
-		return self:create_token("EQ", "==")
+		return self:create_token("OPERATOR", "==")
 	end
 	-- If it's just a single '=', return it as an assignment operator
 	return self:create_token("ASSIGN", "=")

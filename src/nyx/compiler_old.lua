@@ -28,32 +28,6 @@ Compiler.visitor = {
 		end
 	end,
 
-	IfStatement = function(node, self)
-		-- compile condition in A
-		AST.visit(node.condition, self.visitor, self)
-		-- if zero jump to else or end
-
-		-- then-body
-		for _, stmt in ipairs(node.then_body) do
-			AST.visit(stmt, self.visitor, self)
-		end
-
-		-- else/elseif
-		if node.elseif_branches then
-			for _, eb in ipairs(node.elseif_branches) do
-				-- compile elseif condition
-				print("elseif condition")
-				AST.visit(eb.condition, self.visitor, self)
-			end
-		end
-		if node.else_body then
-			print("else body")
-			for _, stmt in ipairs(node.else_body) do
-				AST.visit(stmt, self.visitor, self)
-			end
-		end
-	end,
-
 	--[[	WhileStatement = function(node, self)
 		local startLabel = self:newLabel("while")
 		local endLabel   = self:newLabel("wend")

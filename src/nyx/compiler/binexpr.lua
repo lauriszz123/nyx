@@ -1,6 +1,7 @@
 local AST = require("src.nyx.ast")
 
-return function(self, node, outType)
+---@param self Compiler
+return function(self, node, outType, jmplbl)
 	outType = outType or "u8"
 	if outType == "u8" or outType == "s8" then
 		-- compile right into A, push
@@ -22,6 +23,28 @@ return function(self, node, outType)
 			self:emit("DIV")
 		elseif op == "==" then
 			self:emit("CMP")
+			self:emit("JNZ", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+		elseif op == "!=" then
+			self:emit("CMP")
+			self:emit("JZ", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+		elseif op == "<" then
+			local lbl = self:newLabel()
+
+			self:emit("SUB")
+			self:emit("CMP")
+			self:emit("JC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+
+			self:emit(lbl)
+		elseif op == "<=" then
+			local lbl = self:newLabel()
+
+			self:emit("CMP")
+			self:emit("JZ", "(" .. lbl:sub(1, #lbl - 1) .. ")")
+			self:emit("SUB")
+			self:emit("CMP")
+			self:emit("JC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+
+			self:emit(lbl)
 		else
 			error("Unknown binary operator: " .. op)
 		end

@@ -214,6 +214,13 @@ function CPU:step()
 			self.PC = bit.bor(bit.lshift(hi, 8), lo)
 		end
 		return 3
+	elseif op == 0x53 then -- JC imm16
+		local lo = self:fetch()
+		local hi = self:fetch()
+		if bit.band(self.SR, FLAGS.C) == 0 then
+			self.PC = bit.bor(bit.lshift(hi, 8), lo)
+		end
+		return 3
 	elseif op == 0x60 then -- PHA
 		self:push(self.A)
 		return 3

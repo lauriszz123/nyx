@@ -205,8 +205,6 @@ test(
 	[[
 if 1 == 1 then
 	poke(0x1000, 0x20);
-else
-	poke(0x1000, 0x10);
 end
 ]],
 	{},
@@ -214,3 +212,168 @@ end
 		printreg("true", 0x20, cpu.memory:read(0x1000))
 	end
 )
+
+test(
+	[[
+if 1 == 0 then
+	poke(0x1000, 0x20);
+end
+]],
+	{},
+	function(cpu)
+		printreg("false", 0x00, cpu.memory:read(0x1000))
+	end
+)
+
+test(
+	[[
+if 1 == 0 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+
+poke(0x1001, 0xD0);
+]],
+	{},
+	function(cpu)
+		printreg("false", 0x30, cpu.memory:read(0x1000))
+		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+	end
+)
+
+test(
+	[[
+if 1 == 1 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1001, 0x30);
+end
+
+poke(0x1001, 0xD0);
+]],
+	{},
+	function(cpu)
+		printreg("true", 0x20, cpu.memory:read(0x1000))
+		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+	end
+)
+
+test(
+	[[
+if 1 != 1 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+
+poke(0x1001, 0xD0);
+]],
+	{},
+	function(cpu)
+		printreg("false", 0x30, cpu.memory:read(0x1000))
+		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+	end
+)
+
+test(
+	[[
+if 1 < 1 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+
+poke(0x1001, 0xD0);
+]],
+	{},
+	function(cpu)
+		printreg("false", 0x30, cpu.memory:read(0x1000))
+		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+	end
+)
+
+test(
+	[[
+if 1 < 2 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1001, 0x30);
+end
+
+poke(0x1001, 0xD0);
+]],
+	{},
+	function(cpu)
+		printreg("true", 0x20, cpu.memory:read(0x1000))
+		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+	end
+)
+
+test(
+	[[
+if 1 < 0 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+
+poke(0x1001, 0xD0);
+]],
+	{},
+	function(cpu)
+		printreg("false", 0x30, cpu.memory:read(0x1000))
+		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+	end
+)
+
+-- test(
+-- 	[[
+-- if 1 <= 2 then
+-- 	poke(0x1000, 0x20);
+-- else
+-- 	poke(0x1001, 0x30);
+-- end
+--
+-- poke(0x1001, 0xD0);
+-- ]],
+-- 	{},
+-- 	function(cpu)
+-- 		printreg("true", 0x20, cpu.memory:read(0x1000))
+-- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+-- 	end
+-- )
+--
+-- test(
+-- 	[[
+-- if 1 <= 1 then
+-- 	poke(0x1000, 0x20);
+-- else
+-- 	poke(0x1001, 0x30);
+-- end
+--
+-- poke(0x1001, 0xD0);
+-- ]],
+-- 	{},
+-- 	function(cpu)
+-- 		printreg("true", 0x20, cpu.memory:read(0x1000))
+-- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+-- 	end
+-- )
+--
+-- test(
+-- 	[[
+-- if 1 <= 0 then
+-- 	poke(0x1001, 0x20);
+-- else
+-- 	poke(0x1000, 0x30);
+-- end
+--
+-- poke(0x1001, 0xD0);
+-- ]],
+-- 	{},
+-- 	function(cpu)
+-- 		printreg("false", 0x30, cpu.memory:read(0x1000))
+-- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+-- 	end
+-- )

@@ -142,6 +142,12 @@ function Assembler:setupInstructionSet()
 			addrModes = { "direct" },
 			sizes = { direct = 3 },
 		},
+		-- Jump if not zero
+		["JC"] = {
+			opcode = 0x53,
+			addrModes = { "direct" },
+			sizes = { direct = 3 },
+		},
 		-- Push A to stack
 		["PHA"] = {
 			opcode = 0x60,
@@ -232,7 +238,7 @@ function Assembler:setupInstructionSet()
 		-- Compare A with immediate
 		["CMP"] = {
 			opcode = 0x72,
-			addrModes = { "immediate", "implied" },
+			addrModes = { "implied", "immediate" },
 			sizes = { immediate = 2, implied = 1 },
 		},
 		-- Logical AND
@@ -570,6 +576,12 @@ function Assembler:parseOperand(instruction)
 		else
 			self:addError(string.format("Expected operand for instruction '%s'", instruction.name))
 			return { mode = "implied", bytes = {} }
+		end
+	else
+		if table.contains(instruction.addrModes, "implied") then
+			if self.current.type == "IDENTIFIER" and self.instructions[self.current.value] then
+				return { mode = "implied", bytes = {} }
+			end
 		end
 	end
 
