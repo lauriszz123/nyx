@@ -369,6 +369,7 @@ function Assembler:setupAddressingModes()
 						bytes = { value },
 					}
 				elseif self.current.type == "IDENTIFIER" then
+					local value = self:parseExpression()
 					return {
 						mode = "immediate",
 						label = value,
