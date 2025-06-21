@@ -14,9 +14,18 @@ end
 
 function InitLang:compile(source_code)
 	local lexer = Lexer(source_code)
+	---@type BaseParser
 	local parser = Parser(lexer)
+
+	---@type Validator
 	local validator = Validator()
+
 	local ast = parser:parse()
+	if parser:hasErrors() then
+		parser:printResults()
+		return
+	end
+
 	validator:validate(ast)
 
 	if validator:hasErrors() then

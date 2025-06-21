@@ -175,10 +175,22 @@ test(
 	[[
 	fn variants(byte: u8)
 	end
+
 	fn variants(pointer: ptr)
+		poke(pointer, 0x10);
 	end
 
 	variants(0x1000);
+]],
+	{},
+	function(cpu) end
+)
+
+test(
+	[[
+for i = 1, 10 do
+	poke(i, 0xFF);
+end
 ]],
 	{},
 	function(cpu) end
