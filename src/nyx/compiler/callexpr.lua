@@ -26,8 +26,14 @@ return function(self, node)
 	else
 		self:emit("CALL (" .. fname .. ")")
 		-- clean up args (if your VM needs manual cleanup)
-		for _ = 1, #node.arguments do
-			self:emit("PLB")
+		for i, _ in ipairs(node.arguments) do
+			local argType = fn.params[i].type
+			if argType == "ptr" or argType == "str" then
+				self:emit("PLB")
+				self:emit("PLB")
+			else
+				self:emit("PLB")
+			end
 		end
 	end
 end

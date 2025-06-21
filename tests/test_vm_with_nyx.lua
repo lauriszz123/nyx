@@ -56,6 +56,7 @@ local function test(src, expected, expectedfunc)
 	print()
 end
 
+-- Start of tests
 test(
 	[[
 	let x: u8 = 10;
@@ -163,35 +164,53 @@ test(
 test(
 	[[
 	fn variants(byte: u8)
+		poke(0x1000, byte);
 	end
+
 	fn variants(pointer: ptr)
+		poke(pointer, 0x20);
 	end
+
+	variants(0x10);
+	variants(0x1001);
 ]],
 	{},
-	function(cpu) end
+	function(cpu)
+		printreg("First variant", 0x10, cpu.memory:read(0x1000))
+		printreg("Second variant", 0x20, cpu.memory:read(0x1001))
+	end
 )
 
 test(
 	[[
-	fn variants(byte: u8)
+	fn variants(byte: u8, byte2: u8)
+		poke(0x1000, byte + byte2);
 	end
 
-	fn variants(pointer: ptr)
-		poke(pointer, 0x10);
+	fn variants(pointer: ptr, byte2: u8)
+		poke(pointer, 0x20 + byte2);
 	end
 
-	variants(0x1000);
+	variants(0x10, 0x10);
+	variants(0x1001, 0x10);
 ]],
 	{},
-	function(cpu) end
+	function(cpu)
+		printreg("First variant", 0x20, cpu.memory:read(0x1000))
+		printreg("Second variant", 0x30, cpu.memory:read(0x1001))
+	end
 )
 
 test(
 	[[
-for i = 1, 10 do
-	poke(i, 0xFF);
+if 1 == 1 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1000, 0x10);
 end
 ]],
 	{},
-	function(cpu) end
+	function(cpu)
+		printreg("true", 0x20, cpu.memory:read(0x1000))
+	end
 )

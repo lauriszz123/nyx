@@ -22,9 +22,12 @@ function Compiler:initialize()
 		},
 		"nil",
 		function(self)
+			self:emit("")
+			self:emitComment("Store value at the pointer")
 			self:emit("PLA")
 			self:emit("PLP", "#" .. 0x1)
 			self:emit("STA", "(HL)")
+			self:emit("")
 		end
 	)
 
@@ -34,6 +37,12 @@ end
 function Compiler:emit(op, ...)
 	local instr = op .. " " .. table.concat({ ... }, ", ") .. "\n"
 	self.code[#self.code] = self.code[#self.code] .. instr
+end
+
+---@param comment string Comment in the assembly file
+function Compiler:emitComment(comment)
+	local comment = "; " .. comment
+	self:emit(comment)
 end
 
 function Compiler:pushCode()
@@ -62,17 +71,22 @@ function Compiler:newString(str)
 end
 
 function Compiler:generateFunctions()
+	self:emitComment("Function Memory Space")
+	self:emit("")
 	local code = self.code[#self.code]
 	code = code .. "\n"
 	for _, fn in ipairs(self.functions) do
 		code = code .. fn .. "\n"
 	end
+	code = code .. "\n"
 	self.code[#self.code] = code
 end
 
 function Compiler:generateStrings()
 	if #self.strings > 0 then
+		self:emitComment("String Memory Space")
 		for _, str in ipairs(self.strings) do
+			self:emitComment(str.value)
 			self:emit(str.name .. ":")
 			for i = 1, #str.value do
 				local chr = str.value:sub(i, i)

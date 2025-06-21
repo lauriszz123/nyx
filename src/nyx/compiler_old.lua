@@ -4,33 +4,6 @@ local AST = require("src.nyx.ast")
 
 local Compiler = class("Compiler")
 
--- Initialize compiler state
-function Compiler:initialize(ramAddr)
-	-- emitted instructions: each is {op, args}
-	self.code = ""
-	-- label → instruction index
-	self.functions = {}
-	-- label index for new labels
-	self.nextLabel = 0
-	-- variable name → memory address
-	self.scope = Scope()
-	-- next RAM address for globals
-	self.ramAddr = ramAddr or 0x2000
-end
-
--- Entry point: compile a Program AST node
-function Compiler:compile(ast)
-	assert(ast.kind == "Program", "AST must be a Program")
-	AST.visit(ast, self.visitor, self)
-	self:emit("HLT") -- end of program
-
-	for _, fn in ipairs(self.functions) do
-		self.code = self.code .. fn .. "\n"
-	end
-
-	return self.code
-end
-
 -- Visitor table mapping AST node kinds to compile methods
 Compiler.visitor = {
 	FieldAccess = function(node, self)

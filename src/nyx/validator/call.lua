@@ -42,6 +42,8 @@ return function(self, node)
 						node.variant = j
 						return info.returnType or "any"
 					end
+				else
+					break
 				end
 			end
 			table.insert(funcArgs, param.type)

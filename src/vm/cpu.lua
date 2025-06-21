@@ -264,13 +264,11 @@ function CPU:step()
 		return 3
 	elseif op == 0x66 then -- GETN
 		local index = self:fetch()
-		local value = self.memory:read(self.BP + index)
-		self.A = value
+		self.A = self.memory:read(self.BP + index)
 		self:flag(FLAGS.Z, self.A == 0)
 	elseif op == 0x67 then -- GET
 		local index = self:fetch()
-		local value = self.memory:read(self.BP - index)
-		self.A = value
+		self.A = self.memory:read(self.BP - index)
 		self:flag(FLAGS.Z, self.A == 0)
 	elseif op == 0x68 then -- SETN
 		local index = self:fetch()
@@ -392,6 +390,22 @@ function CPU:step()
 		local hi = self.memory:read(0xFFFF)
 		self.PC = bit.bor(bit.lshift(hi, 8), lo)
 		return 7
+	elseif op == 0xA0 then -- GPTN
+		local index = self.BP + self:fetch()
+		self.L = self.memory:read(index)
+		self.H = self.memory:read(index + 1)
+	elseif op == 0xA1 then -- GPT
+		local index = self.BP - self:fetch()
+		self.L = self.memory:read(index)
+		self.H = self.memory:read(index + 1)
+	elseif op == 0xA2 then -- SPTN
+		local index = self.BP + self:fetch()
+		self.memory:write(index, self.L)
+		self.memory:write(index + 1, self.H)
+	elseif op == 0xA3 then -- SPT
+		local index = self.BP - self:fetch()
+		self.memory:write(index, self.L)
+		self.memory:write(index + 1, self.H)
 	elseif op == 0xFF then -- HALT
 		self.halted = true
 		return 0

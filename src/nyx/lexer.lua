@@ -151,18 +151,19 @@ end
 function Lexer:tokenize_operator()
 	local op = self.current_char
 	self:advance()
-	if op == "<" and self.current_char == "=" then
+	if op == "<" then
 		self:advance()
-		return self:create_token("LE", "<=")
+		if self.current_char == "-" then
+			return self:create_token("ARROW", "<-")
+		elseif self.current_char == "=" then
+			return self:create_token("LE", "<=")
+		end
 	elseif op == ">" and self.current_char == "=" then
 		self:advance()
 		return self:create_token("GE", ">=")
 	elseif op == "!" and self.current_char == "=" then
 		self:advance()
 		return self:create_token("NE", "!=")
-	elseif op == "=" and self.current_char == ">" then
-		self:advance()
-		return self:create_token("ARROW", "=>")
 	end
 	return self:create_token("OPERATOR", op)
 end
@@ -262,7 +263,11 @@ function Lexer:iter()
 			elseif self.current_char == ":" then
 				return self:tokenize_colon()
 			elseif self.current_char == ";" then
-				return self:tokenize_semicolon()
+				if self.isAsm then
+					self:tokenize_comment()
+				else
+					return self:tokenize_semicolon()
+				end
 			elseif self.current_char == "," then
 				return self:tokenize_comma()
 			elseif self.current_char == "." then
@@ -277,7 +282,7 @@ function Lexer:iter()
 				if self.isAsm then
 					return self:tokenize_hash()
 				else
-					return self:tokenize_comment()
+					self:tokenize_comment()
 				end
 			elseif self.current_char == "&" then
 				return self:tokenize_and()

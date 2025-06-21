@@ -196,6 +196,27 @@ function Assembler:setupInstructionSet()
 			addrModes = { "immediate" },
 			sizes = { immediate = 2 },
 		},
+		-- Pointer stack stuff
+		["GPTN"] = {
+			opcode = 0x66,
+			addrModes = { "immediate" },
+			sizes = { immediate = 2 },
+		},
+		["GPT"] = {
+			opcode = 0x67,
+			addrModes = { "immediate" },
+			sizes = { immediate = 2 },
+		},
+		["SPTN"] = {
+			opcode = 0x68,
+			addrModes = { "immediate" },
+			sizes = { immediate = 2 },
+		},
+		["SPT"] = {
+			opcode = 0x69,
+			addrModes = { "immediate" },
+			sizes = { immediate = 2 },
+		},
 		-- Call subroutine
 		["CALL"] = {
 			opcode = 0x70,
@@ -624,9 +645,12 @@ function Assembler:parseOperand(instruction)
 end
 
 -- Process a label declaration
-function Assembler:processLabel(name)
-	self.labels[name] = self.programOffset + self.currentAddress
-	print("Defined label: " .. name .. " = " .. self.currentAddress)
+function Assembler:processLabel(name, line, col)
+	self.labels[name] = {
+		address = self.programOffset + self.currentAddress,
+		line = line,
+		col = col,
+	}
 end
 
 -- Emit a byte to the output bytecode
@@ -695,7 +719,7 @@ function Assembler:calculateInstructionSize(name)
 	local instruction = self.instructions[instrName]
 
 	if not instruction then
-		print("Unknown instruction: " .. name)
+		self:addError("Unknown instruction: " .. name)
 		return 1 -- Default size for unknown instructions
 	end
 
@@ -732,6 +756,8 @@ function Assembler:firstPass()
 		-- Handle labels (NAME:)
 		if self.current.type == "IDENTIFIER" then
 			local name = self.current.value
+			local name_line = self.current.line
+			local name_col = self.current.col
 			self:advance()
 
 			if name == "DB" then
@@ -748,7 +774,7 @@ function Assembler:firstPass()
 			else
 				if self.current and self.current.type == "COLON" then
 					self:advance() -- Skip the colon
-					self:processLabel(name)
+					self:processLabel(name, name_line, name_col)
 				elseif self.instructions[name] or self.aliases[name] then
 					-- This is an instruction - get the instruction definition
 					local instrName = self.aliases[name] or name
@@ -810,7 +836,7 @@ function Assembler:resolveLabels()
 	for label, fixups in pairs(self.fixups) do
 		if self.labels[label] then
 			-- Label exists, update all references
-			local address = self.labels[label]
+			local address = self.labels[label].address
 			for _, fixup in ipairs(fixups) do
 				self.bytecode[fixup.position + 1] = bit.band(bit.rshift(address, 8), 0xFF) -- High byte
 				self.bytecode[fixup.position] = bit.band(address, 0xFF) -- Low byte
