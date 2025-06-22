@@ -34,7 +34,7 @@ local function test(src, expected, expectedfunc)
 
 		local steps = 0
 
-		while vm.running do
+		while vm.running and steps <= 0xFFFF do
 			vm:step()
 			steps = steps + 1
 		end
@@ -496,4 +496,34 @@ end
 	end
 )
 
-test(love.filesystem.read("tests/source.nyx"), {}, function(cpu) end)
+test(
+	[[
+fn print(string: str)
+	let len: u8 = 0;
+	let char: u8 = peek(string, len);
+	poke(0x3000 + len, char);
+	while char != 0x00 do
+		len = len + 1;
+		char = peek(string, len);
+		poke(0x3000 + len, char);
+	end
+end
+let hello: str = "Hello, world!";
+print(hello);
+]],
+	{},
+	function(cpu)
+		local str = "Hello, world!"
+
+		for i = 1, #str do
+			local byte = string.byte(str:sub(i, i))
+			if cpu.memory:read(0x3000 + (i - 1)) ~= byte then
+				print("Failed at " .. i)
+				return
+			end
+		end
+		print("Passed!")
+	end
+)
+
+-- test(love.filesystem.read("tests/source.nyx"), {}, function(cpu) end)

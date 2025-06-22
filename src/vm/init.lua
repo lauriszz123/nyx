@@ -1,17 +1,22 @@
 local class = require("middleclass")
-local inspect = require("inspect")
 
 local Memory = require("src.vm.memory")
+local PluginManager = require("src.vm.pluginManager")
 local CPU = require("src.vm.cpu")
-local DeviceManager = require("src.vm.deviceManager")
 
 ---@class VM
 local VM = class("VM")
 
 function VM:initialize()
-	self.memory = Memory()
+	---@type PluginManager
+	self.pluginManager = PluginManager()
+
+	---@type Memory
+	self.memory = Memory(self.pluginManager)
+
 	---@type CPU
 	self.cpu = CPU(self.memory)
+
 	self.cycles = 0
 	self.running = false
 end
@@ -47,19 +52,15 @@ function VM:reset(bytecode, offset)
 	print("Bytecode loaded: " .. #bytecode .. " bytes")
 	print("Reset vector: " .. string.format("0x%04X", self.memory:read(0xFFFC) + (self.memory:read(0xFFFF) * 256)))
 	print()
-	-- self:printState()
 end
 
-function VM:updateDevices()
-	for _, dev in pairs(DeviceManager.devices) do
-		if dev.update then
-			dev:update()
-		end
-	end
+---@return PluginManager
+function VM:getPluginManager()
+	return self.pluginManager
 end
 
 -- Main update: advance CPU and handle interrupts per frame
-function VM:update(dt)
+function VM:cycle()
 	if not self.running then
 		return
 	end
@@ -70,19 +71,6 @@ function VM:update(dt)
 		self.running = false
 		return
 	end
-
-	-- -- update CPU cycles
-	-- local CYCLES_PER_FRAME = 1000
-	-- for i = 1, CYCLES_PER_FRAME do
-	-- 	self.cycles = self.cycles +
-	-- 	if self.cycles >= CYCLES_PER_FRAME then
-	-- 		self.cycles = self.cycles - CYCLES_PER_FRAME
-	-- 		-- service interrupts
-	-- 		-- TODO: implement interrupt checking & handling
-	-- 	end
-	-- 	-- update connected devices
-	-- 	self:updateDevices()
-	-- end
 end
 
 function VM:step()
@@ -90,7 +78,6 @@ function VM:step()
 	if self.cpu.halted then
 		self.running = false
 	end
-	self:updateDevices()
 	return ret
 end
 

@@ -1,15 +1,17 @@
 local class = require("middleclass")
-local DeviceManager = require("src.vm.deviceManager")
 
 ---@class Memory
 local Memory = class("Memory")
 
 -- 64KB memory space
-function Memory:initialize()
+---@param pluginManager PluginManager
+function Memory:initialize(pluginManager)
 	self.ram = {}
 	for i = 0, 0xFFFF do
 		self.ram[i] = 0
 	end
+	---@type PluginManager
+	self.pluginManager = pluginManager
 end
 
 function Memory:reset()
@@ -21,20 +23,16 @@ end
 -- Read a byte from memory or device
 function Memory:read(addr)
 	addr = bit.band(addr, 0xFFFF)
-	local dev_val = DeviceManager:read(addr)
-	if dev_val ~= nil then
-		return dev_val
-	end
+	self.pluginManager:call("write", addr)
 	return self.ram[addr]
 end
 
 -- Write a byte to memory or device
 function Memory:write(addr, value)
 	addr = bit.band(addr, 0xFFFF)
-	if DeviceManager:write(addr, value) then
-		return
-	end
+	value = bit.band(value, 0xFF)
 	self.ram[addr] = bit.band(value, 0xFF)
+	self.pluginManager:call("read", addr, value)
 end
 
 return Memory
