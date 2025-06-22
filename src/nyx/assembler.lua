@@ -70,6 +70,11 @@ function Assembler:setupInstructionSet()
 			addrModes = { "implied" },
 			sizes = { implied = 1 },
 		},
+		["ADDHL"] = {
+			opcode = 0x34,
+			addrModes = { "implied" },
+			sizes = { implied = 1 },
+		},
 		-- Subtract B from A
 		["SUB"] = {
 			opcode = 0x31,

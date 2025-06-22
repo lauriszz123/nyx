@@ -1,9 +1,10 @@
 local AST = require("src.nyx.ast")
 
+---@param self Compiler
 return function(self, node)
 	AST.visit(self, node.value)
-	if self.scope.isLocalScope then
-		local var = self.scope:fetch(node.target.name)
+	local var = self.scope:lookup(node.target.name)
+	if var.isLocal then
 		self:emit("SET", "#" .. var.index)
 	else
 		self:emit("STA (v_" .. node.target.name .. ")")

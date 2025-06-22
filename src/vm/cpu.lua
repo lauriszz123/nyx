@@ -188,8 +188,15 @@ function CPU:step()
 		end
 		if self.A == 0 then
 			self:setFlag(FLAGS.Z)
+		else
+			self:clearFlag()
 		end
 		return 1
+	elseif op == 0x34 then -- ADD HL, A
+		local hl = self:getHL()
+		hl = hl + self.A
+		self:setHL(hl)
+		return 3
 	elseif op == 0x40 then -- INC HL
 		self:setHL(self:getHL() + 1)
 		return 2
@@ -318,7 +325,9 @@ function CPU:step()
 	elseif op == 0x67 then -- GET
 		local index = self:fetch()
 		self.A = self.memory:read(self.BP - index)
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 	elseif op == 0x68 then -- SETN
 		local index = self:fetch()
 		self.memory:write(self.BP + index, self.A)

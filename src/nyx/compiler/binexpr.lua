@@ -49,6 +49,15 @@ return function(self, node, outType, jmplbl)
 			error("Unknown binary operator: " .. op)
 		end
 	elseif outType == "ptr" then
-		error("POINTER REACHED")
+		local op = node.operator
+		AST.visit(self, node.left, outType)
+		AST.visit(self, node.right, outType)
+		if op == "+" then
+			self:emit("ADDHL")
+		else
+			error("POINTER OP: " .. op)
+		end
+	else
+		error("OTHER OP REACHER" .. node.operator)
 	end
 end

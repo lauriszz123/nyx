@@ -440,13 +440,16 @@ end
 
 test(
 	[[
-for i=0, 10 do
-	peek(0x1000 + i, i);
+for i = 0, 10 do
+	poke(0x1000 + i, i);
+	i = i + 1;
 end
 ]],
 	{},
 	function(cpu)
-		printreg("false", 0x30, cpu.memory:read(0x1000))
-		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+		for i = 0, 9 do
+			printreg(0x1000 + i, i, cpu.memory:read(0x1000 + i))
+		end
+		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
 	end
 )

@@ -11,14 +11,16 @@ return function(self, node)
 
 	self:emitComment("Variable Memory Space")
 	for varName, var in pairs(self.scope.variables) do
-		self:emit("v_" .. varName .. ":")
-		if var.type == "ptr" or var.type == "str" then
-			self:emit("DB #00")
-			self:emit("DB #00")
-		elseif var.type == "u8" or var.type == "s8" then
-			self:emit("DB #00")
+		if not var.isLocal then
+			self:emit("v_" .. varName .. ":")
+			if var.type == "ptr" or var.type == "str" then
+				self:emit("DB #00")
+				self:emit("DB #00")
+			elseif var.type == "u8" or var.type == "s8" then
+				self:emit("DB #00")
+			end
+			self:emit("")
 		end
-		self:emit("")
 	end
 
 	self:generateStrings()

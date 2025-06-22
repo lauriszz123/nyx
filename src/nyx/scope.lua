@@ -90,6 +90,28 @@ function Scope:structExists(struct)
 	return false
 end
 
+function Scope:declareLocal(name, varType)
+	if self.variables[name] then
+		error("Variable " .. name .. " already declared in this scope")
+	end
+
+	local var = {
+		type = varType,
+		isArg = false,
+		isLocal = true,
+	}
+
+	if varType == "ptr" or varType == "str" then
+		var.index = self.stackIndex
+		self.stackIndex = self.stackIndex + 2
+	else
+		var.index = self.stackIndex
+		self.stackIndex = self.stackIndex + 1
+	end
+
+	self.variables[name] = var
+end
+
 function Scope:declare(name, varType, isArg)
 	if self.variables[name] then
 		error("Variable " .. name .. " already declared in this scope")
@@ -99,8 +121,6 @@ function Scope:declare(name, varType, isArg)
 		isArg = isArg or false,
 		isLocal = false,
 	}
-
-	print(name, varType, isArg)
 
 	if self.isLocalScope then
 		var.isLocal = true
