@@ -2,13 +2,12 @@ local AST = require("src.nyx.ast")
 
 ---@param self Compiler
 return function(self, node)
-	local lbl = self:newLabel()
 	local forStart = self:newLabel()
 	local forBody = self:newLabel()
 	local forEnd = self:newLabel()
 
 	local name = node.name
-	self.scope:declareLocal(name, "u8")
+	local var = self.scope:declareLocal(name, "u8")
 	AST.visit(self, node.start, "u8")
 	self:emit("PHA")
 
@@ -29,6 +28,15 @@ return function(self, node)
 	for _, stmt in ipairs(node.body) do
 		AST.visit(self, stmt)
 	end
+
+	AST.visit(self, {
+		kind = "Identifier",
+		name = name,
+	})
+	self:emit("LDB #1")
+	self:emit("ADD")
+	self:emit("SET", "#" .. var.index)
+
 	self:emit("JMP", "(" .. forStart:sub(1, #forStart - 1) .. ")")
 
 	self:emit(forEnd)

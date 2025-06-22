@@ -110,6 +110,8 @@ function Scope:declareLocal(name, varType)
 	end
 
 	self.variables[name] = var
+
+	return var
 end
 
 function Scope:declare(name, varType, isArg)

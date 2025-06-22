@@ -442,12 +442,37 @@ test(
 	[[
 for i = 0, 10 do
 	poke(0x1000 + i, i);
-	i = i + 1;
 end
 ]],
 	{},
 	function(cpu)
 		for i = 0, 9 do
+			printreg(0x1000 + i, i, cpu.memory:read(0x1000 + i))
+		end
+		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
+	end
+)
+
+test(
+	[[
+fn test(byte: u8)
+	for i = 0, byte do
+		if i < 5 then
+			poke(0x1000 + i, 0xFF);
+		else
+			poke(0x1000 + i, i);
+		end
+	end
+end
+
+test(10);
+]],
+	{},
+	function(cpu)
+		for i = 0, 4 do
+			printreg(0x1000 + i, 0xFF, cpu.memory:read(0x1000 + i))
+		end
+		for i = 5, 9 do
 			printreg(0x1000 + i, i, cpu.memory:read(0x1000 + i))
 		end
 		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
