@@ -3,7 +3,13 @@ local Scope = require("src.nyx.scope")
 
 ---@param self Compiler
 return function(self, node)
+	local retLbl = self:newLabel()
 	local variant = self.scope:declareFunction(node.name, node.params, node.retType)
+	self.currentFunction = {
+		returnType = node.retType,
+		name = node.name,
+		returnLabel = retLbl,
+	}
 	local fnName = node.name .. "_" .. variant .. ":"
 
 	self:pushCode()
@@ -30,6 +36,7 @@ return function(self, node)
 		AST.visit(self, stmt)
 	end
 
+	self:emit(retLbl)
 	-- return (drops into caller)
 	self:emit("PLP #0") -- pop base pointer
 	self:emit("RET")

@@ -11,6 +11,7 @@ function Compiler:initialize()
 	self.functions = {}
 	self.structs = {}
 	self.strings = {}
+	self.currentFunction = nil
 
 	---@type Scope
 	self.scope = Scope()
