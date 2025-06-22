@@ -1,7 +1,5 @@
 local AST = require("src.nyx.ast")
 
-local function findFnInfo(fn, i, arg) end
-
 ---@param self Compiler
 return function(self, node)
 	local fname = node.callee.name .. "_" .. node.variant
