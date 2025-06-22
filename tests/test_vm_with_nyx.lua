@@ -478,3 +478,20 @@ test(10);
 		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
 	end
 )
+
+test(
+	[[
+let i: u8 = 0;
+while i < 10 do
+	poke(0x1000 + i, i);
+	i = i + 1;
+end
+]],
+	{},
+	function(cpu)
+		for i = 0, 9 do
+			printreg(0x1000 + i, i, cpu.memory:read(0x1000 + i))
+		end
+		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
+	end
+)
