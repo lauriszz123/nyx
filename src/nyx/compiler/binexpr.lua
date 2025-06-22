@@ -28,22 +28,22 @@ return function(self, node, outType, jmplbl)
 			self:emit("CMP")
 			self:emit("JZ", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
 		elseif op == "<" then
-			local lbl = self:newLabel()
-
-			self:emit("SUB")
 			self:emit("CMP")
-			self:emit("JC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
-
-			self:emit(lbl)
+			self:emit("BCC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
 		elseif op == "<=" then
 			local lbl = self:newLabel()
-
 			self:emit("CMP")
 			self:emit("JZ", "(" .. lbl:sub(1, #lbl - 1) .. ")")
-			self:emit("SUB")
+			self:emit("BCC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+			self:emit(lbl)
+		elseif op == ">" then
 			self:emit("CMP")
-			self:emit("JC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
-
+			self:emit("BNC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+		elseif op == ">=" then
+			local lbl = self:newLabel()
+			self:emit("CMP")
+			self:emit("JZ", "(" .. lbl:sub(1, #lbl - 1) .. ")")
+			self:emit("BNC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
 			self:emit(lbl)
 		else
 			error("Unknown binary operator: " .. op)

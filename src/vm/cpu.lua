@@ -41,13 +41,16 @@ function CPU:reset()
 	self.halted = false
 end
 
--- Helper to set/clear flags
-function CPU:flag(mask, cond)
-	if cond then
-		self.SR = bit.bor(self.SR, mask)
-	else
-		self.SR = bit.band(self.SR, bit.bnot(mask))
-	end
+function CPU:setFlag(flag)
+	self.SR = bit.bor(self.SR, flag)
+end
+
+function CPU:clearFlag(flag)
+	self.SR = bit.band(self.SR, bit.bnot(flag))
+end
+
+function CPU:isFlagSet(flag)
+	return bit.band(self.SR, flag) ~= 0
 end
 
 -- Fetch next byte
@@ -86,12 +89,16 @@ function CPU:step()
 	if op == 0x10 then -- LDA #imm8
 		local imm = self:fetch()
 		self.A = imm
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 2
 	elseif op == 0x11 then -- LDB #imm8
 		local imm = self:fetch()
 		self.B = imm
-		self:flag(FLAGS.Z, self.B == 0)
+		if self.B == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 2
 	elseif op == 0x12 then -- LDHL #imm16
 		local lo = self:fetch()
@@ -101,7 +108,9 @@ function CPU:step()
 	elseif op == 0x20 then -- LDA (HL)
 		local addr = self:getHL()
 		self.A = self.memory:read(addr)
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 3
 	elseif op == 0x21 then -- STA (HL)
 		local addr = self:getHL()
@@ -112,7 +121,9 @@ function CPU:step()
 		local hi = self:fetch()
 		local addr = bit.bor(bit.lshift(hi, 8), lo)
 		self.A = self.memory:read(addr)
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 4
 	elseif op == 0x23 then -- STA (#imm16)
 		local lo = self:fetch()
@@ -139,31 +150,45 @@ function CPU:step()
 		return 6
 	elseif op == 0x30 then -- ADD A, B
 		local result = self.A + self.B
-		self:flag(FLAGS.C, result > 0xFF)
+		if result > 0xFF then
+			self:setFlag(FLAGS.C)
+		end
 		self.A = bit.band(result, 0xFF)
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 1
 	elseif op == 0x31 then -- SUB A, B
 		local result = self.A - self.B
-		self:flag(FLAGS.C, result >= 0)
+		if result >= 0 then
+			self:setFlag(FLAGS.C)
+		end
 		self.A = bit.band(result, 0xFF)
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 1
 	elseif op == 0x32 then -- MUL A, B
 		local result = self.A * self.B
-		self:flag(FLAGS.C, result > 0xFF)
+		if result > 0xFF then
+			self:setFlag(FLAGS.C)
+		end
 		self.A = bit.band(result, 0xFF)
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 1
 	elseif op == 0x33 then -- DIV A, B
 		if self.B == 0 then
-			self:flag(FLAGS.C, true) -- Division by zero error
+			self:setFlag(FLAGS.C) -- Division by zero error
 			self.A = 0
 		else
-			self:flag(FLAGS.C, false)
+			self:clearFlag(FLAGS.C)
 			self.A = math.floor(self.A / self.B)
 		end
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 1
 	elseif op == 0x40 then -- INC HL
 		self:setHL(self:getHL() + 1)
@@ -173,9 +198,13 @@ function CPU:step()
 		return 2
 	elseif op == 0x42 then -- INC A
 		local result = self.A + 1
-		self:flag(FLAGS.C, result > 0xFF)
+		if result > 0xFF then
+			self:setFlag(FLAGS.C)
+		end
 		self.A = bit.band(result, 0xFF)
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 1
 	elseif op == 0x43 then -- DEC A
 		local result = self.A - 1
@@ -203,21 +232,28 @@ function CPU:step()
 	elseif op == 0x51 then -- JZ imm16
 		local lo = self:fetch()
 		local hi = self:fetch()
-		if bit.band(self.SR, FLAGS.Z) ~= 0 then
+		if self:isFlagSet(FLAGS.Z) then
 			self.PC = bit.bor(bit.lshift(hi, 8), lo)
 		end
 		return 3
 	elseif op == 0x52 then -- JNZ imm16
 		local lo = self:fetch()
 		local hi = self:fetch()
-		if bit.band(self.SR, FLAGS.Z) == 0 then
+		if not self:isFlagSet(FLAGS.Z) then
 			self.PC = bit.bor(bit.lshift(hi, 8), lo)
 		end
 		return 3
-	elseif op == 0x53 then -- JC imm16
+	elseif op == 0x53 then -- BCC imm16
 		local lo = self:fetch()
 		local hi = self:fetch()
-		if bit.band(self.SR, FLAGS.C) == 0 then
+		if self:isFlagSet(FLAGS.C) then
+			self.PC = bit.bor(bit.lshift(hi, 8), lo)
+		end
+		return 3
+	elseif op == 0x54 then -- BNC imm16
+		local lo = self:fetch()
+		local hi = self:fetch()
+		if not self:isFlagSet(FLAGS.C) then
 			self.PC = bit.bor(bit.lshift(hi, 8), lo)
 		end
 		return 3
@@ -226,14 +262,18 @@ function CPU:step()
 		return 3
 	elseif op == 0x61 then -- PLA
 		self.A = self:pop()
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 3
 	elseif op == 0x62 then -- PHB
 		self:push(self.B)
 		return 3
 	elseif op == 0x63 then -- PLB
 		self.B = self:pop()
-		self:flag(FLAGS.Z, self.B == 0)
+		if self.B == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 		return 3
 	elseif op == 0x64 then -- PHP
 		local ptrType = self:fetch()
@@ -272,7 +312,9 @@ function CPU:step()
 	elseif op == 0x66 then -- GETN
 		local index = self:fetch()
 		self.A = self.memory:read(self.BP + index)
-		self:flag(FLAGS.Z, self.A == 0)
+		if self.A == 0 then
+			self:setFlag(FLAGS.Z)
+		end
 	elseif op == 0x67 then -- GET
 		local index = self:fetch()
 		self.A = self.memory:read(self.BP - index)
@@ -299,24 +341,40 @@ function CPU:step()
 	elseif op == 0x72 then -- CMP A, #imm8
 		local imm = self:fetch()
 		local result = self.A - imm
-		self:flag(FLAGS.C, result >= 0)
-		self:flag(FLAGS.Z, self.A == imm)
-		self:flag(FLAGS.N, bit.band(result, 0x80) ~= 0)
-		self:flag(
-			FLAGS.V,
-			(bit.band(self.A, 0x80) ~= bit.band(imm, 0x80)) and (bit.band(result, 0x80) ~= bit.band(self.A, 0x80))
-		)
+		if result >= 0 then
+			self:setFlag(FLAGS.C)
+		else
+			self:clearFlag(FLAGS.C)
+		end
+		if self.A == self.B then
+			self:setFlag(FLAGS.Z)
+		else
+			self:clearFlag(FLAGS.Z)
+		end
+		if bit.band(result, 0x80) ~= 0 then
+			self:setFlag(FLAGS.N)
+		else
+			self:clearFlag(FLAGS.N)
+		end
 		return 2
 	elseif op == 0x73 then -- CMP A, B
 		local result = self.A - self.B
-		self:flag(FLAGS.C, result >= 0)
-		self:flag(FLAGS.Z, self.A == self.B)
-		self:flag(FLAGS.N, bit.band(result, 0x80) ~= 0)
-		self:flag(
-			FLAGS.V,
-			(bit.band(self.A, 0x80) ~= bit.band(self.B, 0x80)) and (bit.band(result, 0x80) ~= bit.band(self.A, 0x80))
-		)
-		return 1
+		if result >= 0 then
+			self:setFlag(FLAGS.C)
+		else
+			self:clearFlag(FLAGS.C)
+		end
+		if self.A == self.B then
+			self:setFlag(FLAGS.Z)
+		else
+			self:clearFlag(FLAGS.Z)
+		end
+		if bit.band(result, 0x80) ~= 0 then
+			self:setFlag(FLAGS.N)
+		else
+			self:clearFlag(FLAGS.N)
+		end
+		return 2
 	elseif op == 0x74 then -- AND A, B
 		local result = bit.band(self.A, self.B)
 		self.A = result

@@ -142,9 +142,13 @@ function Assembler:setupInstructionSet()
 			addrModes = { "direct" },
 			sizes = { direct = 3 },
 		},
-		-- Jump if not zero
-		["JC"] = {
+		["BCC"] = {
 			opcode = 0x53,
+			addrModes = { "direct" },
+			sizes = { direct = 3 },
+		},
+		["BNC"] = {
+			opcode = 0x54,
 			addrModes = { "direct" },
 			sizes = { direct = 3 },
 		},
