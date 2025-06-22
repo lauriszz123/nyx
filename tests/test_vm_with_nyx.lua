@@ -437,3 +437,16 @@ end
 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
 	end
 )
+
+test(
+	[[
+for i=0, 10 do
+	peek(0x1000 + i, i);
+end
+]],
+	{},
+	function(cpu)
+		printreg("false", 0x30, cpu.memory:read(0x1000))
+		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
+	end
+)
