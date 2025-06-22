@@ -6,6 +6,9 @@ local function findFnInfo(fn, i, arg) end
 return function(self, node)
 	local fname = node.callee.name .. "_" .. node.variant
 	local fn = self.scope:getFunction(node.callee.name, node.variant)
+	if not fn then
+		error(fname)
+	end
 
 	-- push args in order
 	for i, arg in ipairs(node.arguments) do

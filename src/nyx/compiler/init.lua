@@ -25,8 +25,41 @@ function Compiler:initialize()
 			self:emit("")
 			self:emitComment("Store value at the pointer")
 			self:emit("PLA")
-			self:emit("PLP", "#" .. 0x1)
+			self:emit("PLP", "#1")
 			self:emit("STA", "(HL)")
+			self:emit("")
+		end
+	)
+
+	self.scope:declareFunction(
+		"peek",
+		{
+			{ name = "pointer", type = "ptr" },
+		},
+		"u8",
+		function(self)
+			self:emit("")
+			self:emitComment("Return value at pointer")
+			self:emit("PLP", "#1")
+			self:emit("LDA", "(HL)")
+			self:emit("")
+		end
+	)
+
+	self.scope:declareFunction(
+		"peek",
+		{
+			{ name = "pointer", type = "str" },
+			{ name = "offset", type = "u8" },
+		},
+		"u8",
+		function(self)
+			self:emit("")
+			self:emitComment("Return value at pointer + offset")
+			self:emit("PLA")
+			self:emit("PLP", "#1")
+			self:emit("ADDHL")
+			self:emit("LDA", "(HL)")
 			self:emit("")
 		end
 	)

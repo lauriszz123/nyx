@@ -495,3 +495,5 @@ end
 		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
 	end
 )
+
+test(love.filesystem.read("tests/source.nyx"), {}, function(cpu) end)
