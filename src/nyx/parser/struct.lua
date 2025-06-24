@@ -1,3 +1,4 @@
+---@class StructParser: BaseParser
 local StructParser = {}
 
 function StructParser:parse()

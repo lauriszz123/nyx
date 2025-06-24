@@ -29,7 +29,7 @@ end
 
 function Scope:getGlobalScope()
 	local scope = self
-	while scope ~= nil do
+	while scope do
 		if scope.parent == nil then
 			return scope
 		end
@@ -74,10 +74,27 @@ end
 
 function Scope:declareStruct(name, fields)
 	local global = self:getGlobalScope()
-	global.variables[name] = {
+	local struct = {
 		isStruct = true,
 		fields = fields,
 	}
+
+	local size = 0
+	for _, field in ipairs(fields) do
+		field.index = size
+		if field.type == "u8" or field.type == "s8" then
+			size = size + 1
+		elseif field.type == "ptr" or field.type == "str" then
+			size = size + 2
+		else
+			error("WTF? " .. field.type)
+		end
+		fields[field.name] = field
+	end
+
+	struct.size = size
+
+	global.variables[name] = struct
 end
 
 function Scope:structExists(struct)

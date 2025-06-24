@@ -638,4 +638,18 @@ strlen("HELLO");
 	end
 )
 
+test(
+	[[
+struct Test
+	test: u8;
+end
+
+Test.test = 10;
+]],
+	{},
+	function(cpu)
+		printreg("12", 10, cpu.memory:read(12))
+	end
+)
+
 -- test(love.filesystem.read("tests/source.nyx"), {}, function(cpu) end)

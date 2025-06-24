@@ -672,6 +672,7 @@ function Assembler:processLabel(name, line, col)
 		line = line,
 		col = col,
 	}
+	print("LABEL", self.labels[name].address)
 end
 
 -- Emit a byte to the output bytecode
