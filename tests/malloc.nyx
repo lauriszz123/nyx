@@ -1,0 +1,63 @@
+const HEAP_SIZE: u8 = 128;
+const HEAP_START: ptr = 0xF000;
+
+struct Block {
+  start: ptr,
+  size: u8,
+  used: bool
+}
+
+let heap: Block[HEAP_SIZE] = {
+  Block {
+    start: HEAP_START,
+    size: HEAP_SIZE,
+    used: false
+  }
+};
+
+fn blocklen(heap: Block[]): u8
+  while i < HEAP_SIZE do
+  end
+end
+
+fn malloc(size: u8): ptr
+  let i: u8 = 0;
+  while i < heap.size do
+    let block: Block = heap[i];
+
+    if block.used == false and block.size >= size then
+      let pointer: ptr = block.start;
+
+      if block.size > size then
+        let new_block: Block = Block {
+          start: block.start + size,
+          size: block.size - size,
+          used: false
+        }
+
+        heap[i + 1] = new_block;
+      end
+
+      block.size = size;
+      block.used = true; 
+      return ptr;
+    end
+  end
+
+  return 0;
+end
+
+fn free(pointer: ptr)
+  let i: u8 = 0;
+  let blocklen = len(blocks);
+  while i < blocklen do
+    let block: Block = heap[i];
+    if block.start == pointer then
+      block.used = false;
+
+      if i+1 < len(blocks) and blocks[i+1].used == false then
+        
+      end
+    end
+  end
+end
