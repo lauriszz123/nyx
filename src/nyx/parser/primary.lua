@@ -1,5 +1,6 @@
 local ExpressionParser
 
+---@class PrimaryParser: BaseParser
 local PrimaryParser = {}
 
 local function getExpressionParser()
@@ -62,6 +63,22 @@ function PrimaryParser:parse()
 		return self:node("GetAddress", {
 			value = self:expect("IDENTIFIER"),
 			line = t.line,
+		})
+	elseif t.type == "CURLY" and t.value == "{" then
+		self:advance()
+		local expressions = {}
+
+		while self.current and (self.current.type ~= "CURLY" and self.current.value ~= "}") do
+			local expr = getExpressionParser().parse(self)
+			if self.current.value ~= "}" then
+				self:expect("COMMA")
+			end
+			table.insert(expressions, expr)
+		end
+		self:expect("CURLY", "}")
+
+		return self:node("ArrayBlock", {
+			expressions = expressions,
 		})
 	else
 		self:addError("Unexpected token in expression: " .. t.type .. ":" .. t.value, t)

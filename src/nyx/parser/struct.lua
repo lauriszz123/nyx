@@ -5,11 +5,14 @@ function StructParser:parse()
 	self:expect("STRUCT")
 	local name = self:expect("IDENTIFIER")
 	local body = {}
-	while self.current and self.current.type ~= "END" do
+	self:expect("CURLY", "{")
+	while self.current and (self.current.type ~= "CURLY" and self.current.value ~= "}") do
 		local varName = self:expect("IDENTIFIER")
 		self:expect("COLON")
 		local varType = self:expect("IDENTIFIER")
-		self:expect("SEMICOLON")
+		if self.current.value ~= "}" then
+			self:expect("COMMA")
+		end
 		table.insert(
 			body,
 			self:node("StructField", {
@@ -19,7 +22,7 @@ function StructParser:parse()
 			})
 		)
 	end
-	self:expect("END")
+	self:expect("CURLY", "}")
 	return self:node("StructDeclaration", {
 		name = name.value,
 		body = body,

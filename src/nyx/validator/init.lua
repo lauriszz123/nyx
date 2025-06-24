@@ -53,13 +53,14 @@ end
 
 function Validator:printResults()
 	if #self.errors > 0 then
-		print("=== VALIDATOR ERRORS ===")
+		print("=== VALIDATOR ERROR ===")
 		for _, err in ipairs(self.errors) do
 			print(string.format("Error at line %d: %s", err.line, err.message))
 		end
 	end
 
 	if #self.errors == 0 then
+		print("=== VALIDATOR ===")
 		print("No issues found!")
 	end
 end

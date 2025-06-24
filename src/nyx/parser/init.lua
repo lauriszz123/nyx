@@ -90,11 +90,12 @@ end
 
 function Parser:printResults()
 	if self:hasErrors() then
-		print("=== PARSER ERRORS ===")
+		print("=== PARSER ERROR ===")
 		for _, err in ipairs(self.errors) do
 			print(string.format("Error at line %d: %s", err.line, err.message))
 		end
 	else
+		print("=== PARSER ===")
 		print("No issues found!")
 	end
 end
