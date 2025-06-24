@@ -652,4 +652,21 @@ Test.test = 10;
 	end
 )
 
+test(
+	[[
+struct Test
+	test: u8;
+end
+
+Test.test = 10;
+
+poke(0x1000, Test.test);
+]],
+	{},
+	function(cpu)
+		printreg("29", 10, cpu.memory:read(29))
+		printreg("0x1000", 10, cpu.memory:read(0x1000))
+	end
+)
+
 -- test(love.filesystem.read("tests/source.nyx"), {}, function(cpu) end)
