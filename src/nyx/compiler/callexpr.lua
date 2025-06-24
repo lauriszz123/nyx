@@ -2,6 +2,7 @@ local AST = require("src.nyx.ast")
 
 ---@param self Compiler
 return function(self, node)
+	self:emitComment("Calling function " .. node.callee.name)
 	local fname = node.callee.name .. "_" .. node.variant
 	local fn = self.scope:getFunction(node.callee.name, node.variant)
 	if not fn then
@@ -37,4 +38,5 @@ return function(self, node)
 			end
 		end
 	end
+	self:emit("")
 end

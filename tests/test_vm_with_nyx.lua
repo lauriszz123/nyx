@@ -540,4 +540,102 @@ test(0xEF, 0x1000, 0xBE);
 	end
 )
 
+test(
+	[[
+fn strlen(): u8
+	let len: u8 = 0;
+	let pow: u8 = 0;
+
+	while len < 5 do
+		poke(0x1000 + len, len);
+
+		pow = len * 2;
+		poke(0x2000 + len, pow);
+
+		len = len + 1;
+	end
+
+	return len;
+end
+
+strlen();
+]],
+	{},
+	function(cpu)
+		for i = 1, 5 do
+			local got = cpu.memory:read(0x1000 + (i - 1))
+			if i - 1 ~= got then
+				print(i .. " -> ", "FAILED!")
+				print("Expected:", i)
+				print("Got:", got)
+				return
+			else
+				print(i .. " -> ", "PASSED!")
+			end
+
+			got = cpu.memory:read(0x2000 + (i - 1))
+			if (i - 1) * 2 ~= got then
+				print(i .. " -> ", "FAILED!")
+				print("Expected:", i)
+				print("Got:", got)
+				return
+			else
+				print(i .. " -> ", "PASSED!")
+			end
+		end
+	end
+)
+
+test(
+	[[
+fn peek()
+	let hello: str = "HELLO";
+	poke(0x1000, peek(hello, 1));
+end
+
+peek();
+]],
+	{},
+	function(cpu)
+		local hello = "HELLO"
+		local char = 1
+		printreg("0x1000", hello:sub(char + 1, char + 1):byte(), cpu.memory:read(0x1000))
+	end
+)
+
+test(
+	[[
+fn strlen(string: str): u8
+	let len: u8 = 0;
+	let currChar: u8 = peek(string, len);
+
+	while currChar != 0x00 do
+		poke(0x1000 + len, currChar);
+		len = len + 1;
+		currChar = peek(string, len);
+	end
+
+	return len;
+end
+
+strlen("HELLO");
+]],
+	{ A = 5 },
+	function(cpu)
+		local hello = "HELLO"
+		for i = 1, #hello do
+			local chr = hello:sub(i, i)
+			local got = cpu.memory:read(0x1000 + (i - 1))
+			if chr:byte() ~= got then
+				print(chr .. " -> ", "FAILED!")
+				print("Expected:", chr)
+				print("Got:", got)
+				return
+			else
+				print(chr .. " -> ", "PASSED!")
+			end
+		end
+	end
+)
+
 -- test(love.filesystem.read("tests/source.nyx"), {}, function(cpu) end)

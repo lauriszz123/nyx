@@ -28,8 +28,11 @@ return function(self, node)
 		self.scope:declare(param.name, param.type)
 	end
 
-	for _, stmt in ipairs(node.body) do
+	for i, stmt in ipairs(node.body) do
 		AST.visit(self, stmt)
+		if stmt.kind == "ReturnStatement" and i == #node.body then
+			stmt.last = true
+		end
 	end
 
 	self.scope = oldScope

@@ -1,6 +1,8 @@
 local AST = require("src.nyx.ast")
 
+---@param self Compiler
 return function(self, node)
+	self:emitComment("Declaring variable " .. node.name)
 	AST.visit(self, node.value, node.varType)
 	self.scope:declare(node.name, node.varType)
 	if self.scope.isLocalScope then
@@ -18,4 +20,5 @@ return function(self, node)
 			error("WTF IS THIS TYPE")
 		end
 	end
+	self:emit("")
 end

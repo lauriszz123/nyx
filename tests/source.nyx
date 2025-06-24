@@ -17,10 +17,12 @@ fn strlen(string: str): u8
 end
 
 fn print(string: str)
-	for i=0, 10 do
-		writeChar(0x47);
+let len: u8 = strlen(string);
+	for i=0, len do
+		writeChar(peek(string, i));
 	end
 	writeChar(0x0A);
 end
 
-strlen("Hello, world!");
+print("Hello, world!");
+print("Written in my language and my CPU!");

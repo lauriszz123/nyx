@@ -1,5 +1,0 @@
-fn writeChar(byte: u8)
-	poke(0x3000, byte);
-end
-
-writeChar(0x47);

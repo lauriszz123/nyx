@@ -16,9 +16,10 @@ end
 
 function love.load()
 	---@type SRC
-	-- vm = VM(love.filesystem.read("tests/source.nyx"))
-	-- vm:getPluginManager():register(require("src.plugins.termScreen"))
-	require("tests.test_vm_with_nyx")
+	vm = VM(love.filesystem.read("tests/source.nyx"))
+	vm:getPluginManager():register(require("src.plugins.termScreen"))
+	-- require("tests.test_vm_with_nyx")
+	-- love.event.quit()
 end
 
 function love.update(dt)
@@ -32,6 +33,11 @@ end
 
 function love.draw()
 	if vm then
+		if vm.vm.running then
+			love.graphics.clear({ 0.1, 0.1, 0.1 })
+		else
+			love.graphics.clear({ 0, 0, 0 })
+		end
 		if vm:getPluginManager() then
 			vm:getPluginManager():call("draw")
 		end

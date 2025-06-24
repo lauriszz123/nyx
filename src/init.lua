@@ -38,7 +38,7 @@ end
 
 function T:update(dt)
 	if self.vm then
-		self.vm:cycle()
+		self.vm:cycle(dt)
 	end
 end
 

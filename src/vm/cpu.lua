@@ -315,25 +315,29 @@ function CPU:step()
 			self.SP = bit.bor(bit.lshift(hi, 8), lo)
 		end
 
-		return 3
+		return 5
 	elseif op == 0x66 then -- GETN
 		local index = self:fetch()
 		self.A = self.memory:read(self.BP + index)
 		if self.A == 0 then
 			self:setFlag(FLAGS.Z)
 		end
+		return 4
 	elseif op == 0x67 then -- GET
 		local index = self:fetch()
 		self.A = self.memory:read(self.BP - index)
 		if self.A == 0 then
 			self:setFlag(FLAGS.Z)
 		end
+		return 4
 	elseif op == 0x68 then -- SETN
 		local index = self:fetch()
 		self.memory:write(self.BP + index, self.A)
+		return 4
 	elseif op == 0x69 then -- SET
 		local index = self:fetch()
 		self.memory:write(self.BP - index, self.A)
+		return 4
 	elseif op == 0x70 then -- CALL imm16
 		local lo = self:fetch()
 		local hi = self:fetch()
@@ -466,20 +470,24 @@ function CPU:step()
 		return 7
 	elseif op == 0xA0 then -- GPTN
 		local index = self.BP + self:fetch()
-		self.L = self.memory:read(index)
-		self.H = self.memory:read(index + 1)
+		self.H = self.memory:read(index)
+		self.L = self.memory:read(index - 1)
+		return 8
 	elseif op == 0xA1 then -- GPT
 		local index = self.BP - self:fetch()
-		self.L = self.memory:read(index + 1)
 		self.H = self.memory:read(index)
+		self.L = self.memory:read(index - 1)
+		return 8
 	elseif op == 0xA2 then -- SPTN
 		local index = self.BP + self:fetch()
 		self.memory:write(index, self.H)
-		self.memory:write(index + 1, self.L)
+		self.memory:write(index - 1, self.L)
+		return 8
 	elseif op == 0xA3 then -- SPT
 		local index = self.BP - self:fetch()
 		self.memory:write(index, self.H)
-		self.memory:write(index + 1, self.L)
+		self.memory:write(index - 1, self.L)
+		return 8
 	elseif op == 0xFF then -- HALT
 		self.halted = true
 		return 0

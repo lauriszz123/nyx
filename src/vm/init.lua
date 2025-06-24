@@ -17,7 +17,9 @@ function VM:initialize()
 	---@type CPU
 	self.cpu = CPU(self.memory)
 
-	self.cycles = 0
+	self.accCycles = 0
+	self.targetFreq = 1000000
+	self.lastTime = love.timer.getTime()
 	self.running = false
 end
 
@@ -60,16 +62,22 @@ function VM:getPluginManager()
 end
 
 -- Main update: advance CPU and handle interrupts per frame
-function VM:cycle()
+function VM:cycle(dt)
 	if not self.running then
 		return
 	end
 
-	self.cpu:step()
+	local targetCycles = dt * self.targetFreq
+	self.accCycles = self.accCycles + targetCycles
 
-	if self.cpu.halted then
-		self.running = false
-		return
+	while self.accCycles >= 1 do
+		local cycles = self.cpu:step()
+		self.accCycles = self.accCycles - cycles
+
+		if self.cpu.halted then
+			self.running = false
+			return
+		end
 	end
 end
 

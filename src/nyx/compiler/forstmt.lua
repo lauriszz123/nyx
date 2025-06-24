@@ -40,4 +40,6 @@ return function(self, node)
 	self:emit("JMP", "(" .. forStart:sub(1, #forStart - 1) .. ")")
 
 	self:emit(forEnd)
+	self.scope:deallocLocal(name)
+	self:emit("PLB")
 end

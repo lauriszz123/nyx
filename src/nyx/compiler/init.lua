@@ -23,12 +23,10 @@ function Compiler:initialize()
 		},
 		"nil",
 		function(self)
-			self:emit("")
 			self:emitComment("Store value at the pointer")
 			self:emit("PLA")
 			self:emit("PLP", "#1")
 			self:emit("STA", "(HL)")
-			self:emit("")
 		end
 	)
 
@@ -39,11 +37,9 @@ function Compiler:initialize()
 		},
 		"u8",
 		function(self)
-			self:emit("")
 			self:emitComment("Return value at pointer")
 			self:emit("PLP", "#1")
 			self:emit("LDA", "(HL)")
-			self:emit("")
 		end
 	)
 
@@ -54,14 +50,12 @@ function Compiler:initialize()
 			{ name = "offset", type = "u8" },
 		},
 		"u8",
-		function(self)
-			self:emit("")
-			self:emitComment("Return value at pointer + offset")
-			self:emit("PLA")
-			self:emit("PLP", "#1")
-			self:emit("ADDHL")
-			self:emit("LDA", "(HL)")
-			self:emit("")
+		function(c)
+			c:emitComment("Return value at string pointer + offset")
+			c:emit("PLA")
+			c:emit("PLP", "#1")
+			c:emit("ADDHL")
+			c:emit("LDA", "(HL)")
 		end
 	)
 
@@ -126,8 +120,8 @@ function Compiler:generateStrings()
 				local chr = str.value:sub(i, i)
 				self:emit("DB", "#" .. string.byte(chr))
 			end
+			self:emit("DB", "#" .. 0)
 		end
-		self:emit("DB", "#" .. 0)
 	end
 end
 

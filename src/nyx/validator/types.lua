@@ -31,18 +31,14 @@ function Types.getArithmeticResultType(leftType, rightType, op)
 		return nil
 	end
 
-	if leftType == "ptr" or rightType == "ptr" then
-		if op == "+" or op == "-" then
-			if leftType == "ptr" and Types.isNumericType(rightType) then
-				return "ptr"
-			elseif rightType == "ptr" and Types.isNumericType(leftType) then
-				return "ptr"
-			elseif leftType == "ptr" and rightType == "ptr" and op == "-" then
-				return "u8"
+	if leftType == "ptr" then
+		if op == "+" then
+			if not rightType == "u8" then
+				return nil
 			end
-
-			return nil
+			return "ptr"
 		end
+		return nil
 	end
 
 	if leftType == "s8" or rightType == "s8" then

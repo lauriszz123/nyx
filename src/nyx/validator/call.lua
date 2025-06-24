@@ -32,6 +32,11 @@ return function(self, node)
 	for j, info in ipairs(func.info) do
 		local funcArgs = {}
 
+		if #info.params == 0 and #node.arguments == 0 then
+			node.variant = j
+			return info.returnType or "any"
+		end
+
 		for i, param in ipairs(info.params) do
 			local arg = node.arguments[i]
 			if arg then

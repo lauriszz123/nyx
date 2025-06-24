@@ -114,6 +114,23 @@ function Scope:declareLocal(name, varType)
 	return var
 end
 
+function Scope:deallocLocal(name)
+	if not self.variables[name] then
+		error("Variable " .. name .. " not in this scope")
+	end
+
+	local var = self:lookup(name)
+	self.variables[name] = nil
+
+	if var.type == "ptr" or var.type == "str" then
+		self.stackIndex = self.stackIndex - 2
+	else
+		self.stackIndex = self.stackIndex - 1
+	end
+
+	return var
+end
+
 function Scope:declare(name, varType, isArg)
 	if self.variables[name] then
 		error("Variable " .. name .. " already declared in this scope")
@@ -147,6 +164,13 @@ function Scope:declare(name, varType, isArg)
 	end
 
 	self.variables[name] = var
+end
+
+---@param compiler Compiler
+function Scope:generateStackCleanup(compiler)
+	for _ = 0, self.stackIndex - 1 do
+		compiler:emit("PLB")
+	end
 end
 
 return Scope

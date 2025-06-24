@@ -38,6 +38,7 @@ return function(self, node)
 	end
 
 	self:emit(retLbl)
+	self.scope:generateStackCleanup(self)
 	-- return (drops into caller)
 	self:emit("PLP #0") -- pop base pointer
 	self:emit("RET")

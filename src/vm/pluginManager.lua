@@ -1,5 +1,8 @@
 local class = require("middleclass")
 
+---@class Plugin
+---@field initialize fun(...)
+
 ---@class PluginManager
 local PluginManager = class("PluginManager")
 
@@ -9,6 +12,9 @@ end
 
 function PluginManager:register(device)
 	table.insert(self.plugins, device)
+	if device.initialize then
+		device:initialize()
+	end
 end
 
 function PluginManager:call(fn, ...)

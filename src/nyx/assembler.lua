@@ -213,22 +213,22 @@ function Assembler:setupInstructionSet()
 		},
 		-- Pointer stack stuff
 		["GPTN"] = {
-			opcode = 0x66,
+			opcode = 0xA0,
 			addrModes = { "immediate" },
 			sizes = { immediate = 2 },
 		},
 		["GPT"] = {
-			opcode = 0x67,
+			opcode = 0xA1,
 			addrModes = { "immediate" },
 			sizes = { immediate = 2 },
 		},
 		["SPTN"] = {
-			opcode = 0x68,
+			opcode = 0xA2,
 			addrModes = { "immediate" },
 			sizes = { immediate = 2 },
 		},
 		["SPT"] = {
-			opcode = 0x69,
+			opcode = 0xA3,
 			addrModes = { "immediate" },
 			sizes = { immediate = 2 },
 		},
