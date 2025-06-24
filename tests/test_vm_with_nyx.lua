@@ -498,31 +498,45 @@ end
 
 test(
 	[[
-fn print(string: str)
-	let len: u8 = 0;
-	let char: u8 = peek(string, len);
-	poke(0x3000 + len, char);
-	while char != 0x00 do
-		len = len + 1;
-		char = peek(string, len);
-		poke(0x3000 + len, char);
-	end
+fn test(byte: u8, pointer: ptr)
+	poke(pointer, byte);
 end
-let hello: str = "Hello, world!";
-print(hello);
+
+test(0xBE, 0x1000);
 ]],
 	{},
 	function(cpu)
-		local str = "Hello, world!"
+		printreg(0x1000, 0xBE, cpu.memory:read(0x1000))
+	end
+)
 
-		for i = 1, #str do
-			local byte = string.byte(str:sub(i, i))
-			if cpu.memory:read(0x3000 + (i - 1)) ~= byte then
-				print("Failed at " .. i)
-				return
-			end
-		end
-		print("Passed!")
+test(
+	[[
+fn test(pointer: ptr, byte: u8)
+	poke(pointer, byte);
+end
+
+test(0x1000, 0xBE);
+]],
+	{},
+	function(cpu)
+		printreg(0x1000, 0xBE, cpu.memory:read(0x1000))
+	end
+)
+
+test(
+	[[
+fn test(byte2: u8, pointer: ptr, byte: u8)
+	poke(pointer, byte);
+	poke(pointer + 1, byte2);
+end
+
+test(0xEF, 0x1000, 0xBE);
+]],
+	{},
+	function(cpu)
+		printreg(0x1000, 0xBE, cpu.memory:read(0x1000))
+		printreg(0x1001, 0xEF, cpu.memory:read(0x1001))
 	end
 )
 

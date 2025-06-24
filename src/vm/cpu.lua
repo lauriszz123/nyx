@@ -470,16 +470,16 @@ function CPU:step()
 		self.H = self.memory:read(index + 1)
 	elseif op == 0xA1 then -- GPT
 		local index = self.BP - self:fetch()
-		self.L = self.memory:read(index)
-		self.H = self.memory:read(index + 1)
+		self.L = self.memory:read(index + 1)
+		self.H = self.memory:read(index)
 	elseif op == 0xA2 then -- SPTN
 		local index = self.BP + self:fetch()
-		self.memory:write(index, self.L)
-		self.memory:write(index + 1, self.H)
+		self.memory:write(index, self.H)
+		self.memory:write(index + 1, self.L)
 	elseif op == 0xA3 then -- SPT
 		local index = self.BP - self:fetch()
-		self.memory:write(index, self.L)
-		self.memory:write(index + 1, self.H)
+		self.memory:write(index, self.H)
+		self.memory:write(index + 1, self.L)
 	elseif op == 0xFF then -- HALT
 		self.halted = true
 		return 0

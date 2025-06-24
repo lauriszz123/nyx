@@ -8,8 +8,8 @@ function Scope:initialize(parent)
 	self.variables = {}
 	self.isLocalScope = false
 	self.functions = {}
-	self.stackPtr = 1
-	self.paramIndex = 4
+	self.stackPtr = 0
+	self.paramIndex = 5
 	self.stackIndex = 0
 end
 
@@ -129,7 +129,7 @@ function Scope:declare(name, varType, isArg)
 
 		if var.isArg then
 			if varType == "ptr" or varType == "str" then
-				var.index = self.paramIndex
+				var.index = self.paramIndex + 1
 				self.paramIndex = self.paramIndex + 2
 			else
 				var.index = self.paramIndex

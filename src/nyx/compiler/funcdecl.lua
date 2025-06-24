@@ -27,7 +27,8 @@ return function(self, node)
 	self.scope.isLocalScope = true
 
 	-- parameters
-	for _, param in ipairs(node.params) do
+	for i = #node.params, 1, -1 do
+		local param = node.params[i]
 		self.scope:declare(param.name, param.type, true)
 	end
 

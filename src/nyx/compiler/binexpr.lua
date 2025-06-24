@@ -51,7 +51,7 @@ return function(self, node, outType, jmplbl)
 	elseif outType == "ptr" then
 		local op = node.operator
 		AST.visit(self, node.left, outType)
-		AST.visit(self, node.right, outType)
+		AST.visit(self, node.right, "u8")
 		if op == "+" then
 			self:emit("ADDHL")
 		else
