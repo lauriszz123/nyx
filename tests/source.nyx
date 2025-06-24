@@ -17,7 +17,7 @@ fn strlen(string: str): u8
 end
 
 fn print(string: str)
-let len: u8 = strlen(string);
+	let len: u8 = strlen(string);
 	for i=0, len do
 		writeChar(peek(string, i));
 	end
