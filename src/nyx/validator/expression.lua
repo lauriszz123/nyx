@@ -46,6 +46,8 @@ function ExpressionValidator.getExpressionType(self, node, against)
 		return self.expression.checkUnaryExpression(self, node)
 	elseif node.kind == "FieldAccess" then
 		return self.expression.checkFieldAccess(self, node)
+	elseif node.kind == "ArrayBlock" then
+		return self.expression.checkArrayBlock(self, node, against)
 	else
 		return "any"
 	end
@@ -54,6 +56,7 @@ end
 ExpressionValidator.checkBinaryExpression = require("src.nyx.validator.binary")
 ExpressionValidator.checkCallExpression = require("src.nyx.validator.call")
 ExpressionValidator.checkUnaryExpression = require("src.nyx.validator.unary")
+ExpressionValidator.checkArrayBlock = require("src.nyx.validator.arrayblock")
 ExpressionValidator.checkFieldAccess = require("src.nyx.validator.fieldaccess")
 
 return ExpressionValidator

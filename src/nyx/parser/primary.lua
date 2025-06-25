@@ -17,24 +17,46 @@ function PrimaryParser:parse()
 	end
 	if t.type == "IDENTIFIER" then
 		self:advance()
-		local expr = self:node("Identifier", {
-			name = t.value,
-			line = t.line,
-		})
-
-		-- SUPPORT: chain of dot accesses
-		while self.current and self.current.type == "DOT" do
+		if self.current.type == "CURLY" and self.current.value == "{" then
 			self:advance()
-			local field = self:expect("IDENTIFIER")
-
-			expr = self:node("FieldAccess", {
-				object = expr,
-				field = field.value,
-				line = field.line,
+			local body = {}
+			while self.current and (self.current.type ~= "CURLY" and self.current.value ~= "}") do
+				local name = self:expect("IDENTIFIER").value
+				self:expect("COLON")
+				local expr = getExpressionParser().parse(self)
+				if self.current.value ~= "}" then
+					self:expect("COMMA")
+				end
+				table.insert(body, {
+					name = name,
+					value = expr,
+				})
+			end
+			self:expect("CURLY", "}")
+			return self:node("StructBody", {
+				struct = t.value,
+				body = body,
 			})
-		end
+		else
+			local expr = self:node("Identifier", {
+				name = t.value,
+				line = t.line,
+			})
 
-		return expr
+			-- SUPPORT: chain of dot accesses
+			while self.current and self.current.type == "DOT" do
+				self:advance()
+				local field = self:expect("IDENTIFIER")
+
+				expr = self:node("FieldAccess", {
+					object = expr,
+					field = field.value,
+					line = field.line,
+				})
+			end
+
+			return expr
+		end
 	elseif t.type == "NUMBER" then
 		self:advance()
 		return self:node("NumberLiteral", {

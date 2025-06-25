@@ -398,6 +398,39 @@ checkCodeSnippet(
 ]]
 )
 
+checkCodeSnippet(
+	"ARRAY DECLARATION AND ASSIGNMENT BAD",
+	[[
+  let arr: u8[5] = {
+  	1, 2, 3, 4, 0x1000
+  };
+]],
+	true
+)
+
+checkCodeSnippet(
+	"ARRAY DECLARATION AND ASSIGNMENT BAD 2",
+	[[
+  let arr: u8[5] = {
+  	1, 2, 0x1000, 4, 5
+  };
+]],
+	true
+)
+
+checkCodeSnippet(
+	"STRUCT DECLARATION AND ASSIGNMENT",
+	[[
+struct Test {
+	test: u8
+}
+
+let test: Test = Test {
+	test: 10
+};
+]]
+)
+
 -- checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))
 
 printResults()
