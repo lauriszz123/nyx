@@ -7,7 +7,7 @@ return function(self, node)
 
 		if not node.last then
 			local lbl = self.currentFunction.returnLabel
-			self:emit("JMP", "(" .. lbl:sub(1, #lbl - 1) .. ")")
+			self:emit("jump", lbl:sub(1, #lbl - 1))
 		end
 	end
 end

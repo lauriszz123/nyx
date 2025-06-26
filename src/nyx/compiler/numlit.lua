@@ -1,8 +1,8 @@
 return function(self, node, outType)
 	if outType == "u8" or outType == "s8" then
-		self:emit("LDA", "#" .. node.value)
+		self:emit("const_u8", node.value)
 	elseif outType == "ptr" then
-		self:emit("LDHL", "#" .. node.value)
+		self:emit("const_u16", node.value)
 	else
 		print("Unsupported outType on numlit:", outType)
 		error()

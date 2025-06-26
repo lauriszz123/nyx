@@ -14,11 +14,7 @@ return function(self, node)
 
 	self:pushCode()
 	self:emitComment("Declaring function: " .. fnName:sub(1, #fnName - 1))
-	self:emit(fnName)
-	self:emit("")
-	self:emitComment("Setting up function header")
-	self:emit("PHP #0")
-	self:emit("SBP")
+	self:emit("function", fnName, #node.params)
 	self:emit("")
 
 	-- create a new scope for the function
@@ -30,6 +26,7 @@ return function(self, node)
 	for i = #node.params, 1, -1 do
 		local param = node.params[i]
 		self.scope:declare(param.name, param.type, true)
+		self:emit("define_arg", param.name, param.type)
 	end
 
 	-- compile body
@@ -39,9 +36,7 @@ return function(self, node)
 
 	self:emit(retLbl)
 	self.scope:generateStackCleanup(self)
-	-- return (drops into caller)
-	self:emit("PLP #0") -- pop base pointer
-	self:emit("RET")
+	self:emit("return")
 
 	-- restore scope
 	self.scope = self.scope.parent

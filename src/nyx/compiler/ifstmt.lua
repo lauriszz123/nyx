@@ -22,7 +22,7 @@ return function(self, node)
 	end
 
 	if node.body_false then
-		self:emit("JMP", "(" .. ifend:sub(1, #ifend - 1) .. ")")
+		self:emit("jump", ifend:sub(1, #ifend - 1))
 		self:emit("")
 		self:emitComment("Else block")
 		self:emit(ifelse)

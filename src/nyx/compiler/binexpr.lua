@@ -4,13 +4,8 @@ local AST = require("src.nyx.ast")
 return function(self, node, outType, jmplbl)
 	outType = outType or "u8"
 	if outType == "u8" or outType == "s8" then
-		-- compile right into A, push
-		AST.visit(self, node.right, outType)
-		self:emit("PHA")
-		-- compile left into A
 		AST.visit(self, node.left, outType)
-		-- pop right into B
-		self:emit("PLB")
+		AST.visit(self, node.right, outType)
 		-- apply operator
 		local op = node.operator
 		if op == "+" then
@@ -22,29 +17,23 @@ return function(self, node, outType, jmplbl)
 		elseif op == "/" then
 			self:emit("DIV")
 		elseif op == "==" then
-			self:emit("CMP")
-			self:emit("JNZ", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+			self:emit("cmp_eq")
+			self:emit("jmp_z", jmplbl:sub(1, #jmplbl - 1))
 		elseif op == "!=" then
-			self:emit("CMP")
-			self:emit("JZ", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+			self:emit("cmp_neq")
+			self:emit("jmp_z", jmplbl:sub(1, #jmplbl - 1))
 		elseif op == "<" then
-			self:emit("CMP")
-			self:emit("BCC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+			self:emit("cmp_lt")
+			self:emit("jmp_z", jmplbl:sub(1, #jmplbl - 1))
 		elseif op == "<=" then
-			local lbl = self:newLabel()
-			self:emit("CMP")
-			self:emit("JZ", "(" .. lbl:sub(1, #lbl - 1) .. ")")
-			self:emit("BCC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
-			self:emit(lbl)
+			self:emit("cmp_leq")
+			self:emit("jmp_z", jmplbl:sub(1, #jmplbl - 1))
 		elseif op == ">" then
-			self:emit("CMP")
-			self:emit("BNC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
+			self:emit("cmp_mt")
+			self:emit("jmp_z", jmplbl:sub(1, #jmplbl - 1))
 		elseif op == ">=" then
-			local lbl = self:newLabel()
-			self:emit("CMP")
-			self:emit("JZ", "(" .. lbl:sub(1, #lbl - 1) .. ")")
-			self:emit("BNC", "(" .. jmplbl:sub(1, #jmplbl - 1) .. ")")
-			self:emit(lbl)
+			self:emit("cmp_meq")
+			self:emit("jmp_z", jmplbl:sub(1, #jmplbl - 1))
 		else
 			error("Unknown binary operator: " .. op)
 		end

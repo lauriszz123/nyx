@@ -18,11 +18,10 @@ return function(self, node)
 		self:emit("STA (HL)")
 	else
 		local var = self.scope:lookup(node.target.name)
-		self:emitComment("Varriable " .. node.target.name .. " assignment")
 		AST.visit(self, node.value, var.type)
 
 		if var.isLocal then
-			self:emit("SET", "#" .. var.index)
+			self:emit("set_local", "#" .. var.index)
 		else
 			self:emit("STA (v_" .. node.target.name .. ")")
 		end

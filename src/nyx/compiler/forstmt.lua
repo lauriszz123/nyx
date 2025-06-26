@@ -9,7 +9,7 @@ return function(self, node)
 	local name = node.name
 	local var = self.scope:declareLocal(name, "u8")
 	AST.visit(self, node.start, "u8")
-	self:emit("PHA")
+	self:emit("store_local", name)
 
 	self:emit(forStart)
 	AST.visit(self, node.stop, "u8")
