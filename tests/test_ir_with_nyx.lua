@@ -90,34 +90,34 @@ test(
 	end
 )
 
--- test(
--- 	[[
--- 	let x: u8 = 0xDE;
--- 	poke(0x1000, x);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("0x1000", 0xDE, cpu.memory:read(0x1000))
--- 	end
--- )
---
--- test(
--- 	[[
--- 	let VIDEO_MEM_CHAR: ptr = 0x3000;
---
--- 	fn writeChar(byte: u8)
--- 		poke(VIDEO_MEM_CHAR, byte);
--- 	end
---
--- 	writeChar(0x21);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("0x3000 stored", 0x30, cpu.memory:read(14))
--- 		printreg("0x3000 pointed to", 0x21, cpu.memory:read(0x3000))
--- 	end
--- )
---
+test(
+	[[
+	let x: u8 = 0xDE;
+	poke(0x1000, x);
+]],
+	function(interpreter)
+		local ptr = interpreter.globals["x"].pointer
+		if interpreter.memory:read(0x1000) == interpreter.memory:read(ptr) then
+			print("Passed!")
+		else
+			print("Failed!")
+		end
+	end
+)
+
+test(
+	[[
+	let VIDEO_MEM_CHAR: ptr = 0x3000;
+
+	fn writeChar(byte: u8)
+		poke(VIDEO_MEM_CHAR, byte);
+	end
+
+	writeChar(0x21);
+]],
+	function(interpreter) end
+)
+
 -- test(
 -- 	[[
 -- 	let testStr: str = "Hello, world!";

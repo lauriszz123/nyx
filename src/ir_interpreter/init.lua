@@ -5,7 +5,7 @@ local Lexer = require("src.nyx.lexer")
 
 local function reverseList(t)
 	local reversed = {}
-	local n = #t               -- Get the length of the table
+	local n = #t -- Get the length of the table
 	for i = 1, n do
 		reversed[i] = t[n - i + 1] -- Fill the reversed table
 	end
@@ -38,6 +38,14 @@ local IR_CODES = {
 					pointer = self.varmem,
 				}
 				self.varmem = self.varmem + 1
+			elseif type == "u16" then
+				self.memory:write(self.varmem, self:pop_u8())
+				self.memory:write(self.varmem + 1, self:pop_u8())
+				self.globals[name] = {
+					type = type,
+					pointer = self.varmem,
+				}
+				self.varmem = self.varmem + 2
 			end
 		end,
 	},
@@ -47,6 +55,16 @@ local IR_CODES = {
 			local var = self.globals[name]
 
 			self:push_u8(self.memory:read(var.pointer))
+		end,
+	},
+	load_global_u16 = {
+		argc = 1,
+		process = function(self, name)
+			local var = self.globals[name]
+			local hi = self.memory:read(var.pointer)
+			local lo = self.memory:read(var.pointer + 1)
+			self:push_u8(lo)
+			self:push_u8(hi)
 		end,
 	},
 	set_global = {
@@ -64,6 +82,9 @@ local IR_CODES = {
 			local b = self:pop_u8()
 			self:push_u8(self:pop_u8() + b)
 		end,
+	},
+	call = {
+		argc = 2,
 	},
 	system_call = {
 		argc = 2,
@@ -112,6 +133,8 @@ function Interpreter:initialize()
 			end,
 		},
 	}
+	self.labels = {}
+	self.functions = {}
 
 	self.halted = false
 end
@@ -150,41 +173,88 @@ function Interpreter:peek(offset)
 	return self.tokens[self.position + offset]
 end
 
+function Interpreter:atom()
+	local val = self.current.value
+	if self.current.type == "IDENTIFIER" then
+		self:advance()
+		print(self.current.type)
+		if self.current.type == "COLON" then
+			self:advance()
+			local t = self.current.value
+			self:advance()
+			return {
+				kind = "NameType",
+				name = val,
+				type = t,
+			}
+		else
+			return val
+		end
+	else
+		self:advance()
+		return val
+	end
+end
+
 function Interpreter:tokenize(source)
 	self:setupLexer(source)
+	local pc = 1
 	while self.current do
 		local currType = self:peek().type
 		if currType == "IDENTIFIER" then
 			local name = self:peek().value
 			self:advance()
 
-			local ir = IR_CODES[name]
-			if not ir then
-				error("Unknown IR: " .. name)
-			end
-			local args = {}
-
-			for i = 1, ir.argc do
-				if self.current.type == "IDENTIFIER" or self.current.type == "NUMBER" then
-					table.insert(args, self.current.value)
-					self:advance()
-				else
-					error("Unknown arg type: " .. self.current.type)
-				end
-
-				if i < ir.argc then
-					if self.current.type ~= "COMMA" then
-						error("Expected a comma!")
-					else
+			if self.current and self.current.type == "COLON" then
+				self:advance()
+				self.labels[name] = pc + 1
+			else
+				if name == "function" then
+					local args = {}
+					name = self.current.value
+					if self:advance().type == "COMMA" then
 						self:advance()
 					end
+
+					while self.current do
+						table.insert(args, self:atom())
+						if self.current.type ~= "COMMA" then
+							break
+						end
+						self:advance()
+					end
+
+					self.functions[name] = {
+						argc = #args,
+						args = args,
+						pointer = pc + 1,
+					}
+				else
+					local ir = IR_CODES[name]
+					if not ir then
+						error("Unknown IR: " .. name .. " line: " .. self.current.line)
+					end
+					local args = {}
+
+					for i = 1, ir.argc do
+						table.insert(args, self:atom())
+
+						if i < ir.argc then
+							if self.current.type ~= "COMMA" then
+								error("Expected a comma!")
+							else
+								self:advance()
+							end
+						end
+					end
+
+					table.insert(self.irList, {
+						name = name,
+						args = args,
+					})
+					pc = pc + 1
 				end
 			end
-
-			table.insert(self.irList, {
-				name = name,
-				args = args,
-			})
 		else
 			error("Unknown type: " .. currType)
 		end

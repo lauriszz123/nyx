@@ -12,9 +12,15 @@ return function(self, node)
 	}
 	local fnName = node.name .. "_" .. variant
 
+	local args = ""
+	for _, arg in ipairs(node.params) do
+		args = args .. arg.name .. ":" .. arg.type .. ", "
+	end
+	args = args:sub(1, #args - 2)
+
 	self:pushCode()
 	self:emitComment("Declaring function: " .. fnName)
-	self:emit("function", fnName, #node.params)
+	self:emit("function", fnName, args)
 	self:emit("")
 
 	-- create a new scope for the function
@@ -26,7 +32,6 @@ return function(self, node)
 	for i = #node.params, 1, -1 do
 		local param = node.params[i]
 		self.scope:declare(param.name, param.type, true)
-		self:emit("define_arg", param.name, param.type)
 	end
 
 	-- compile body

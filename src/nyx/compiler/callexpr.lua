@@ -16,8 +16,8 @@ return function(self, node)
 
 	-- call function label
 	if fn.builtin then
-		self:emit("system_call", node.callee.name, #node.arguments)
+		self:emit("system_call", fname, #node.arguments)
 	else
-		self:emit("call", node.callee.name, #node.arguments)
+		self:emit("call", fname, #node.arguments)
 	end
 end
