@@ -9,13 +9,13 @@ return function(self, node, outType, jmplbl)
 		-- apply operator
 		local op = node.operator
 		if op == "+" then
-			self:emit("ADD")
+			self:emit("add")
 		elseif op == "-" then
-			self:emit("SUB")
+			self:emit("sub")
 		elseif op == "*" then
-			self:emit("MUL")
+			self:emit("mul")
 		elseif op == "/" then
-			self:emit("DIV")
+			self:emit("div")
 		elseif op == "==" then
 			self:emit("cmp_eq")
 			self:emit("jmp_z", jmplbl:sub(1, #jmplbl - 1))
@@ -42,7 +42,7 @@ return function(self, node, outType, jmplbl)
 		AST.visit(self, node.left, outType)
 		AST.visit(self, node.right, "u8")
 		if op == "+" then
-			self:emit("ADDHL")
+			self:emit("add_u16")
 		else
 			error("POINTER OP: " .. op)
 		end

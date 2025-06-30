@@ -7,15 +7,15 @@ return function(self, node)
 	self.scope:declare(node.name, node.varType)
 	if self.scope.isLocalScope then
 		if node.varType == "u8" or node.varType == "s8" then
-			self:emit("PHA")
+			self:emit("define_local", node.name, "u8")
 		elseif node.varType == "ptr" or node.varType == "str" then
-			self:emit("PHP #1")
+			self:emit("define_local", node.name, "u16")
 		end
 	else
 		if node.varType == "ptr" or node.varType == "str" then
-			self:emit("STHL (v_" .. node.name .. ")")
+			self:emit("define_global", node.name, "u16")
 		elseif node.varType == "u8" or node.varType == "s8" then
-			self:emit("STA (v_" .. node.name .. ")")
+			self:emit("define_global", node.name, "u8")
 		else
 			error("WTF IS THIS TYPE")
 		end

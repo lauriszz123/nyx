@@ -10,10 +10,10 @@ return function(self, node)
 		name = node.name,
 		returnLabel = retLbl,
 	}
-	local fnName = node.name .. "_" .. variant .. ":"
+	local fnName = node.name .. "_" .. variant
 
 	self:pushCode()
-	self:emitComment("Declaring function: " .. fnName:sub(1, #fnName - 1))
+	self:emitComment("Declaring function: " .. fnName)
 	self:emit("function", fnName, #node.params)
 	self:emit("")
 

@@ -23,7 +23,7 @@ end
 -- Read a byte from memory or device
 function Memory:read(addr)
 	addr = bit.band(addr, 0xFFFF)
-	self.pluginManager:call("write", addr)
+	self.pluginManager:call("read", addr)
 	return self.ram[addr]
 end
 
@@ -32,7 +32,7 @@ function Memory:write(addr, value)
 	addr = bit.band(addr, 0xFFFF)
 	value = bit.band(value, 0xFF)
 	self.ram[addr] = bit.band(value, 0xFF)
-	self.pluginManager:call("read", addr, value)
+	self.pluginManager:call("write", addr, value)
 end
 
 return Memory

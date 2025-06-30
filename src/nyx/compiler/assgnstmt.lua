@@ -21,9 +21,9 @@ return function(self, node)
 		AST.visit(self, node.value, var.type)
 
 		if var.isLocal then
-			self:emit("set_local", "#" .. var.index)
+			self:emit("set_local", node.target.name)
 		else
-			self:emit("STA (v_" .. node.target.name .. ")")
+			self:emit("set_global", node.target.name)
 		end
 		self:emit("")
 	end
