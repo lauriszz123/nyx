@@ -2,9 +2,8 @@ local Nyx = require("src.nyx")
 local Interpreter = require("src.ir_interpreter")
 
 ---@param src string
----@param expected table
----@param expectedfunc nil | fun(cpu: CPU): nil
-local function test(src, expected, expectedfunc)
+---@param expectedfunc nil | fun(intr: Interpreter): nil
+local function test(src, expectedfunc)
 	print("=== RUNNING TEST ===")
 	print("SOURCE:")
 	print(src)
@@ -19,8 +18,13 @@ local function test(src, expected, expectedfunc)
 	print(irc)
 
 	---@type Interpreter
-	local interpreter = Interpreter(irc)
-	interpreter:tokenize()
+	local interpreter = Interpreter()
+	interpreter:tokenize(irc)
+	interpreter:run()
+
+	if expectedfunc then
+		expectedfunc(interpreter)
+	end
 
 	print("===   ===")
 	print()
@@ -31,47 +35,61 @@ test(
 	[[
 	let x: u8 = 10;
 ]],
-	function(memory) end
+	function(interpreter)
+		local ptr = interpreter.globals["x"].pointer
+		if interpreter.memory:read(ptr) == 10 then
+			print("Passed!")
+		else
+			print("Failed!")
+		end
+	end
 )
 
--- test(
--- 	[[
--- 	let x: u8 = 20;
---
--- 	x + 10;
--- ]],
--- 	{
--- 		A = 30,
--- 	},
--- 	function(cpu)
--- 		printreg("x", 20, cpu.memory:read(14))
--- 	end
--- )
---
--- test(
--- 	[[
--- 	let x: u8 = 20;
---
--- 	x = x + 10;
--- ]],
--- 	{
--- 		A = 30,
--- 	},
--- 	function(cpu)
--- 		printreg("x", 30, cpu.memory:read(17))
--- 	end
--- )
---
--- test(
--- 	[[
--- 	poke(0x1000, 0xDE);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("0x1000", 0xDE, cpu.memory:read(0x1000))
--- 	end
--- )
---
+test(
+	[[
+	let x: u8 = 20;
+
+	x + 10;
+]],
+	function(interpreter)
+		local ptr = interpreter.globals["x"].pointer
+		if interpreter.memory:read(ptr) == 20 and interpreter:pop_u8() == 30 then
+			print("Passed!")
+		else
+			print("Failed!")
+		end
+	end
+)
+
+test(
+	[[
+	let x: u8 = 20;
+
+	x = x + 10;
+]],
+	function(interpreter)
+		local ptr = interpreter.globals["x"].pointer
+		if interpreter.memory:read(ptr) == 30 then
+			print("Passed!")
+		else
+			print("Failed!")
+		end
+	end
+)
+
+test(
+	[[
+	poke(0x1000, 0xDE);
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1000) == 0xDE then
+			print("Passed!")
+		else
+			print("Failed!")
+		end
+	end
+)
+
 -- test(
 -- 	[[
 -- 	let x: u8 = 0xDE;

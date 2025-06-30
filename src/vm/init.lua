@@ -1,6 +1,6 @@
 local class = require("middleclass")
 
-local Memory = require("src.vm.memory")
+local Memory = require("src.util.memory")
 local PluginManager = require("src.vm.pluginManager")
 local CPU = require("src.vm.cpu")
 
