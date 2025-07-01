@@ -19,6 +19,7 @@ local IR_CODES = {
 			self:push_u8(u8)
 		end,
 	},
+
 	const_u16 = {
 		argc = 1,
 		process = function(self, u16)
@@ -28,6 +29,7 @@ local IR_CODES = {
 			self:push_u8(hi)
 		end,
 	},
+
 	define_global = {
 		argc = 2,
 		process = function(self, name, type)
@@ -49,6 +51,7 @@ local IR_CODES = {
 			end
 		end,
 	},
+
 	load_global_u8 = {
 		argc = 1,
 		process = function(self, name)
@@ -57,6 +60,7 @@ local IR_CODES = {
 			self:push_u8(self.memory:read(var.pointer))
 		end,
 	},
+
 	load_global_u16 = {
 		argc = 1,
 		process = function(self, name)
@@ -65,8 +69,19 @@ local IR_CODES = {
 			local lo = self.memory:read(var.pointer + 1)
 			self:push_u8(lo)
 			self:push_u8(hi)
+			print(lo, hi)
 		end,
 	},
+
+	load_local_u8 = {
+		argc = 1,
+		process = function(self, index)
+			local val = self.memory:read(self.bp - index)
+			print("load_local_u8", val)
+			self:push_u8(val)
+		end,
+	},
+
 	set_global = {
 		argc = 1,
 		process = function(self, name)
@@ -76,6 +91,7 @@ local IR_CODES = {
 			self.memory:write(var.pointer, value)
 		end,
 	},
+
 	add = {
 		argc = 0,
 		process = function(self)
@@ -83,9 +99,35 @@ local IR_CODES = {
 			self:push_u8(self:pop_u8() + b)
 		end,
 	},
+
 	call = {
-		argc = 2,
+		argc = 1,
+		process = function(self, name)
+			local hi = bit.rshift(self.pc, 8)
+			local lo = bit.band(self.pc, 0xFF)
+			self:push_u8(lo)
+			self:push_u8(hi)
+			self.pc = self.functions[name].pointer
+			hi = bit.rshift(self.bp, 8)
+			lo = bit.band(self.bp, 0xFF)
+			self:push_u8(lo)
+			self:push_u8(hi)
+			self.bp = self.sp
+		end,
 	},
+
+	["return"] = {
+		argc = 0,
+		process = function(self)
+			local hi = self:pop_u8()
+			local lo = self:pop_u8()
+			self.bp = bit.bor(bit.lshift(hi, 8), lo)
+			hi = self:pop_u8()
+			lo = self:pop_u8()
+			self.pc = bit.bor(bit.lshift(hi, 8), lo)
+		end,
+	},
+
 	system_call = {
 		argc = 2,
 		process = function(self, name, argc)
@@ -104,9 +146,12 @@ local IR_CODES = {
 				end
 				args = reverseList(args)
 				syscall.call(self, unpack(args))
+			else
+				print("NO SYS CALL")
 			end
 		end,
 	},
+
 	halt = {
 		argc = 0,
 		process = function(self)
@@ -123,13 +168,15 @@ function Interpreter:initialize()
 	---@type Memory
 	self.memory = Memory()
 	self.sp = 0x1FF
+	self.bp = self.sp
 	self.varmem = 0x2000
 	self.globals = {}
 	self.sys_calls = {
-		poke = {
+		poke_1 = {
 			args = { "u16", "u8" },
 			call = function(intr, pointer, value)
 				intr.memory:write(pointer, value)
+				print("pointer", string.format("0x%x", pointer))
 			end,
 		},
 	}
@@ -177,7 +224,6 @@ function Interpreter:atom()
 	local val = self.current.value
 	if self.current.type == "IDENTIFIER" then
 		self:advance()
-		print(self.current.type)
 		if self.current.type == "COLON" then
 			self:advance()
 			local t = self.current.value
@@ -190,6 +236,11 @@ function Interpreter:atom()
 		else
 			return val
 		end
+	elseif self.current.type == "OPERATOR" and val == "-" then
+		self:advance()
+		local ret = -self.current.value
+		self:advance()
+		return ret
 	else
 		self:advance()
 		return val
@@ -201,13 +252,13 @@ function Interpreter:tokenize(source)
 	local pc = 1
 	while self.current do
 		local currType = self:peek().type
-		if currType == "IDENTIFIER" then
+		if currType == "IDENTIFIER" or currType == "RETURN" then
 			local name = self:peek().value
 			self:advance()
 
 			if self.current and self.current.type == "COLON" then
 				self:advance()
-				self.labels[name] = pc + 1
+				self.labels[name] = pc
 			else
 				if name == "function" then
 					local args = {}
@@ -262,9 +313,12 @@ function Interpreter:tokenize(source)
 end
 
 function Interpreter:run()
-	local pc = 1
-	while pc < #self.irList and not self.halted do
-		local instr = self.irList[pc]
+	self.pc = 1
+	while self.pc < #self.irList and not self.halted do
+		local instr = self.irList[self.pc]
+		if not instr then
+			return
+		end
 		if IR_CODES[instr.name] then
 			if IR_CODES[instr.name].process then
 				local ok, err = pcall(IR_CODES[instr.name].process, self, unpack(instr.args))
@@ -277,7 +331,7 @@ function Interpreter:run()
 		else
 			print(instr.name, "doesnt exist!")
 		end
-		pc = pc + 1
+		self.pc = self.pc + 1
 	end
 end
 

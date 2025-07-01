@@ -18,6 +18,6 @@ return function(self, node)
 	if fn.builtin then
 		self:emit("system_call", fname, #node.arguments)
 	else
-		self:emit("call", fname, #node.arguments)
+		self:emit("call", fname)
 	end
 end

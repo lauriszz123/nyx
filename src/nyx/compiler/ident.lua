@@ -6,9 +6,9 @@ return function(self, node)
 		-- load local variable into A
 		if var.isArg then
 			if var.type == "u8" or var.type == "s8" then
-				self:emit("load_arg_u8", index)
+				self:emit("load_local_u8", -index)
 			elseif var.type == "ptr" or var.type == "str" then
-				self:emit("load_arg_u16", index)
+				self:emit("load_local_u16", -index)
 			end
 		else
 			if var.type == "u8" or var.type == "s8" then

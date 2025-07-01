@@ -115,7 +115,14 @@ test(
 
 	writeChar(0x21);
 ]],
-	function(interpreter) end
+	function(interpreter)
+		if interpreter.memory:read(0x3000) == 0x21 then
+			print("Passed!")
+		else
+			print("Failed!")
+			print("0x3000: " .. interpreter.memory:read(0x3000))
+		end
+	end
 )
 
 -- test(
