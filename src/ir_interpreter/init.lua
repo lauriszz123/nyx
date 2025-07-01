@@ -13,6 +13,9 @@ local function reverseList(t)
 end
 
 local IR_CODES = {
+	alloc_string = {
+		argc = 2,
+	},
 	const_u8 = {
 		argc = 1,
 		process = function(self, u8)
@@ -23,6 +26,9 @@ local IR_CODES = {
 	const_u16 = {
 		argc = 1,
 		process = function(self, u16)
+			if self.globals["!" .. u16] then
+				u16 = self.globals["!" .. u16].pointer
+			end
 			local hi = bit.rshift(u16, 8)
 			local lo = bit.band(u16, 0xFF)
 			self:push_u8(lo)
@@ -69,7 +75,6 @@ local IR_CODES = {
 			local lo = self.memory:read(var.pointer + 1)
 			self:push_u8(lo)
 			self:push_u8(hi)
-			print(lo, hi)
 		end,
 	},
 
@@ -77,8 +82,17 @@ local IR_CODES = {
 		argc = 1,
 		process = function(self, index)
 			local val = self.memory:read(self.bp - index)
-			print("load_local_u8", val)
 			self:push_u8(val)
+		end,
+	},
+
+	load_local_u16 = {
+		argc = 1,
+		process = function(self, index)
+			local hi = self.memory:read(self.bp - index)
+			local lo = self.memory:read(self.bp - (index - 1))
+			self:push_u8(lo)
+			self:push_u8(hi)
 		end,
 	},
 
@@ -107,12 +121,12 @@ local IR_CODES = {
 			local lo = bit.band(self.pc, 0xFF)
 			self:push_u8(lo)
 			self:push_u8(hi)
-			self.pc = self.functions[name].pointer
 			hi = bit.rshift(self.bp, 8)
 			lo = bit.band(self.bp, 0xFF)
 			self:push_u8(lo)
 			self:push_u8(hi)
 			self.bp = self.sp
+			self.pc = self.functions[name].pointer
 		end,
 	},
 
@@ -164,26 +178,27 @@ local IR_CODES = {
 local Interpreter = class("Interpreter")
 
 function Interpreter:initialize()
+	self.halted = false
 	self.irList = {}
-	---@type Memory
-	self.memory = Memory()
-	self.sp = 0x1FF
-	self.bp = self.sp
-	self.varmem = 0x2000
-	self.globals = {}
 	self.sys_calls = {
 		poke_1 = {
 			args = { "u16", "u8" },
 			call = function(intr, pointer, value)
 				intr.memory:write(pointer, value)
-				print("pointer", string.format("0x%x", pointer))
 			end,
 		},
 	}
+
 	self.labels = {}
+	self.globals = {}
 	self.functions = {}
 
-	self.halted = false
+	---@type Memory
+	self.memory = Memory()
+	self.sp = 0x1FF
+	self.bp = self.sp
+	self.varmemstart = 0x2000
+	self.varmem = self.varmemstart
 end
 
 function Interpreter:push_u8(u8)
@@ -249,7 +264,6 @@ end
 
 function Interpreter:tokenize(source)
 	self:setupLexer(source)
-	local pc = 1
 	while self.current do
 		local currType = self:peek().type
 		if currType == "IDENTIFIER" or currType == "RETURN" then
@@ -258,7 +272,7 @@ function Interpreter:tokenize(source)
 
 			if self.current and self.current.type == "COLON" then
 				self:advance()
-				self.labels[name] = pc
+				self.labels[name] = #self.irList
 			else
 				if name == "function" then
 					local args = {}
@@ -278,8 +292,26 @@ function Interpreter:tokenize(source)
 					self.functions[name] = {
 						argc = #args,
 						args = args,
-						pointer = pc + 1,
+						pointer = #self.irList,
 					}
+				elseif name == "alloc_string" then
+					name = self.current.value
+					if self:advance().type == "COMMA" then
+						self:advance()
+					end
+					local str = self.current.value
+					self:advance()
+
+					local start = self.varmem
+					for i = 1, #str do
+						local chr = str:sub(i, i):byte()
+						self.memory:write(start + (i - 1), chr)
+					end
+					self.memory:write(start + #str, 0x00)
+					self.globals["!" .. name] = {
+						pointer = start,
+					}
+					self.varmem = self.varmem + #str + 1
 				else
 					local ir = IR_CODES[name]
 					if not ir then
@@ -303,7 +335,6 @@ function Interpreter:tokenize(source)
 						name = name,
 						args = args,
 					})
-					pc = pc + 1
 				end
 			end
 		else

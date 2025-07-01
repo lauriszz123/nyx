@@ -9,6 +9,5 @@ return function(self, node)
 	self:emit("halt")
 	self:emit("")
 
-	self:generateStrings()
 	self:generateFunctions()
 end

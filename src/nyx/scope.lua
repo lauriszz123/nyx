@@ -163,7 +163,7 @@ function Scope:declare(name, varType, isArg)
 
 		if var.isArg then
 			if varType == "ptr" or varType == "str" then
-				var.index = self.paramIndex + 1
+				var.index = self.paramIndex
 				self.paramIndex = self.paramIndex + 2
 			else
 				var.index = self.paramIndex

@@ -125,86 +125,97 @@ test(
 	end
 )
 
--- test(
--- 	[[
--- 	let testStr: str = "Hello, world!";
--- ]],
--- 	{},
--- 	function(cpu)
--- 		local hello = "Hello, world!"
--- 		local err = false
--- 		printreg("str pointer", 9, cpu.memory:read(8))
--- 		for i = 1, #hello do
--- 			local byte = hello:sub(i, i):byte()
--- 			if byte ~= cpu.memory:read(8 + i) then
--- 				print("STR NOT STORED CORRECTLY!")
--- 				print("I:", i)
--- 				print(byte, cpu.memory:read(8 + i))
--- 				err = true
--- 				break
--- 			end
--- 		end
---
--- 		if not err then
--- 			print("Passed!")
--- 		end
--- 	end
--- )
---
--- test(
--- 	[[
--- 	fn variants(byte: u8)
--- 		poke(0x1000, byte);
--- 	end
---
--- 	fn variants(pointer: ptr)
--- 		poke(pointer, 0x20);
--- 	end
---
--- 	variants(0x10);
--- 	variants(0x1001);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("First variant", 0x10, cpu.memory:read(0x1000))
--- 		printreg("Second variant", 0x20, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- 	fn variants(byte: u8, byte2: u8)
--- 		poke(0x1000, byte + byte2);
--- 	end
---
--- 	fn variants(pointer: ptr, byte2: u8)
--- 		poke(pointer, 0x20 + byte2);
--- 	end
---
--- 	variants(0x10, 0x10);
--- 	variants(0x1001, 0x10);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("First variant", 0x20, cpu.memory:read(0x1000))
--- 		printreg("Second variant", 0x30, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 == 1 then
--- 	poke(0x1000, 0x20);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("true", 0x20, cpu.memory:read(0x1000))
--- 		printreg("Not modified?", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
+test(
+	[[
+	let testStr: str = "Hello, world!";
+]],
+	function(interpreter)
+		local str = ""
+		local expected = "Hello, world!"
+
+		local strPtr = interpreter.globals["!str_0"].pointer
+
+		while interpreter.memory:read(strPtr) ~= 0x00 do
+			local byte = interpreter.memory:read(strPtr)
+			str = str .. string.char(byte)
+			strPtr = strPtr + 1
+		end
+
+		if str == expected then
+			print("Passed!")
+		else
+			print("Failed!")
+		end
+	end
+)
+
+test(
+	[[
+	fn variants(byte: u8)
+		poke(0x1000, byte);
+	end
+
+	fn variants(pointer: ptr)
+		poke(pointer, 0x20);
+	end
+
+	variants(0x10);
+	variants(0x1001);
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1000) ~= 0x10 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1001) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+	fn variants(byte: u8, byte2: u8)
+		poke(0x1000, byte + byte2);
+	end
+
+	fn variants(pointer: ptr, byte2: u8)
+		poke(pointer, 0x20 + byte2);
+	end
+
+	variants(0x10, 0x10);
+	variants(0x1001, 0x10);
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1000) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1001) ~= 0x30 then
+			print("Failed!")
+			return
+		end
+
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 == 1 then
+	poke(0x1000, 0x20);
+end
+]],
+	function(interpreter)
+		printreg("true", 0x20, cpu.memory:read(0x1000))
+		printreg("Not modified?", 0xD0, cpu.memory:read(0x1001))
+	end
+)
+
 -- test(
 -- 	[[
 -- poke(0x1001, 0xD0);

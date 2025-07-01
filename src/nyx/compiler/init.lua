@@ -69,7 +69,7 @@ end
 
 ---@param comment string Comment in the assembly file
 function Compiler:emitComment(comment)
-	local comment = "; " .. comment
+	comment = "; " .. comment
 	self:emit(comment)
 end
 
@@ -108,21 +108,6 @@ function Compiler:generateFunctions()
 	end
 	code = code .. "\n"
 	self.code[#self.code] = code
-end
-
-function Compiler:generateStrings()
-	if #self.strings > 0 then
-		self:emitComment("String Memory Space")
-		for _, str in ipairs(self.strings) do
-			self:emitComment(str.value)
-			self:emit(str.name .. ":")
-			for i = 1, #str.value do
-				local chr = str.value:sub(i, i)
-				self:emit("DB", "#" .. string.byte(chr))
-			end
-			self:emit("DB", "#" .. 0)
-		end
-	end
 end
 
 function Compiler:generate(ast)
