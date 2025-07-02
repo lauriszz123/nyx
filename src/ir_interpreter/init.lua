@@ -5,7 +5,7 @@ local Lexer = require("src.nyx.lexer")
 
 local function reverseList(t)
 	local reversed = {}
-	local n = #t -- Get the length of the table
+	local n = #t               -- Get the length of the table
 	for i = 1, n do
 		reversed[i] = t[n - i + 1] -- Fill the reversed table
 	end
@@ -163,6 +163,77 @@ local IR_CODES = {
 			else
 				print("NO SYS CALL")
 			end
+		end,
+	},
+
+	cmp_eq = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			self:push_u8(self:pop_u8() == b and 1 or 0)
+		end,
+	},
+
+	cmp_neq = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			self:push_u8(self:pop_u8() ~= b and 1 or 0)
+		end,
+	},
+
+	cmp_lt = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			self:push_u8(self:pop_u8() < b and 1 or 0)
+		end,
+	},
+
+	cmp_leq = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			self:push_u8(self:pop_u8() <= b and 1 or 0)
+		end,
+	},
+
+	cmp_mt = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			self:push_u8(self:pop_u8() > b and 1 or 0)
+		end,
+	},
+
+	cmp_meq = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			self:push_u8(self:pop_u8() >= b and 1 or 0)
+		end,
+	},
+
+	jmp_z = {
+		argc = 1,
+		process = function(self, loc)
+			if self.labels[loc] then
+				loc = self.labels[loc]
+			end
+			local val = self:pop_u8()
+			if val == 0 then
+				self.pc = loc
+			end
+		end,
+	},
+
+	jump = {
+		argc = 1,
+		process = function(self, loc)
+			if self.labels[loc] then
+				loc = self.labels[loc]
+			end
+			self.pc = loc
 		end,
 	},
 

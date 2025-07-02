@@ -211,249 +211,347 @@ if 1 == 1 then
 end
 ]],
 	function(interpreter)
-		printreg("true", 0x20, cpu.memory:read(0x1000))
-		printreg("Not modified?", 0xD0, cpu.memory:read(0x1001))
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
 	end
 )
 
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 == 0 then
--- 	poke(0x1001, 0x20);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("false", 0x00, cpu.memory:read(0x1000))
--- 		printreg("Not modified?", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 == 0 then
--- 	poke(0x1001, 0x20);
--- else
--- 	poke(0x1000, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("false", 0x30, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 == 1 then
--- 	poke(0x1000, 0x20);
--- else
--- 	poke(0x1001, 0x30);
--- end
---
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("true", 0x20, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 != 1 then
--- 	poke(0x1001, 0x20);
--- else
--- 	poke(0x1000, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("false", 0x30, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 < 1 then
--- 	poke(0x1001, 0x20);
--- else
--- 	poke(0x1000, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("false", 0x30, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 < 2 then
--- 	poke(0x1000, 0x20);
--- else
--- 	poke(0x1001, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("true", 0x20, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 < 0 then
--- 	poke(0x1001, 0x20);
--- else
--- 	poke(0x1000, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("false", 0x30, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 <= 1 then
--- 	poke(0x1000, 0x20);
--- else
--- 	poke(0x1001, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("true", 0x20, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 <= 0 then
--- 	poke(0x1001, 0x20);
--- else
--- 	poke(0x1000, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("false", 0x30, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 > 0 then
--- 	poke(0x1000, 0x20);
--- else
--- 	poke(0x1001, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("true", 0x20, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 > 2 then
--- 	poke(0x1001, 0x20);
--- else
--- 	poke(0x1000, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("false", 0x30, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 >= 1 then
--- 	poke(0x1000, 0x20);
--- else
--- 	poke(0x1001, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("true", 0x20, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 >= 0 then
--- 	poke(0x1000, 0x20);
--- else
--- 	poke(0x1001, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("true", 0x20, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- poke(0x1001, 0xD0);
--- if 1 >= 2 then
--- 	poke(0x1001, 0x20);
--- else
--- 	poke(0x1000, 0x30);
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("false", 0x30, cpu.memory:read(0x1000))
--- 		printreg("0x1001", 0xD0, cpu.memory:read(0x1001))
--- 	end
--- )
---
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 == 0 then
+	poke(0x1001, 0x20);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x00 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 == 0 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x30 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 == 1 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1001, 0x30);
+end
+
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 != 1 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x30 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 < 1 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x30 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 < 2 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1001, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 < 0 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x30 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 <= 1 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1001, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 <= 0 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x30 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 > 0 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1001, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 > 2 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x30 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 >= 1 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1001, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 >= 0 then
+	poke(0x1000, 0x20);
+else
+	poke(0x1001, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+poke(0x1001, 0xD0);
+if 1 >= 2 then
+	poke(0x1001, 0x20);
+else
+	poke(0x1000, 0x30);
+end
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1001) ~= 0xD0 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 0x30 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+-- TODO: Fix the for loops!
 -- test(
 -- 	[[
 -- for i = 0, 10 do
 -- 	poke(0x1000 + i, i);
 -- end
 -- ]],
--- 	{},
--- 	function(cpu)
+-- 	function(interpreter)
 -- 		for i = 0, 9 do
--- 			printreg(0x1000 + i, i, cpu.memory:read(0x1000 + i))
+-- 			if interpreter.memory:read(0x1000 + 1) ~= i then
+-- 				print("Failed!")
+-- 				return
+-- 			end
 -- 		end
--- 		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
+-- 		if interpreter.memory:read(0x100A) ~= 0x00 then
+-- 			print("Failed!")
+-- 			return
+-- 		end
+-- 		print("Passed!")
 -- 	end
 -- )
---
+
 -- test(
 -- 	[[
 -- fn test(byte: u8)
