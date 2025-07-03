@@ -5,7 +5,7 @@ local Lexer = require("src.nyx.lexer")
 
 local function reverseList(t)
 	local reversed = {}
-	local n = #t               -- Get the length of the table
+	local n = #t -- Get the length of the table
 	for i = 1, n do
 		reversed[i] = t[n - i + 1] -- Fill the reversed table
 	end
@@ -106,11 +106,48 @@ local IR_CODES = {
 		end,
 	},
 
+	set_local_u8 = {
+		argc = 1,
+		process = function(self, index)
+			local val = self:pop_u8()
+			self.memory:write(self.bp - index, val)
+		end,
+	},
+
+	pop_u8 = {
+		argc = 0,
+		process = function(self)
+			self:pop_u8()
+		end,
+	},
+
 	add = {
 		argc = 0,
 		process = function(self)
 			local b = self:pop_u8()
 			self:push_u8(self:pop_u8() + b)
+		end,
+	},
+
+	mul = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			self:push_u8(self:pop_u8() * b)
+		end,
+	},
+
+	add_u16 = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			local hi = self:pop_u8()
+			local lo = self:pop_u8()
+			local u16 = bit.bor(bit.lshift(hi, 8), lo) + b
+			hi = bit.rshift(u16, 8)
+			lo = bit.band(u16, 0xFF)
+			self:push_u8(lo)
+			self:push_u8(hi)
 		end,
 	},
 
@@ -258,6 +295,12 @@ function Interpreter:initialize()
 				intr.memory:write(pointer, value)
 			end,
 		},
+		peek_2 = {
+			args = { "u16", "u8" },
+			call = function(intr, pointer, offset)
+				intr:push_u8(intr.memory:read(pointer + offset))
+			end,
+		},
 	}
 
 	self.labels = {}
@@ -347,12 +390,15 @@ function Interpreter:tokenize(source)
 			else
 				if name == "function" then
 					local args = {}
+					local noargs = false
 					name = self.current.value
 					if self:advance().type == "COMMA" then
 						self:advance()
+					else
+						noargs = true
 					end
 
-					while self.current do
+					while self.current and noargs == false do
 						table.insert(args, self:atom())
 						if self.current.type ~= "COMMA" then
 							break

@@ -530,178 +530,206 @@ end
 	end
 )
 
--- TODO: Fix the for loops!
--- test(
--- 	[[
--- for i = 0, 10 do
--- 	poke(0x1000 + i, i);
--- end
--- ]],
--- 	function(interpreter)
--- 		for i = 0, 9 do
--- 			if interpreter.memory:read(0x1000 + 1) ~= i then
--- 				print("Failed!")
--- 				return
--- 			end
--- 		end
--- 		if interpreter.memory:read(0x100A) ~= 0x00 then
--- 			print("Failed!")
--- 			return
--- 		end
--- 		print("Passed!")
--- 	end
--- )
+test(
+	[[
+for i = 0, 10 do
+	poke(0x1000 + i, i);
+end
+]],
+	function(interpreter)
+		for i = 0, 9 do
+			if interpreter.memory:read(0x1000 + i) ~= i then
+				print("Failed!")
+				return
+			end
+		end
+		if interpreter.memory:read(0x100A) ~= 0x00 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
 
--- test(
--- 	[[
--- fn test(byte: u8)
--- 	for i = 0, byte do
--- 		if i < 5 then
--- 			poke(0x1000 + i, 0xFF);
--- 		else
--- 			poke(0x1000 + i, i);
--- 		end
--- 	end
--- end
---
--- test(10);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		for i = 0, 4 do
--- 			printreg(0x1000 + i, 0xFF, cpu.memory:read(0x1000 + i))
--- 		end
--- 		for i = 5, 9 do
--- 			printreg(0x1000 + i, i, cpu.memory:read(0x1000 + i))
--- 		end
--- 		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
--- 	end
--- )
---
--- test(
--- 	[[
--- let i: u8 = 0;
--- while i < 10 do
--- 	poke(0x1000 + i, i);
--- 	i = i + 1;
--- end
--- ]],
--- 	{},
--- 	function(cpu)
--- 		for i = 0, 9 do
--- 			printreg(0x1000 + i, i, cpu.memory:read(0x1000 + i))
--- 		end
--- 		printreg(0x100A, 0x00, cpu.memory:read(0x100A))
--- 	end
--- )
---
--- test(
--- 	[[
--- fn test(byte: u8, pointer: ptr)
--- 	poke(pointer, byte);
--- end
---
--- test(0xBE, 0x1000);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg(0x1000, 0xBE, cpu.memory:read(0x1000))
--- 	end
--- )
---
--- test(
--- 	[[
--- fn test(pointer: ptr, byte: u8)
--- 	poke(pointer, byte);
--- end
---
--- test(0x1000, 0xBE);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg(0x1000, 0xBE, cpu.memory:read(0x1000))
--- 	end
--- )
---
--- test(
--- 	[[
--- fn test(byte2: u8, pointer: ptr, byte: u8)
--- 	poke(pointer, byte);
--- 	poke(pointer + 1, byte2);
--- end
---
--- test(0xEF, 0x1000, 0xBE);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg(0x1000, 0xBE, cpu.memory:read(0x1000))
--- 		printreg(0x1001, 0xEF, cpu.memory:read(0x1001))
--- 	end
--- )
---
--- test(
--- 	[[
--- fn strlen(): u8
--- 	let len: u8 = 0;
--- 	let pow: u8 = 0;
---
--- 	while len < 5 do
--- 		poke(0x1000 + len, len);
---
--- 		pow = len * 2;
--- 		poke(0x2000 + len, pow);
---
--- 		len = len + 1;
--- 	end
---
--- 	return len;
--- end
---
--- strlen();
--- ]],
--- 	{},
--- 	function(cpu)
--- 		for i = 1, 5 do
--- 			local got = cpu.memory:read(0x1000 + (i - 1))
--- 			if i - 1 ~= got then
--- 				print(i .. " -> ", "FAILED!")
--- 				print("Expected:", i)
--- 				print("Got:", got)
--- 				return
--- 			else
--- 				print(i .. " -> ", "PASSED!")
--- 			end
---
--- 			got = cpu.memory:read(0x2000 + (i - 1))
--- 			if (i - 1) * 2 ~= got then
--- 				print(i .. " -> ", "FAILED!")
--- 				print("Expected:", i)
--- 				print("Got:", got)
--- 				return
--- 			else
--- 				print(i .. " -> ", "PASSED!")
--- 			end
--- 		end
--- 	end
--- )
---
--- test(
--- 	[[
--- fn peek()
--- 	let hello: str = "HELLO";
--- 	poke(0x1000, peek(hello, 1));
--- end
---
--- peek();
--- ]],
--- 	{},
--- 	function(cpu)
--- 		local hello = "HELLO"
--- 		local char = 1
--- 		printreg("0x1000", hello:sub(char + 1, char + 1):byte(), cpu.memory:read(0x1000))
--- 	end
--- )
---
+test(
+	[[
+fn test(byte: u8)
+	for i = 0, byte do
+		if i < 5 then
+			poke(0x1000 + i, 0xFF);
+		else
+			poke(0x1000 + i, i);
+		end
+	end
+end
+
+test(10);
+]],
+	function(interpreter)
+		for i = 0, 4 do
+			if interpreter.memory:read(0x1000 + i) ~= 0xFF then
+				print("Failed!")
+				return
+			end
+		end
+		for i = 5, 9 do
+			if interpreter.memory:read(0x1000 + i) ~= i then
+				print("Failed!")
+				return
+			end
+		end
+		if interpreter.memory:read(0x100A) ~= 0x00 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+let i: u8 = 0;
+while i < 10 do
+	poke(0x1000 + i, i);
+	i = i + 1;
+end
+]],
+	function(interpreter)
+		for i = 0, 9 do
+			if interpreter.memory:read(0x1000 + i) ~= i then
+				print("Failed!")
+				return
+			end
+		end
+		if interpreter.memory:read(0x100A) ~= 0x00 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+fn test(byte: u8, pointer: ptr)
+	poke(pointer, byte);
+end
+
+test(0xBE, 0x1000);
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1000) ~= 0xBE then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+fn test(pointer: ptr, byte: u8)
+	poke(pointer, byte);
+end
+
+test(0x1000, 0xBE);
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1000) ~= 0xBE then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+fn test(byte2: u8, pointer: ptr, byte: u8)
+	poke(pointer, byte);
+	poke(pointer + 1, byte2);
+end
+
+test(0xEF, 0x1000, 0xBE);
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x1000) ~= 0xBE then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1001) ~= 0xEF then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+fn strlen(): u8
+	let len: u8 = 0;
+	let pow: u8 = 0;
+
+	while len < 5 do
+		poke(0x1000 + len, len);
+
+		pow = len * 2;
+		poke(0x2000 + len, pow);
+
+		len = len + 1;
+	end
+
+	return len;
+end
+
+strlen();
+]],
+	function(cpu)
+		for i = 1, 5 do
+			local got = cpu.memory:read(0x1000 + (i - 1))
+			if i - 1 ~= got then
+				print(i .. " -> ", "FAILED!")
+				print("Expected:", i)
+				print("Got:", got)
+				return
+			else
+				print(i .. " -> ", "PASSED!")
+			end
+
+			got = cpu.memory:read(0x2000 + (i - 1))
+			if (i - 1) * 2 ~= got then
+				print(i .. " -> ", "FAILED!")
+				print("Expected:", i)
+				print("Got:", got)
+				return
+			else
+				print(i .. " -> ", "PASSED!")
+			end
+		end
+	end
+)
+
+test(
+	[[
+fn peek()
+	let hello: str = "HELLO";
+	poke(0x1000, peek(hello, 1));
+end
+
+peek();
+]],
+	function(interpreter)
+		local hello = "HELLO"
+		local char = 2
+		if hello:sub(char, char):byte() ~= interpreter.memory:read(0x1000) then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
 -- test(
 -- 	[[
 -- fn strlen(string: str): u8

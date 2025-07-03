@@ -9,6 +9,6 @@ return function(self, node)
 	for _, stmt in ipairs(node.body) do
 		AST.visit(self, stmt)
 	end
-	self:emit("JMP", "(" .. whileStart:sub(1, #whileStart - 1) .. ")")
+	self:emit("jump", whileStart:sub(1, #whileStart - 1))
 	self:emit(whileEnd)
 end

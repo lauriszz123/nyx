@@ -20,7 +20,11 @@ return function(self, node)
 
 	self:pushCode()
 	self:emitComment("Declaring function: " .. fnName)
-	self:emit("function", fnName, args)
+	if #args > 0 then
+		self:emit("function", fnName, args)
+	else
+		self:emit("function", fnName)
+	end
 	self:emit("")
 
 	-- create a new scope for the function
@@ -40,8 +44,10 @@ return function(self, node)
 	end
 
 	self:emit(retLbl)
-	self.scope:generateStackCleanup(self)
-	self:emit("return")
+	if node.body[#node.body].kind ~= "ReturnStatement" then
+		self.scope:generateStackCleanup(self)
+		self:emit("return")
+	end
 
 	-- restore scope
 	self.scope = self.scope.parent

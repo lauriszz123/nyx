@@ -186,7 +186,7 @@ end
 ---@param compiler Compiler
 function Scope:generateStackCleanup(compiler)
 	for _ = 0, self.stackIndex - 1 do
-		compiler:emit("PLB")
+		compiler:emit("pop_u8")
 	end
 end
 

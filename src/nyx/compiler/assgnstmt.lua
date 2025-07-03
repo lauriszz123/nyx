@@ -21,7 +21,11 @@ return function(self, node)
 		AST.visit(self, node.value, var.type)
 
 		if var.isLocal then
-			self:emit("set_local", node.target.name)
+			if var.type == "u8" then
+				self:emit("set_local_u8", var.index)
+			else
+				error("Add this")
+			end
 		else
 			self:emit("set_global", node.target.name)
 		end
