@@ -167,6 +167,13 @@ local IR_CODES = {
 		end,
 	},
 
+	set_return_value = {
+		argc = 0,
+		process = function(self)
+			self.returnValue = self:pop_u8()
+		end,
+	},
+
 	["return"] = {
 		argc = 0,
 		process = function(self)
@@ -176,6 +183,10 @@ local IR_CODES = {
 			hi = self:pop_u8()
 			lo = self:pop_u8()
 			self.pc = bit.bor(bit.lshift(hi, 8), lo)
+			if self.returnValue then
+				self:push_u8(self.returnValue)
+				self.returnValue = nil
+			end
 		end,
 	},
 
@@ -306,6 +317,7 @@ function Interpreter:initialize()
 	self.labels = {}
 	self.globals = {}
 	self.functions = {}
+	self.returnValue = nil
 
 	---@type Memory
 	self.memory = Memory()

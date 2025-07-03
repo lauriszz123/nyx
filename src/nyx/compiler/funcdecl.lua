@@ -48,10 +48,8 @@ return function(self, node)
 	end
 
 	self:emit(retLbl)
-	if node.body[#node.body].kind ~= "ReturnStatement" then
-		self.scope:generateStackCleanup(self)
-		self:emit("return")
-	end
+	self.scope:generateStackCleanup(self)
+	self:emit("return")
 
 	-- restore scope
 	self.scope = self.scope.parent

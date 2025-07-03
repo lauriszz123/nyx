@@ -747,11 +747,11 @@ end
 
 strlen("HELLO");
 ]],
-	function(cpu)
+	function(interpreter)
 		local hello = "HELLO"
 		for i = 1, #hello do
 			local chr = hello:sub(i, i)
-			local got = cpu.memory:read(0x1000 + (i - 1))
+			local got = interpreter.memory:read(0x1000 + (i - 1))
 			if chr:byte() ~= got then
 				print(chr .. " -> ", "FAILED!")
 				print("Expected:", chr)
@@ -760,6 +760,9 @@ strlen("HELLO");
 			else
 				print(chr .. " -> ", "PASSED!")
 			end
+		end
+		if interpreter.returnValue and interpreter.returnValue == 5 then
+			print("Return value passed!")
 		end
 	end
 )
