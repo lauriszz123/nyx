@@ -730,41 +730,40 @@ peek();
 	end
 )
 
--- test(
--- 	[[
--- fn strlen(string: str): u8
--- 	let len: u8 = 0;
--- 	let currChar: u8 = peek(string, len);
---
--- 	while currChar != 0x00 do
--- 		poke(0x1000 + len, currChar);
--- 		len = len + 1;
--- 		currChar = peek(string, len);
--- 	end
---
--- 	return len;
--- end
---
--- strlen("HELLO");
--- ]],
--- 	{ A = 5 },
--- 	function(cpu)
--- 		local hello = "HELLO"
--- 		for i = 1, #hello do
--- 			local chr = hello:sub(i, i)
--- 			local got = cpu.memory:read(0x1000 + (i - 1))
--- 			if chr:byte() ~= got then
--- 				print(chr .. " -> ", "FAILED!")
--- 				print("Expected:", chr)
--- 				print("Got:", got)
--- 				return
--- 			else
--- 				print(chr .. " -> ", "PASSED!")
--- 			end
--- 		end
--- 	end
--- )
---
+test(
+	[[
+fn strlen(string: str): u8
+	let len: u8 = 0;
+	let currChar: u8 = peek(string, len);
+
+	while currChar != 0x00 do
+		poke(0x1000 + len, currChar);
+		len = len + 1;
+		currChar = peek(string, len);
+	end
+
+	return len;
+end
+
+strlen("HELLO");
+]],
+	function(cpu)
+		local hello = "HELLO"
+		for i = 1, #hello do
+			local chr = hello:sub(i, i)
+			local got = cpu.memory:read(0x1000 + (i - 1))
+			if chr:byte() ~= got then
+				print(chr .. " -> ", "FAILED!")
+				print("Expected:", chr)
+				print("Got:", got)
+				return
+			else
+				print(chr .. " -> ", "PASSED!")
+			end
+		end
+	end
+)
+
 -- test(
 -- 	[[
 -- struct Test

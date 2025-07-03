@@ -89,8 +89,8 @@ local IR_CODES = {
 	load_local_u16 = {
 		argc = 1,
 		process = function(self, index)
-			local hi = self.memory:read(self.bp - index)
-			local lo = self.memory:read(self.bp - (index - 1))
+			local lo = self.memory:read(self.bp - index)
+			local hi = self.memory:read(self.bp - (index + 1))
 			self:push_u8(lo)
 			self:push_u8(hi)
 		end,

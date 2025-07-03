@@ -14,7 +14,11 @@ return function(self, node)
 
 	local args = ""
 	for _, arg in ipairs(node.params) do
-		args = args .. arg.name .. ":" .. arg.type .. ", "
+		local argt = "u8"
+		if arg.type == "ptr" or arg.type == "str" then
+			argt = "u16"
+		end
+		args = args .. arg.name .. ":" .. argt .. ", "
 	end
 	args = args:sub(1, #args - 2)
 
