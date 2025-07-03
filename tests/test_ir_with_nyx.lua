@@ -775,26 +775,40 @@ struct Test {
 
 Test.test = 10;
 ]],
-	function(interpreter) end
+	function(interpreter)
+		local var = interpreter.globals["!s_Test"].pointer
+		if interpreter.memory:read(var) ~= 10 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
 )
 
--- test(
--- 	[[
--- struct Test
--- 	test: u8;
--- end
---
--- Test.test = 10;
---
--- poke(0x1000, Test.test);
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("29", 10, cpu.memory:read(29))
--- 		printreg("0x1000", 10, cpu.memory:read(0x1000))
--- 	end
--- )
---
+test(
+	[[
+struct Test {
+	test: u8
+}
+
+Test.test = 10;
+
+poke(0x1000, Test.test);
+]],
+	function(interpreter)
+		local var = interpreter.globals["!s_Test"].pointer
+		if interpreter.memory:read(var) ~= 10 then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(0x1000) ~= 10 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
 -- test(
 -- 	[[
 -- let array: u8[5] = {

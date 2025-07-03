@@ -13,9 +13,6 @@ local function reverseList(t)
 end
 
 local IR_CODES = {
-	alloc_string = {
-		argc = 2,
-	},
 	const_u8 = {
 		argc = 1,
 		process = function(self, u8)
@@ -70,6 +67,7 @@ local IR_CODES = {
 	load_global_u16 = {
 		argc = 1,
 		process = function(self, name)
+			print(name)
 			local var = self.globals[name]
 			local hi = self.memory:read(var.pointer)
 			local lo = self.memory:read(var.pointer + 1)
@@ -306,6 +304,12 @@ function Interpreter:initialize()
 				intr.memory:write(pointer, value)
 			end,
 		},
+		peek_1 = {
+			args = { "u16" },
+			call = function(intr, pointer)
+				intr:push_u8(intr.memory:read(pointer))
+			end,
+		},
 		peek_2 = {
 			args = { "u16", "u8" },
 			call = function(intr, pointer, offset)
@@ -441,6 +445,22 @@ function Interpreter:tokenize(source)
 						pointer = start,
 					}
 					self.varmem = self.varmem + #str + 1
+				elseif name == "alloc_struct" then
+					name = self.current.value
+					if self:advance().type == "COMMA" then
+						self:advance()
+					end
+					local size = self.current.value
+					self:advance()
+
+					local start = self.varmem
+					for i = 1, size do
+						self.memory:write(start + (i - 1), 0x00)
+					end
+					self.globals["!" .. name] = {
+						pointer = start,
+					}
+					self.varmem = self.varmem + size
 				else
 					local ir = IR_CODES[name]
 					if not ir then

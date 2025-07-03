@@ -95,6 +95,7 @@ function Scope:declareStruct(name, fields)
 	struct.size = size
 
 	global.variables[name] = struct
+	return struct
 end
 
 function Scope:structExists(struct)
