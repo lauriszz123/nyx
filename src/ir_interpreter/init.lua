@@ -1,5 +1,6 @@
 local class = require("middleclass")
 
+local PluginManager = require("src.vm.pluginManager")
 local Memory = require("src.util.memory")
 local Lexer = require("src.nyx.lexer")
 
@@ -323,8 +324,10 @@ function Interpreter:initialize()
 	self.functions = {}
 	self.returnValue = nil
 
+	---@type PluginManager
+	self.pluginManager = PluginManager()
 	---@type Memory
-	self.memory = Memory()
+	self.memory = Memory(self.pluginManager)
 	self.sp = 0x1FF
 	self.bp = self.sp
 	self.varmemstart = 0x2000
@@ -490,29 +493,34 @@ function Interpreter:tokenize(source)
 			error("Unknown type: " .. currType)
 		end
 	end
+	self.pc = 1
 end
 
 function Interpreter:run()
 	self.pc = 1
 	while self.pc < #self.irList and not self.halted do
-		local instr = self.irList[self.pc]
-		if not instr then
-			return
-		end
-		if IR_CODES[instr.name] then
-			if IR_CODES[instr.name].process then
-				local ok, err = pcall(IR_CODES[instr.name].process, self, unpack(instr.args))
-				if not ok then
-					error(err)
-				end
-			else
-				print("TODO:", "Implement " .. instr.name .. " process function!")
+		self:step()
+	end
+end
+
+function Interpreter:step()
+	local instr = self.irList[self.pc]
+	if not instr then
+		return
+	end
+	if IR_CODES[instr.name] then
+		if IR_CODES[instr.name].process then
+			local ok, err = pcall(IR_CODES[instr.name].process, self, unpack(instr.args))
+			if not ok then
+				error(err)
 			end
 		else
-			print(instr.name, "doesnt exist!")
+			print("TODO:", "Implement " .. instr.name .. " process function!")
 		end
-		self.pc = self.pc + 1
+	else
+		print(instr.name, "doesnt exist!")
 	end
+	self.pc = self.pc + 1
 end
 
 return Interpreter

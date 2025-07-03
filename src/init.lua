@@ -1,8 +1,7 @@
 local class = require("middleclass")
 
-local VM = require("src.vm")
+local Interpreter = require("src.ir_interpreter")
 local Nyx = require("src.nyx")
-local Assembler = require("src.nyx.assembler")
 
 ---@class SRC
 local T = class("SrcClass")
@@ -10,35 +9,21 @@ local T = class("SrcClass")
 function T:initialize(source)
 	---@type Nyx
 	local nyx = Nyx()
-	local assembly = nyx:compile(source)
-	if not assembly then
+	local irc = nyx:compile(source)
+
+	if not irc then
 		return
 	end
-	-- print("ASSEMBLY:")
-	-- print(assembly)
+	print(irc)
 
-	---@type Assembler
-	local assembler = Assembler(assembly)
-	local bytecode = assembler:assemble()
-
-	if bytecode then
-		---@type VM
-		self.vm = VM()
-		self.vm:reset(bytecode)
-	else
-		error("WTF")
-	end
-end
-
-function T:getPluginManager()
-	if self.vm then
-		return self.vm:getPluginManager()
-	end
+	---@type Interpreter
+	self.interpreter = Interpreter()
+	self.interpreter:tokenize(irc)
 end
 
 function T:update(dt)
-	if self.vm then
-		self.vm:cycle(dt)
+	if not self.interpreter.halted then
+		self.interpreter:step()
 	end
 end
 

@@ -31,7 +31,7 @@ function TerminalScreen:draw()
 	love.graphics.draw(self.canvas, 0, 0, 0, self.scale, self.scale)
 end
 
-function TerminalScreen:read(addr, value)
+function TerminalScreen:write(addr, value)
 	if addr == 0x3000 then
 		if value == ("\n"):byte() then
 			self.currentY = self.currentY + 1
@@ -43,6 +43,10 @@ function TerminalScreen:read(addr, value)
 		end
 		self.doUpdate = true
 	end
+end
+
+function TerminalScreen:read(addr)
+	print(addr)
 end
 
 return TerminalScreen
