@@ -808,7 +808,47 @@ poke(0x1000, Test.test);
 		print("Passed!")
 	end
 )
+test(
+	[[
+let VIDEO_MEM_CHAR: ptr = 0x3000;
 
+fn writeChar(byte: u8)
+	poke(VIDEO_MEM_CHAR, byte);
+end
+
+fn strlen(string: str): u8
+	let len: u8 = 0;
+	let currChar: u8 = peek(string, len);
+
+	while currChar != 0x00 do
+		len = len + 1;
+		currChar = peek(string, len);
+	end
+
+	return len;
+end
+
+fn print(string: str)
+	let len: u8 = strlen(string);
+	for i=0, len do
+		writeChar(peek(string, i));
+	end
+	writeChar(0x0A);
+end
+
+# print("Hello, world!");
+# print("Written in my language and my CPU!");
+
+writeChar(strlen("12345"));
+]],
+	function(interpreter)
+		if interpreter.memory:read(0x3000) ~= 5 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
 -- test(
 -- 	[[
 -- let array: u8[5] = {

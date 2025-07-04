@@ -120,6 +120,19 @@ local IR_CODES = {
 		end,
 	},
 
+	pop_fncall = {
+		argc = 1,
+		process = function(self, size)
+			for _ = 1, size do
+				self:pop_u8()
+			end
+			if self.returnValue ~= nil then
+				self:push_u8(self.returnValue)
+				self.returnValue = nil
+			end
+		end,
+	},
+
 	add = {
 		argc = 0,
 		process = function(self)
@@ -153,6 +166,7 @@ local IR_CODES = {
 	call = {
 		argc = 1,
 		process = function(self, name)
+			self.pc = self.pc + 1
 			local hi = bit.rshift(self.pc, 8)
 			local lo = bit.band(self.pc, 0xFF)
 			self:push_u8(lo)
@@ -182,10 +196,6 @@ local IR_CODES = {
 			hi = self:pop_u8()
 			lo = self:pop_u8()
 			self.pc = bit.bor(bit.lshift(hi, 8), lo)
-			if self.returnValue then
-				self:push_u8(self.returnValue)
-				self.returnValue = nil
-			end
 		end,
 	},
 
@@ -521,6 +531,9 @@ function Interpreter:step()
 		print(instr.name, "doesnt exist!")
 	end
 	self.pc = self.pc + 1
+	if self.pc > #self.irList then
+		self.halted = true
+	end
 end
 
 return Interpreter

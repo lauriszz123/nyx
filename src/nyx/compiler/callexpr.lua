@@ -10,8 +10,14 @@ return function(self, node)
 	end
 
 	-- push args in order
+	local size = 0
 	for i, arg in ipairs(node.arguments) do
 		AST.visit(self, arg, fn.params[i].type)
+		if fn.params[i].type == "u8" or fn.params[i].type == "s8" then
+			size = size + 1
+		else
+			size = size + 2
+		end
 	end
 
 	-- call function label
@@ -19,5 +25,6 @@ return function(self, node)
 		self:emit("system_call", fname, #node.arguments)
 	else
 		self:emit("call", fname)
+		self:emit("pop_fncall", size)
 	end
 end
