@@ -1,5 +1,5 @@
-const HEAP_START: u16 = 0x0200
-const HEAP_END: u16 = 0x0FFF
+const HEAP_START: u16 = 0x0200;
+const HEAP_END: u16 = 0x0FFF;
 
 struct Block {
   size: u16,
@@ -7,9 +7,9 @@ struct Block {
   next: ptr of Block,
 }
 
-const BLOCK_OVERHEAD = sizeof(Block);
+const BLOCK_OVERHEAD: u16 = sizeof(Block);
 
-let heap_start: ptr of Block = HEAP_START; 
+let heap_start: ptr of Block = HEAP_START;
 let free_list: ptr of Block = nil;
 
 fn heap_init()
@@ -54,7 +54,7 @@ fn free(pointer: ptr)
 
   while current != nil and current.next != nil do
     if current.free and current.next.free then
-      current.size += BLOCK_OVERHEAD + current.next.size;
+      current.size = current.size + BLOCK_OVERHEAD + current.next.size;
       current.next = current.next.next;
     else
       current = current.next;

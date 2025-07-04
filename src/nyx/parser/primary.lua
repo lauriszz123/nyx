@@ -63,6 +63,12 @@ function PrimaryParser:parse()
 			value = tonumber(t.value),
 			line = t.line,
 		})
+	elseif t.type == "NIL" then
+		self:advance()
+		return self:node("NumberLiteral", {
+			value = 0,
+			line = t.line,
+		})
 	elseif t.type == "STRING" then
 		self:advance()
 		return self:node("StringLiteral", {

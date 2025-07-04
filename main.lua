@@ -16,10 +16,10 @@ end
 
 function love.load()
 	---@type SRC
-	vm = VM(love.filesystem.read("tests/source.nyx"))
-	vm.interpreter.pluginManager:register(require("src.plugins.termScreen"), 0x3000, 0x3000)
-	-- require("tests.test_ir_with_nyx")
-	-- love.event.quit()
+	-- vm = VM(love.filesystem.read("tests/source.nyx"))
+	-- vm.interpreter.pluginManager:register(require("src.plugins.termScreen"), 0x3000, 0x3000)
+	require("tests.test_ir_with_nyx")
+	love.event.quit()
 end
 
 function love.update(dt)

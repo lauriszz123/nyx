@@ -10,6 +10,11 @@ function StructParser:parse()
 		local varName = self:expect("IDENTIFIER")
 		self:expect("COLON")
 		local varType = self:expect("IDENTIFIER")
+		local ofType
+		if self.current.type == "OF" then
+			self:advance()
+			ofType = self:expect("IDENTIFIER").value
+		end
 		if self.current.value ~= "}" then
 			self:expect("COMMA")
 		end
@@ -18,6 +23,7 @@ function StructParser:parse()
 			self:node("StructField", {
 				name = varName.value,
 				type = varType.value,
+				of = ofType,
 				line = varName.line,
 			})
 		)

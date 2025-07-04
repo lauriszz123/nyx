@@ -1,6 +1,7 @@
 local ExpressionParser = require("src.nyx.parser.expression")
 local PrimaryParser = require("src.nyx.parser.primary")
 
+---@class LetParser: BaseParser
 local LetParser = {}
 
 function LetParser:parse()
@@ -9,6 +10,12 @@ function LetParser:parse()
 	local nameTok = self:expect("IDENTIFIER")
 	self:expect("COLON")
 	local varType = self:expect("IDENTIFIER").value
+
+	local ofType
+	if self.current.type == "OF" then
+		self:advance()
+		ofType = self:expect("IDENTIFIER").value
+	end
 
 	local arraySize
 	if self.current.type == "BRACKET" then
@@ -29,6 +36,7 @@ function LetParser:parse()
 	return self:node("VariableDeclaration", {
 		name = nameTok.value,
 		varType = varType,
+		ofType = ofType,
 		value = value,
 		isArray = arraySize ~= nil,
 		arraySize = arraySize,

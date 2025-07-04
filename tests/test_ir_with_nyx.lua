@@ -834,17 +834,5 @@ let x: u8 = strlen("12345");
 		print("Passed!")
 	end
 )
--- test(
--- 	[[
--- let array: u8[5] = {
--- 	1, 2, 3, 4, 5
--- };
--- ]],
--- 	{},
--- 	function(cpu)
--- 		printreg("29", 10, cpu.memory:read(29))
--- 		printreg("0x1000", 10, cpu.memory:read(0x1000))
--- 	end
--- )
---
--- test(love.filesystem.read("tests/source.nyx"), {}, function(cpu) end)
+
+test(love.filesystem.read("tests/malloc.nyx"), function(cpu) end)

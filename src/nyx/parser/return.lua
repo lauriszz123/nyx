@@ -1,5 +1,6 @@
 local ExpressionParser = require("src.nyx.parser.expression")
 
+---@class ReturnStatement: BaseParser
 local ReturnStatement = {}
 
 function ReturnStatement:parse()
@@ -14,8 +15,12 @@ function ReturnStatement:parse()
 		and self.current.type ~= "FINALLY"
 	then
 		value = ExpressionParser.parse(self)
+		self:expect("SEMICOLON")
+	else
+		if self.current.type == "SEMICOLON" then
+			self:advance()
+		end
 	end
-	self:expect("SEMICOLON")
 	return self:node("ReturnStatement", { value = value, line = line })
 end
 

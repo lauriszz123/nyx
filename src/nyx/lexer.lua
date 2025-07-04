@@ -24,7 +24,6 @@ local keywords = {
 	["try"] = "TRY",
 	["catch"] = "CATCH",
 	["finally"] = "FINALLY",
-	["with"] = "WITH",
 	["not"] = "NOT",
 	["and"] = "AND",
 	["or"] = "OR",
@@ -35,9 +34,8 @@ local keywords = {
 	["impl"] = "IMPL",
 	["enum"] = "ENUM",
 	["import"] = "IMPORT",
-	["as"] = "AS",
 	["const"] = "CONST",
-	["abstract"] = "ABSTRACT",
+	["of"] = "OF",
 }
 
 -- Constructor

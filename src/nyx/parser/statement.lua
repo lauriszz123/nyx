@@ -2,6 +2,7 @@ local StructParser = require("src.nyx.parser.struct")
 local ImplParser = require("src.nyx.parser.impl")
 local FunctionParser = require("src.nyx.parser.function")
 local LetParser = require("src.nyx.parser.let")
+local ConstParser = require("src.nyx.parser.const")
 local IfParser = require("src.nyx.parser.if")
 local WhileParser = require("src.nyx.parser.while")
 local ForParser = require("src.nyx.parser.for")
@@ -31,6 +32,8 @@ function StatementParser:parse()
 		-- return self:parse_try()
 	elseif t == "LET" then
 		return LetParser.parse(self)
+	elseif t == "CONST" then
+		return ConstParser.parse(self)
 	else
 		return ExpressionStatementParser.parse(self)
 	end
