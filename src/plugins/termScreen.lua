@@ -45,8 +45,6 @@ function TerminalScreen:write(addr, value)
 	end
 end
 
-function TerminalScreen:read(addr)
-	print(addr)
-end
+function TerminalScreen:read(addr) end
 
 return TerminalScreen

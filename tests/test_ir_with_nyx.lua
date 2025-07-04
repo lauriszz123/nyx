@@ -14,8 +14,8 @@ local function test(src, expectedfunc)
 	if not irc then
 		return
 	end
-	print("ASSEMBLY:")
-	print(irc)
+	-- print("ASSEMBLY:")
+	-- print(irc)
 
 	---@type Interpreter
 	local interpreter = Interpreter()
@@ -808,14 +808,9 @@ poke(0x1000, Test.test);
 		print("Passed!")
 	end
 )
+
 test(
 	[[
-let VIDEO_MEM_CHAR: ptr = 0x3000;
-
-fn writeChar(byte: u8)
-	poke(VIDEO_MEM_CHAR, byte);
-end
-
 fn strlen(string: str): u8
 	let len: u8 = 0;
 	let currChar: u8 = peek(string, len);
@@ -828,22 +823,12 @@ fn strlen(string: str): u8
 	return len;
 end
 
-fn print(string: str)
-	let len: u8 = strlen(string);
-	for i=0, len do
-		writeChar(peek(string, i));
-	end
-	writeChar(0x0A);
-end
-
-# print("Hello, world!");
-# print("Written in my language and my CPU!");
-
-writeChar(strlen("12345"));
+let x: u8 = strlen("12345");
 ]],
 	function(interpreter)
-		if interpreter.memory:read(0x3000) ~= 5 then
+		if interpreter.memory:read(interpreter.globals["x"].pointer) ~= 5 then
 			print("Failed!")
+			print(interpreter.memory:read(interpreter.globals["x"].pointer))
 			return
 		end
 		print("Passed!")

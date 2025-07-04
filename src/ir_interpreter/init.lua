@@ -126,7 +126,7 @@ local IR_CODES = {
 			for _ = 1, size do
 				self:pop_u8()
 			end
-			if self.returnValue ~= nil then
+			if self.returnValue then
 				self:push_u8(self.returnValue)
 				self.returnValue = nil
 			end
@@ -166,7 +166,6 @@ local IR_CODES = {
 	call = {
 		argc = 1,
 		process = function(self, name)
-			self.pc = self.pc + 1
 			local hi = bit.rshift(self.pc, 8)
 			local lo = bit.band(self.pc, 0xFF)
 			self:push_u8(lo)
@@ -483,7 +482,6 @@ function Interpreter:tokenize(source)
 
 					for i = 1, ir.argc do
 						table.insert(args, self:atom())
-
 						if i < ir.argc then
 							if self.current.type ~= "COMMA" then
 								error("Expected a comma!")
@@ -508,16 +506,23 @@ end
 
 function Interpreter:run()
 	self.pc = 1
-	while self.pc < #self.irList and not self.halted do
+	while self.pc <= #self.irList and not self.halted do
 		self:step()
 	end
 end
 
 function Interpreter:step()
+	if self.pc > #self.irList then
+		self.halted = true
+		return
+	end
+
 	local instr = self.irList[self.pc]
+
 	if not instr then
 		return
 	end
+
 	if IR_CODES[instr.name] then
 		if IR_CODES[instr.name].process then
 			local ok, err = pcall(IR_CODES[instr.name].process, self, unpack(instr.args))
@@ -530,10 +535,8 @@ function Interpreter:step()
 	else
 		print(instr.name, "doesnt exist!")
 	end
+
 	self.pc = self.pc + 1
-	if self.pc > #self.irList then
-		self.halted = true
-	end
 end
 
 return Interpreter
