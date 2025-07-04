@@ -1,0 +1,36 @@
+import malloc;
+
+struct Node<ValueType> {
+  value: ValueType,
+  next: ptr of Node
+}
+
+struct List<ValueType> {
+  head: ptr of Node<ValueType>
+}
+
+impl List<ValueType>
+  fn init()
+    self.head = nil;
+  end
+
+  fn insert(value: ValueType)
+    let new_head: ptr of Node<ValueType> = malloc(sizeof(Node<ValueType>));
+    if new_head == nil then return; end
+
+    new_head.value = value;
+    new_head.next = self.head;
+
+    self.head = new_head;
+  end
+
+  fn remove(node: ptr of Node)
+    if self.head == nil or target == nil then return end
+    
+    if self.head == target then
+      self.head = self.head.next;
+      free(target);
+      return;
+    end
+  end
+end

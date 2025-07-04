@@ -68,7 +68,6 @@ local IR_CODES = {
 	load_global_u16 = {
 		argc = 1,
 		process = function(self, name)
-			print(name)
 			local var = self.globals[name]
 			local hi = self.memory:read(var.pointer)
 			local lo = self.memory:read(var.pointer + 1)

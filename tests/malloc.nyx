@@ -1,63 +1,63 @@
-const HEAP_SIZE: u8 = 128;
-const HEAP_START: ptr = 0xF000;
+const HEAP_START: u16 = 0x0200
+const HEAP_END: u16 = 0x0FFF
 
 struct Block {
-  start: ptr,
-  size: u8,
-  used: bool
+  size: u16,
+  free: bool,
+  next: ptr of Block,
 }
 
-let heap: Block[HEAP_SIZE] = {
-  Block {
-    start: HEAP_START,
-    size: HEAP_SIZE,
-    used: false
-  }
-};
+const BLOCK_OVERHEAD = sizeof(Block);
 
-fn blocklen(heap: Block[]): u8
-  while i < HEAP_SIZE do
-  end
+let heap_start: ptr of Block = HEAP_START; 
+let free_list: ptr of Block = nil;
+
+fn heap_init()
+  free_list = HEAP_START;
+  free_list.size = HEAP_END - HEAP_START - BLOCK_OVERHEAD;
+  free_list.free = true;
+  free_list.next = nil;
 end
 
 fn malloc(size: u8): ptr
-  let i: u8 = 0;
-  while i < heap.size do
-    let block: Block = heap[i];
+  let current: ptr of Block = free_list;
 
-    if block.used == false and block.size >= size then
-      let pointer: ptr = block.start;
+  while current != nil do
+    if current.free and current.size >= size then
+      if current.size > size + BLOCK_OVERHEAD then
+        let new_block: ptr of Block = current + BLOCK_OVERHEAD + size; 
+        new_block.size = current.size - size - BLOCK_OVERHEAD;
+        new_block.free = true;
+        new_block.next = nil;
 
-      if block.size > size then
-        let new_block: Block = Block {
-          start: block.start + size,
-          size: block.size - size,
-          used: false
-        }
-
-        heap[i + 1] = new_block;
+        current.size = size;
+        current.next = new_block;
       end
 
-      block.size = size;
-      block.used = true; 
-      return ptr;
+      current.free = false;
+      return current + BLOCK_OVERHEAD;
     end
+
+    current = current.next;
   end
 
-  return 0;
+  return nil;
 end
 
 fn free(pointer: ptr)
-  let i: u8 = 0;
-  let blocklen = len(blocks);
-  while i < blocklen do
-    let block: Block = heap[i];
-    if block.start == pointer then
-      block.used = false;
+  if ptr == nil then return end
 
-      if i+1 < len(blocks) and blocks[i+1].used == false then
-        
-      end
+  let block: ptr of Block = ptr - BLOCK_OVERHEAD;
+  block.free = 1;
+
+  let current: ptr of Block = free_list;
+
+  while current != nil and current.next != nil do
+    if current.free and current.next.free then
+      current.size += BLOCK_OVERHEAD + current.next.size;
+      current.next = current.next.next;
+    else
+      current = current.next;
     end
   end
 end

@@ -19,11 +19,20 @@ function T:initialize(source)
 	---@type Interpreter
 	self.interpreter = Interpreter()
 	self.interpreter:tokenize(irc)
+
+	self.targetFreq = 10000
+	self.accCycles = 0
+	self.avgCycleCount = 34
 end
 
 function T:update(dt)
 	if not self.interpreter.halted then
-		self.interpreter:step()
+		local targetCycles = dt * self.targetFreq
+		self.accCycles = self.accCycles + targetCycles
+		while self.accCycles >= 1 and not self.interpreter.halted do
+			self.interpreter:step()
+			self.accCycles = self.accCycles - (self.avgCycleCount * math.random(0.1, 1))
+		end
 	end
 end
 

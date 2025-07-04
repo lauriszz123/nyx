@@ -25,4 +25,3 @@ fn print(string: str)
 end
 
 print("Hello, world!");
-print("Written in my language and my CPU!");
