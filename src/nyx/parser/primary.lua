@@ -65,8 +65,7 @@ function PrimaryParser:parse()
 		})
 	elseif t.type == "NIL" then
 		self:advance()
-		return self:node("NumberLiteral", {
-			value = 0,
+		return self:node("NIL", {
 			line = t.line,
 		})
 	elseif t.type == "STRING" then

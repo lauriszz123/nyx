@@ -24,6 +24,10 @@ return function(self, node)
 			return "u8"
 		end
 	elseif op == "==" or op == "!=" then
+		if rightType == "nil" then
+			return "bool"
+		end
+
 		if leftType ~= rightType then
 			self:addError(string.format("Comparing different types: %s and %s", leftType, rightType), node)
 		end

@@ -7,7 +7,7 @@ struct Block {
   next: ptr of Block,
 }
 
-const BLOCK_OVERHEAD: u16 = sizeof(Block);
+const BLOCK_OVERHEAD: u8 = sizeof(Block);
 
 let heap_start: ptr of Block = HEAP_START;
 let free_list: ptr of Block = nil;
@@ -19,7 +19,7 @@ fn heap_init()
   free_list.next = nil;
 end
 
-fn malloc(size: u8): ptr
+fn malloc(size: u16): ptr
   let current: ptr of Block = free_list;
 
   while current != nil do
@@ -45,10 +45,10 @@ fn malloc(size: u8): ptr
 end
 
 fn free(pointer: ptr)
-  if ptr == nil then return end
+  if pointer == nil then return end
 
-  let block: ptr of Block = ptr - BLOCK_OVERHEAD;
-  block.free = 1;
+  let block: ptr of Block = pointer - BLOCK_OVERHEAD;
+  block.free = true;
 
   let current: ptr of Block = free_list;
 

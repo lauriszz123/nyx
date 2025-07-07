@@ -1,5 +1,4 @@
 local ExpressionParser = require("src.nyx.parser.expression")
-local PrimaryParser = require("src.nyx.parser.primary")
 
 local ConstParser = {}
 
@@ -20,8 +19,6 @@ function ConstParser:parse()
 		name = nameTok.value,
 		varType = varType,
 		value = value,
-		isArray = arraySize ~= nil,
-		arraySize = arraySize,
 		line = nameTok.line,
 	})
 end

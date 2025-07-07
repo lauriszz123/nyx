@@ -24,10 +24,6 @@ function Types.isNumericType(typeName)
 end
 
 function Types.isTypeCompatible(expected, actual)
-	if actual == "nil" then
-		return true
-	end
-
 	if expected == "any" then
 		return true
 	end

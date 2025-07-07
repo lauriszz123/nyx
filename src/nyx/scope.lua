@@ -149,13 +149,14 @@ function Scope:deallocLocal(name)
 	return var
 end
 
-function Scope:declare(name, varType, isArg)
+function Scope:declare(name, varType, isArg, ofType)
 	if self.variables[name] then
 		error("Variable " .. name .. " already declared in this scope")
 	end
 	local var = {
 		type = varType,
 		isArg = isArg or false,
+		ofType = ofType,
 		isLocal = false,
 	}
 

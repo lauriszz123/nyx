@@ -431,6 +431,38 @@ let test: Test = Test {
 ]]
 )
 
--- checkCodeSnippet("SOURCE CHECK", love.filesystem.read("/tests/source.nyx"))
+checkCodeSnippet(
+	"STRUCT PTR DECLARATION",
+	[[
+struct Test {
+	test: u8
+}
+
+let test: ptr of Test = 0x2000;
+]]
+)
+
+checkCodeSnippet(
+	"STRUCT PTR DECLARATION BAD",
+	[[
+let test: ptr of Next = 0x2000;
+]],
+	true
+)
+
+checkCodeSnippet(
+	"STRUCT PTR DECLARATION AND ACCESS",
+	[[
+struct Test {
+	test: u8
+}
+
+let test: ptr of Test = 0x2000;
+test.test = 0x10;
+]]
+)
+
+local file = love.filesystem.read("/tests/malloc.nyx")
+checkCodeSnippet("SOURCE CHECK", file)
 
 printResults()

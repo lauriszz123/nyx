@@ -15,6 +15,8 @@ function ExpressionValidator.getExpressionType(self, node, against)
 					return "s8"
 				elseif against == "ptr" then
 					return "ptr"
+				elseif against == "u16" then
+					return "u16"
 				else
 					return "u8"
 				end
@@ -24,7 +26,13 @@ function ExpressionValidator.getExpressionType(self, node, against)
 		elseif node.value >= -128 and node.value <= 127 then
 			return "s8"
 		elseif node.value >= 0 and node.value <= 0xFFFF then
-			return "ptr"
+			if against then
+				if against == "ptr" then
+					return "ptr"
+				end
+			end
+
+			return "u16"
 		end
 	elseif node.kind == "StringLiteral" then
 		return "str"
@@ -38,6 +46,8 @@ function ExpressionValidator.getExpressionType(self, node, against)
 			self:addError("Undefined variable: " .. node.name, node)
 			return "any"
 		end
+	elseif node.kind == "NIL" then
+		return "nil"
 	elseif node.kind == "BinaryExpression" then
 		return self.expression.checkBinaryExpression(self, node)
 	elseif node.kind == "CallExpression" then
@@ -48,6 +58,8 @@ function ExpressionValidator.getExpressionType(self, node, against)
 		return self.expression.checkFieldAccess(self, node)
 	elseif node.kind == "ArrayBlock" then
 		return self.expression.checkArrayBlock(self, node, against)
+	elseif node.kind == "StructBody" then
+		return self.expression.checkStructBody(self, node)
 	else
 		return "any"
 	end
@@ -58,5 +70,6 @@ ExpressionValidator.checkCallExpression = require("src.nyx.validator.call")
 ExpressionValidator.checkUnaryExpression = require("src.nyx.validator.unary")
 ExpressionValidator.checkArrayBlock = require("src.nyx.validator.arrayblock")
 ExpressionValidator.checkFieldAccess = require("src.nyx.validator.fieldaccess")
+ExpressionValidator.checkStructBody = require("src.nyx.validator.structbody")
 
 return ExpressionValidator

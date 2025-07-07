@@ -21,6 +21,9 @@ function Validator:initialize()
 		{ name = "string", type = "str" },
 		{ name = "offset", type = "u8" },
 	}, "u8")
+	self.scope:declareFunction("sizeof", {
+		{ name = "obj", type = "any" },
+	}, "u8")
 
 	self.errors = {}
 	self.currentFunction = nil

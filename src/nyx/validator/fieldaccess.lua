@@ -10,6 +10,13 @@ return function(self, node)
 	local fieldName = node.field
 
 	local objectVar = self.scope:lookup(objectName)
+	if not objectVar then
+		self:addError(objectName .. " is not defined!", node)
+	end
+
+	if objectVar.ofType then
+		objectVar = self.scope:lookup(objectVar.ofType)
+	end
 
 	if objectVar.isFunc then
 		return "function", objectVar

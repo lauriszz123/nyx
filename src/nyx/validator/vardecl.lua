@@ -1,8 +1,17 @@
+local inspect = require("inspect")
+
 ---@type NyxTypes
 local Types = require("src.nyx.validator.types")
 
 ---@param self Validator
 return function(self, node)
+	if node.ofType then
+		if not Types.isValidType(self.scope, node.ofType) then
+			self:addError("Unknown type: " .. node.ofType, node)
+		end
+	end
+
+	self.scope:declare(node.name, node.varType, nil, node.ofType)
 	if node.varType and not Types.isValidType(self.scope, node.varType) then
 		self:addError("Unknown type: " .. node.varType, node)
 	end
@@ -18,6 +27,4 @@ return function(self, node)
 			self:addError(string.format("Cannot assign %s to variable of type %s", valueType, node.varType), node)
 		end
 	end
-
-	self.scope:declare(node.name, node.varType)
 end
