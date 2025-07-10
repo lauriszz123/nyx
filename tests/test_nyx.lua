@@ -462,7 +462,42 @@ test.test = 0x10;
 ]]
 )
 
-local file = love.filesystem.read("/tests/malloc.nyx")
-checkCodeSnippet("SOURCE CHECK", file)
+checkCodeSnippet(
+	"STRUCT PTR DECLARATION IN STRUCT",
+	[[
+struct Block {
+	free: bool,
+	next: ptr of Block
+}
+
+let test: ptr of Block = 0x2000;
+test.next = 0x3000;
+
+if test.next.free then
+	poke(0x1000, 0xFF);
+end
+]]
+)
+
+checkCodeSnippet(
+	"WRONG DECLARATION OF PTR STRUCT",
+	[[
+struct Block {
+	free: bool,
+	next: ptr of Knyga
+}
+
+let test: ptr of Block = 0x2000;
+test.next = 0x3000;
+
+if test.next.free then
+	poke(0x1000, 0xFF);
+end
+]],
+	true
+)
+
+-- local file = love.filesystem.read("/tests/malloc.nyx")
+-- checkCodeSnippet("SOURCE CHECK", file)
 
 printResults()

@@ -41,11 +41,11 @@ return function(self, node)
 			return "any"
 		end
 	elseif op == "and" or op == "or" then
-		if leftType ~= "bool" then
+		if rightType ~= "bool" then
 			self:addError(string.format("Left operand of '%s' should be 'bool', got '%s'", op, rightType), node.left)
 			return "any"
 		end
-		if rightType ~= "bool" then
+		if leftType ~= "bool" then
 			self:addError(string.format("Right operand of '%s' should be 'bool', got '%s'", op, leftType), node.right)
 			return "any"
 		end
