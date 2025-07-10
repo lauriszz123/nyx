@@ -16,7 +16,7 @@ return function(self, node)
 			end
 		end
 
-		local resultType = Types.getArithmeticResultType(leftType, rightType, op)
+		local resultType = Types.getArithmeticResultType(leftType, rightType)
 		if resultType then
 			return resultType
 		else
