@@ -11,13 +11,17 @@ return function(self, node)
 		end
 	end
 
-	self.scope:declare(node.name, node.varType, nil, node.ofType)
+	self.scope:declare(node.name, node.varType, nil, node.ofType, node.isConst)
 	if node.varType and not Types.isValidType(self.scope, node.varType) then
 		self:addError("Unknown type: " .. node.varType, node)
 	end
 
 	if node.isArray and node.arraySize.kind ~= "NumberLiteral" then
 		self:addError("Array should be a fixed size, number or a constant", node)
+	end
+
+	if node.isConst and not node.value then
+		self:addError("A const must be always initiated: " .. node.name, node)
 	end
 
 	if node.value then

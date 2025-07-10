@@ -12,7 +12,7 @@ local function runTypeChecker(source, shouldFail)
 	local parser = Parser(lexer)
 	local ast = parser:parse()
 
-	if parser:hasErrors() and not shouldFail then
+	if parser:hasErrors() and shouldFail == nil then
 		parser:printResults()
 		return false
 	end
@@ -20,14 +20,13 @@ local function runTypeChecker(source, shouldFail)
 	if DEBUG then
 		print()
 		print(inspect(ast))
-		print()
 	end
 
 	---@type Validator
 	local validator = Validator()
 	validator:validate(ast)
 
-	if validator:hasErrors() and not shouldFail then
+	if validator:hasErrors() and shouldFail == nil then
 		print()
 		validator:printResults()
 		print()
@@ -495,6 +494,39 @@ if test.next.free then
 end
 ]],
 	true
+)
+
+checkCodeSnippet(
+	"CONST ASSIGN",
+	[[
+const x: u8 = 10;
+
+x = 20;
+]],
+	true
+)
+
+checkCodeSnippet(
+	"CONST SHOULD ALWAYS INITIATE FIRST VALUE",
+	[[
+const x: u8;
+]],
+	true
+)
+
+checkCodeSnippet(
+	"CONST CORRECT",
+	[[
+const x: u8 = 10;
+]]
+)
+
+checkCodeSnippet(
+	"CONST ACCESS",
+	[[
+const x: u8 = 10;
+poke(0x1000, x);
+]]
 )
 
 -- local file = love.filesystem.read("/tests/malloc.nyx")

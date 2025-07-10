@@ -1,4 +1,5 @@
 local class = require("middleclass")
+local inspect = require("inspect")
 local AST = require("src.nyx.ast")
 local StatementParser = require("src.nyx.parser.statement")
 local ERRORS = require("src.nyx.parser.errMessages")
@@ -77,8 +78,7 @@ end
 function Parser:parse()
 	local ok, ast = pcall(self.parse_top, self)
 	if not ok then
-		print("error: ", ast)
-		return
+		return { error = ast or "Crashed!" }
 	end
 
 	return ast

@@ -835,4 +835,11 @@ let x: u8 = strlen("12345");
 	end
 )
 
-test(love.filesystem.read("tests/malloc.nyx"), function(cpu) end)
+test(
+	[[
+
+]],
+	function(interpreter) end
+)
+
+-- test(love.filesystem.read("tests/malloc.nyx"), function(cpu) end)

@@ -16,6 +16,12 @@ return function(self, node)
 			self:addError("Undefined variable: " .. target.name, node)
 			return
 		end
+
+		if var.isConst then
+			self:addError("Cannot assign a constant: " .. target.name, node)
+			return
+		end
+
 		local valueType = self.expression.getExpressionType(self, node.value)
 
 		if not Types.isTypeCompatible(var.type, valueType) then
