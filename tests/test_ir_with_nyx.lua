@@ -14,8 +14,8 @@ local function test(src, expectedfunc)
 	if not irc then
 		return
 	end
-	-- print("ASSEMBLY:")
-	-- print(irc)
+	print("ASSEMBLY:")
+	print(irc)
 
 	---@type Interpreter
 	local interpreter = Interpreter()
@@ -828,7 +828,6 @@ let x: u8 = strlen("12345");
 	function(interpreter)
 		if interpreter.memory:read(interpreter.globals["x"].pointer) ~= 5 then
 			print("Failed!")
-			print(interpreter.memory:read(interpreter.globals["x"].pointer))
 			return
 		end
 		print("Passed!")
@@ -837,9 +836,78 @@ let x: u8 = strlen("12345");
 
 test(
 	[[
-
+const x: u8 = 10;
 ]],
-	function(interpreter) end
+	function(interpreter)
+		if interpreter.globals["x"].isConst == nil then
+			print("Failed!")
+			return
+		end
+		if interpreter.memory:read(interpreter.globals["x"].pointer) ~= 10 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+struct Block {
+  size: u16,
+  free: bool,
+  next: ptr of Block,
+}
+]],
+	function(interpreter)
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+struct Block {
+  size: u16,
+  free: bool,
+  next: ptr of Block,
+}
+
+let block: ptr of Block = 0x1000;
+]],
+	function(interpreter)
+		local var = interpreter.globals["block"]
+		if interpreter.memory:read(var.pointer) ~= 0x10 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+struct Block {
+  size: u16,
+  free: bool,
+  next: ptr of Block,
+}
+
+let block: ptr of Block = 0x1000;
+
+block.size = 0x2000;
+]],
+	function(interpreter)
+		local var = interpreter.globals["block"]
+		if not var then
+			print("Failed cuz var nopt declared!")
+			return
+		end
+		if interpreter.memory:read(var.pointer) ~= 0x10 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
 )
 
 -- test(love.filesystem.read("tests/malloc.nyx"), function(cpu) end)

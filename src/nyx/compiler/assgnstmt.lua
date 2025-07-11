@@ -6,6 +6,9 @@ return function(self, node)
 		local fieldAccess = node.target
 
 		local var = self.scope:lookup(fieldAccess.object.name)
+		if var.ofType then
+			var = self.scope:lookup(var.ofType)
+		end
 
 		AST.visit(self, node.target, nil, true)
 		AST.visit(self, node.value, var.fields[fieldAccess.field].type)

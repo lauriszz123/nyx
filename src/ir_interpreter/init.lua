@@ -56,6 +56,30 @@ local IR_CODES = {
 		end,
 	},
 
+	define_const = {
+		argc = 2,
+		process = function(self, name, type)
+			if type == "u8" then
+				self.memory:write(self.varmem, self:pop_u8())
+				self.globals[name] = {
+					isConst = true,
+					type = type,
+					pointer = self.varmem,
+				}
+				self.varmem = self.varmem + 1
+			elseif type == "u16" then
+				self.memory:write(self.varmem, self:pop_u8())
+				self.memory:write(self.varmem + 1, self:pop_u8())
+				self.globals[name] = {
+					isConst = true,
+					type = type,
+					pointer = self.varmem,
+				}
+				self.varmem = self.varmem + 2
+			end
+		end,
+	},
+
 	load_global_u8 = {
 		argc = 1,
 		process = function(self, name)

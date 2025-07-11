@@ -82,9 +82,9 @@ function Scope:declareStruct(name, fields)
 	local size = 0
 	for _, field in ipairs(fields) do
 		field.index = size
-		if field.type == "u8" or field.type == "s8" then
+		if field.type == "u8" or field.type == "s8" or field.type == "bool" then
 			size = size + 1
-		elseif field.type == "ptr" or field.type == "str" then
+		elseif field.type == "ptr" or field.type == "str" or field.type == "u16" then
 			size = size + 2
 		else
 			error("WTF? " .. field.type)
@@ -165,7 +165,7 @@ function Scope:declare(name, varType, isArg, ofType, isConst)
 		var.isLocal = true
 
 		if var.isArg then
-			if varType == "ptr" or varType == "str" then
+			if varType == "ptr" or varType == "str" or varType == "u16" then
 				var.index = self.paramIndex + 1
 				self.paramIndex = self.paramIndex + 2
 			else
@@ -173,7 +173,7 @@ function Scope:declare(name, varType, isArg, ofType, isConst)
 				self.paramIndex = self.paramIndex + 1
 			end
 		else
-			if varType == "ptr" or varType == "str" then
+			if varType == "ptr" or varType == "str" or varType == "u16" then
 				var.index = self.stackIndex
 				self.stackIndex = self.stackIndex + 2
 			else
