@@ -26,6 +26,8 @@ local IR_CODES = {
 		process = function(self, u16)
 			if self.globals["!" .. u16] then
 				u16 = self.globals["!" .. u16].pointer
+			elseif self.globals[u16] then
+				u16 = self.globals[u16].pointer
 			end
 			local hi = bit.rshift(u16, 8)
 			local lo = bit.band(u16, 0xFF)
@@ -335,6 +337,15 @@ function Interpreter:initialize()
 			args = { "u16", "u8" },
 			call = function(intr, pointer, value)
 				intr.memory:write(pointer, value)
+			end,
+		},
+		poke_2 = {
+			args = { "u16", "u16" },
+			call = function(intr, pointer, value)
+				local hi = bit.rshift(value, 8)
+				local lo = bit.band(value, 0xFF)
+				intr.memory:write(pointer, hi)
+				intr.memory:write(pointer + 1, lo)
 			end,
 		},
 		peek_1 = {

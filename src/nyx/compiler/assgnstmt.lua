@@ -12,7 +12,11 @@ return function(self, node)
 
 		AST.visit(self, node.target, nil, true)
 		AST.visit(self, node.value, var.fields[fieldAccess.field].type)
-		self:emit("system_call", "poke_1", 2)
+		if var.fields[fieldAccess.field].type == "u16" then
+			self:emit("system_call", "poke_2", 2)
+		else
+			self:emit("system_call", "poke_1", 2)
+		end
 	else
 		local var = self.scope:lookup(node.target.name)
 		AST.visit(self, node.value, var.type)

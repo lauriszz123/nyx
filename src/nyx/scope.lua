@@ -40,7 +40,7 @@ end
 ---@param name string
 ---@param params table
 ---@param retType string
----@param builtin nil|fun(self)
+---@param builtin boolean|nil
 function Scope:declareFunction(name, params, retType, builtin)
 	local func = self.functions[name] or {
 		isFunc = true,

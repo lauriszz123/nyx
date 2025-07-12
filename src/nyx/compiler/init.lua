@@ -15,49 +15,24 @@ function Compiler:initialize()
 
 	---@type Scope
 	self.scope = Scope()
-	self.scope:declareFunction(
-		"poke",
-		{
-			{ name = "pointer", type = "ptr" },
-			{ name = "value", type = "u8" },
-		},
-		"nil",
-		function(self)
-			self:emitComment("Store value at the pointer")
-			self:emit("PLA")
-			self:emit("PLP", "#1")
-			self:emit("STA", "(HL)")
-		end
-	)
+	self.scope:declareFunction("poke", {
+		{ name = "pointer", type = "ptr" },
+		{ name = "value", type = "u8" },
+	}, "nil", true)
 
-	self.scope:declareFunction(
-		"peek",
-		{
-			{ name = "pointer", type = "ptr" },
-		},
-		"u8",
-		function(self)
-			self:emitComment("Return value at pointer")
-			self:emit("PLP", "#1")
-			self:emit("LDA", "(HL)")
-		end
-	)
+	self.scope:declareFunction("poke", {
+		{ name = "pointer", type = "ptr" },
+		{ name = "value", type = "u16" },
+	}, "nil", true)
 
-	self.scope:declareFunction(
-		"peek",
-		{
-			{ name = "pointer", type = "str" },
-			{ name = "offset", type = "u8" },
-		},
-		"u8",
-		function(c)
-			c:emitComment("Return value at string pointer + offset")
-			c:emit("PLA")
-			c:emit("PLP", "#1")
-			c:emit("ADDHL")
-			c:emit("LDA", "(HL)")
-		end
-	)
+	self.scope:declareFunction("peek", {
+		{ name = "pointer", type = "ptr" },
+	}, "u8", true)
+
+	self.scope:declareFunction("peek", {
+		{ name = "pointer", type = "str" },
+		{ name = "offset", type = "u8" },
+	}, "u8", true)
 
 	self.visitor = require("src.nyx.compiler.visitor")
 end
