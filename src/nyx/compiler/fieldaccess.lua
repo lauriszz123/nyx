@@ -18,7 +18,7 @@ return function(self, node, _, getValue)
 			self:emitComment("EMMIT A LOCAL STRUCT FETCH")
 		else
 			if isOfType then
-				self:emit("const_u16", object.name)
+				self:emit("load_global_u16", object.name)
 			else
 				self:emit("const_u16", "s_" .. object.name)
 			end

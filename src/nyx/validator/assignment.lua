@@ -24,6 +24,10 @@ return function(self, node)
 
 		local valueType = self.expression.getExpressionType(self, node.value)
 
+		if valueType == "sizeof" then
+			return
+		end
+
 		if not Types.isTypeCompatible(var.type, valueType) then
 			self:addError(
 				string.format("Cannot assign %s to variable '%s' of type %s", valueType, target.name, var.type),

@@ -54,6 +54,8 @@ local IR_CODES = {
 					pointer = self.varmem,
 				}
 				self.varmem = self.varmem + 2
+			else
+				error("WTF")
 			end
 		end,
 	},
@@ -440,6 +442,7 @@ end
 
 function Interpreter:tokenize(source)
 	self:setupLexer(source)
+	self.varmem = 0x2000
 	while self.current do
 		local currType = self:peek().type
 		if currType == "IDENTIFIER" or currType == "RETURN" then
@@ -505,6 +508,7 @@ function Interpreter:tokenize(source)
 					end
 					self.globals["!" .. name] = {
 						pointer = start,
+						size = size,
 					}
 					self.varmem = self.varmem + size
 				else

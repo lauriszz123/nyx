@@ -887,22 +887,44 @@ let block: ptr of Block = 0x1000;
 test(
 	[[
 struct Block {
-  size: u16,
   free: bool,
   next: ptr of Block,
+  size: u16
 }
 
-let block: ptr of Block = 0x1000;
+let block: ptr of Block = 0x8000;
 
 block.size = 0x2000;
 ]],
 	function(interpreter)
 		local var = interpreter.globals["block"]
-		if not var then
-			print("Failed cuz var nopt declared!")
+		if interpreter.memory:read(var.pointer) ~= 0x80 then
+			print("Failed!")
 			return
 		end
-		if interpreter.memory:read(var.pointer) ~= 0x10 then
+		local hi = interpreter.memory:read(var.pointer)
+		local addr = bit.bor(bit.lshift(hi, 8), interpreter.memory:read(var.pointer + 1))
+		if interpreter.memory:read(addr + 3) ~= 0x20 then
+			print("Failed!")
+			return
+		end
+		print("Passed!")
+	end
+)
+
+test(
+	[[
+struct Block {
+  free: bool,
+  next: ptr of Block,
+  size: u16
+}
+
+const BLOCK_OVERHEAD: u8 = sizeof(Block);
+]],
+	function(interpreter)
+		local var = interpreter.globals["BLOCK_OVERHEAD"]
+		if interpreter.memory:read(var.pointer) ~= 5 then
 			print("Failed!")
 			return
 		end

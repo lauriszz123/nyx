@@ -4,6 +4,11 @@ local Types = require("src.nyx.validator.types")
 return function(self, node)
 	local callee = node.callee
 	local funcName = callee.name
+
+	if funcName == "sizeof" then
+		return "sizeof"
+	end
+
 	local func
 	if callee.kind == "FieldAccess" then
 		local fieldType, func_ = self.expression.checkFieldAccess(self, callee)
