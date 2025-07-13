@@ -46,6 +46,20 @@ return function(self, node, outType, jmplbl)
 		else
 			error("POINTER OP: " .. op)
 		end
+	elseif outType == "u16" then
+		AST.visit(self, node.left, outType)
+		AST.visit(self, node.right, outType)
+		-- apply operator
+		local op = node.operator
+		if op == "+" then
+			self:emit("add_u16")
+		elseif op == "-" then
+			self:emit("sub_u16")
+		elseif op == "*" then
+			self:emit("mul_u16")
+		elseif op == "/" then
+			self:emit("div_u16")
+		end
 	else
 		error("OTHER OP REACHER" .. node.operator)
 	end

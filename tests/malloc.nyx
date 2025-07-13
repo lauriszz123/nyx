@@ -9,7 +9,6 @@ struct Block {
 
 const BLOCK_OVERHEAD: u8 = sizeof(Block);
 
-let heap_start: ptr of Block = HEAP_START;
 let free_list: ptr of Block = nil;
 
 fn heap_init()

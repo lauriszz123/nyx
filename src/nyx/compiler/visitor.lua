@@ -16,5 +16,7 @@ Visitor.FieldAccess = require("src.nyx.compiler.fieldaccess")
 Visitor.Identifier = require("src.nyx.compiler.ident")
 Visitor.NumberLiteral = require("src.nyx.compiler.numlit")
 Visitor.StringLiteral = require("src.nyx.compiler.strlit")
+Visitor.BooleanLiteral = require("src.nyx.compiler.bool")
+Visitor.NIL = require("src.nyx.compiler.nil")
 
 return Visitor

@@ -20,7 +20,7 @@ return function(self, node)
 	else
 		if var.type == "u8" or var.type == "s8" then
 			self:emit("load_global_u8", node.name)
-		elseif var.type == "ptr" or var.type == "str" then
+		elseif var.type == "ptr" or var.type == "str" or var.type == "u16" then
 			self:emit("load_global_u16", node.name)
 		end
 	end

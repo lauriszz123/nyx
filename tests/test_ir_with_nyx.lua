@@ -932,4 +932,29 @@ const BLOCK_OVERHEAD: u8 = sizeof(Block);
 	end
 )
 
+test(
+	[[
+const HEAP_START: u16 = 0x0200;
+const HEAP_END: u16 = 0x0FFF;
+
+struct Block {
+  size: u16,
+  free: bool,
+  next: ptr of Block,
+}
+
+const BLOCK_OVERHEAD: u8 = sizeof(Block);
+
+let free_list: ptr of Block = nil;
+
+fn heap_init()
+  free_list = HEAP_START;
+  free_list.size = HEAP_END - HEAP_START - BLOCK_OVERHEAD;
+  free_list.free = true;
+  free_list.next = nil;
+end
+]],
+	function(interpreter) end
+)
+
 -- test(love.filesystem.read("tests/malloc.nyx"), function(cpu) end)

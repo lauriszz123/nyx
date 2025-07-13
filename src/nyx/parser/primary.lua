@@ -82,7 +82,7 @@ function PrimaryParser:parse()
 	elseif t.type == "FALSE" or t.type == "TRUE" then
 		self:advance()
 		return self:node("BooleanLiteral", {
-			value = t.value,
+			boolean = t.type == "TRUE" and true or false,
 			line = t.line,
 		})
 	elseif t.type == "AND_CHAR" then
