@@ -160,7 +160,7 @@ local IR_CODES = {
 		end,
 	},
 
-	add = {
+	add_u8 = {
 		argc = 0,
 		process = function(self)
 			local b = self:pop_u8()
@@ -168,7 +168,15 @@ local IR_CODES = {
 		end,
 	},
 
-	mul = {
+	sub_u8 = {
+		argc = 0,
+		process = function(self)
+			local b = self:pop_u8()
+			self:push_u8(self:pop_u8() - b)
+		end,
+	},
+
+	mul_u8 = {
 		argc = 0,
 		process = function(self)
 			local b = self:pop_u8()
@@ -176,14 +184,88 @@ local IR_CODES = {
 		end,
 	},
 
-	add_u16 = {
+	div_u8 = {
 		argc = 0,
 		process = function(self)
 			local b = self:pop_u8()
+			self:push_u8(math.floor(self:pop_u8() / b))
+		end,
+	},
+
+	u8_to_u16 = {
+		argc = 0,
+		process = function(self)
+			self:push_u8(self:pop_u8())
+			self:push(0x00)
+		end,
+	},
+
+	u16_to_u8 = {
+		argc = 0,
+		process = function(self)
+			self:pop_u8()
+			self:push_u8(self:pop_u8())
+		end,
+	},
+
+	add_u16 = {
+		argc = 0,
+		process = function(self)
+			local hib = self:pop_u8()
+			local lob = self:pop_u8()
+			local b = bit.bor(bit.lshift(hib, 8), lob)
 			local hi = self:pop_u8()
 			local lo = self:pop_u8()
 			local u16 = bit.bor(bit.lshift(hi, 8), lo) + b
-			hi = bit.rshift(u16, 8)
+			hi = bit.band(bit.rshift(u16, 8), 0xFF)
+			lo = bit.band(u16, 0xFF)
+			self:push_u8(lo)
+			self:push_u8(hi)
+		end,
+	},
+
+	sub_u16 = {
+		argc = 0,
+		process = function(self)
+			local hib = self:pop_u8()
+			local lob = self:pop_u8()
+			local b = bit.bor(bit.lshift(hib, 8), lob)
+			local hi = self:pop_u8()
+			local lo = self:pop_u8()
+			local u16 = bit.bor(bit.lshift(hi, 8), lo) - b
+			hi = bit.band(bit.rshift(u16, 8), 0xFF)
+			lo = bit.band(u16, 0xFF)
+			self:push_u8(lo)
+			self:push_u8(hi)
+		end,
+	},
+
+	mul_u16 = {
+		argc = 0,
+		process = function(self)
+			local hib = self:pop_u8()
+			local lob = self:pop_u8()
+			local b = bit.bor(bit.lshift(hib, 8), lob)
+			local hi = self:pop_u8()
+			local lo = self:pop_u8()
+			local u16 = bit.bor(bit.lshift(hi, 8), lo) * b
+			hi = bit.band(bit.rshift(u16, 8), 0xFF)
+			lo = bit.band(u16, 0xFF)
+			self:push_u8(lo)
+			self:push_u8(hi)
+		end,
+	},
+
+	div_u16 = {
+		argc = 0,
+		process = function(self)
+			local hib = self:pop_u8()
+			local lob = self:pop_u8()
+			local b = bit.bor(bit.lshift(hib, 8), lob)
+			local hi = self:pop_u8()
+			local lo = self:pop_u8()
+			local u16 = math.floor(bit.bor(bit.lshift(hi, 8), lo) / b)
+			hi = bit.band(bit.rshift(u16, 8), 0xFF)
 			lo = bit.band(u16, 0xFF)
 			self:push_u8(lo)
 			self:push_u8(hi)
